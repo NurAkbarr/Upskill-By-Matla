@@ -133,12 +133,15 @@
                                             </div>
                                         </div>
 
-                                        <!-- Gambar Promosi Materi -->
-                                        <img 
-                                            src="<?= base_url('uploads/courses/' . (!empty($c['banner_image']) ? $c['banner_image'] : 'course-1.jpg')) ?>" 
-                                            alt="<?= esc($c['title']) ?>" 
-                                            class="w-full h-48 md:h-64 object-cover rounded-xl mb-6 shadow-sm"
-                                        >
+                                        <!-- Gambar Promosi Materi (Tampil Penuh & Proporsional Tanpa Terpotong) -->
+                                        <div class="w-full aspect-[16/10] sm:aspect-video rounded-xl overflow-hidden bg-slate-50 border border-slate-100 mb-6 flex items-center justify-center p-1 sm:p-2 shadow-inner">
+                                            <img 
+                                                src="<?= base_url('uploads/courses/' . (!empty($c['banner_image']) ? $c['banner_image'] : 'course-1.jpg')) ?>" 
+                                                alt="<?= esc($c['title']) ?>" 
+                                                class="w-full h-full object-contain rounded-lg transition-transform duration-300"
+                                                loading="lazy"
+                                            >
+                                        </div>
 
                                         <!-- Konten Teks -->
                                         <div class="text-center">
