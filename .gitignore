@@ -1,0 +1,32 @@
+# --------------------------------------------------------------------
+# CodeIgniter 4 .gitignore
+# --------------------------------------------------------------------
+
+# Environment file (SANGAT PENTING: Jangan commit credentials database/API)
+/.env
+
+# Composer dependencies (Di-include karena hosting tanpa akses SSH/terminal Composer)
+# /vendor/
+
+# Temporary / dynamic writable files
+/writable/cache/*
+!/writable/cache/index.html
+/writable/debugbar/*
+!/writable/debugbar/index.html
+/writable/logs/*
+!/writable/logs/index.html
+/writable/session/*
+!/writable/session/index.html
+/writable/uploads/*
+!/writable/uploads/index.html
+
+# PHPUnit / Testing caches
+.phpunit.result.cache
+
+# IDE & OS files
+.idea/
+.vscode/
+*.sublime-workspace
+*.sublime-project
+.DS_Store
+Thumbs.db
