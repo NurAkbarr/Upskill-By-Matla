@@ -174,6 +174,11 @@ class User extends BaseController
             'instansi_name' => trim((string) $this->request->getPost('instansi_name')) ?: null,
         ];
 
+        // Proteksi Super Admin Utama (ID 1): Cegah penurunan pangkat / demosi role
+        if ($id === 1) {
+            $userData['role'] = 'super_admin';
+        }
+
         // Jika password diisi, lakukan hash dan perbarui password_hash
         $password = (string) $this->request->getPost('password');
         if (!empty($password)) {
@@ -193,6 +198,11 @@ class User extends BaseController
      */
     public function delete(int $id)
     {
+        // Proteksi Super Admin Utama (ID 1): Tidak dapat dihapus oleh siapa pun
+        if ($id === 1) {
+            return redirect()->to(base_url('admin/users'))->with('error', 'Akun Super Admin Utama tidak dapat dihapus.');
+        }
+
         $currentUserId = (int) (session()->get('user_id') ?? 0);
 
         // Proteksi: Admin tidak boleh menghapus akunnya sendiri
