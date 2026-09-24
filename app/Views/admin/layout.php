@@ -149,5 +149,78 @@
         </div>
     </main>
 
+    <!-- SweetAlert2 CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        // Inisialisasi Toast SweetAlert2 untuk Notifikasi Flash Data
+        const Toast = Swal.mixin({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 3500,
+            timerProgressBar: true,
+            didOpen: (toast) => {
+                toast.addEventListener('mouseenter', Swal.stopTimer);
+                toast.addEventListener('mouseleave', Swal.resumeTimer);
+            }
+        });
+
+        <?php if (session()->getFlashdata('success')): ?>
+            Toast.fire({
+                icon: 'success',
+                title: '<?= esc(session()->getFlashdata('success')) ?>'
+            });
+        <?php endif; ?>
+
+        <?php if (session()->getFlashdata('error')): ?>
+            Toast.fire({
+                icon: 'error',
+                title: '<?= esc(session()->getFlashdata('error')) ?>'
+            });
+        <?php endif; ?>
+
+        // Global Event Listener untuk Semua Tombol .btn-delete
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.btn-delete').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Cek jika akun sendiri yang sedang aktif
+                    if (this.getAttribute('data-self') === 'true') {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Aksi Ditolak',
+                            text: 'Anda tidak dapat menghapus akun Anda sendiri yang sedang aktif digunakan.',
+                            confirmButtonColor: '#FA1886',
+                            confirmButtonText: 'Mengerti'
+                        });
+                        return;
+                    }
+
+                    const deleteUrl = this.getAttribute('data-href');
+                    const customMessage = this.getAttribute('data-message') || "Data akses dan riwayat ini akan dihapus secara permanen.";
+                    
+                    Swal.fire({
+                        title: 'Yakin ingin menghapus?',
+                        text: customMessage,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#FA1886', // upskill-pink
+                        cancelButtonColor: '#6B7280', // abu-abu Tailwind
+                        confirmButtonText: 'Ya, Hapus!',
+                        cancelButtonText: 'Batal',
+                        reverseButtons: true
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = deleteUrl;
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+
+    <?= $this->renderSection('scripts') ?>
 </body>
 </html>

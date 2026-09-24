@@ -107,13 +107,14 @@
                                         Lihat
                                     </a>
                                     <span class="text-slate-300">|</span>
-                                    <a 
-                                        href="<?= base_url('admin/courses/delete/' . $c['id']) ?>" 
-                                        onclick="return confirm('Apakah Anda yakin ingin menghapus kelas ini? Seluruh materi di dalamnya akan ikut terhapus.')" 
-                                        class="font-semibold text-rose-600 hover:text-rose-800 transition-colors"
+                                    <button 
+                                        type="button" 
+                                        data-href="<?= base_url('admin/courses/delete/' . $c['id']) ?>" 
+                                        data-message="Seluruh materi dan data yang berkaitan dengan kelas <?= esc($c['title']) ?> akan ikut terhapus secara permanen."
+                                        class="btn-delete font-semibold text-rose-600 hover:text-rose-800 transition-colors cursor-pointer"
                                     >
                                         Hapus
-                                    </a>
+                                    </button>
                                 </div>
                             </td>
                         </tr>

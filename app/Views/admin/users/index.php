@@ -154,17 +154,19 @@
 
                                     <span class="text-slate-300">|</span>
 
-                                    <!-- Tombol Hapus (Merah) -->
-                                    <a 
-                                        href="<?= base_url('admin/users/delete/' . $u['id']) ?>" 
-                                        onclick="<?= (int)$u['id'] === $currentAdminId ? "alert('Peringatan: Anda tidak dapat menghapus akun Anda sendiri yang sedang aktif digunakan.'); return false;" : "return confirm('Yakin ingin menghapus pengguna " . addslashes(esc($u['full_name'])) . "? Seluruh data akses dan riwayatnya akan dihapus.')" ?>" 
-                                        class="inline-flex items-center gap-1 font-semibold text-rose-600 hover:text-rose-800 transition-colors"
+                                    <!-- Tombol Hapus (SweetAlert2) -->
+                                    <button 
+                                        type="button" 
+                                        data-href="<?= base_url('admin/users/delete/' . $u['id']) ?>" 
+                                        data-self="<?= (int)$u['id'] === $currentAdminId ? 'true' : 'false' ?>"
+                                        data-message="Data akses dan riwayat akun <?= esc($u['full_name']) ?> akan dihapus secara permanen."
+                                        class="btn-delete inline-flex items-center gap-1 font-semibold text-rose-600 hover:text-rose-800 transition-colors cursor-pointer"
                                     >
                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                                         </svg>
                                         Hapus
-                                    </a>
+                                    </button>
                                 </div>
                             </td>
                         </tr>
