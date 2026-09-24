@@ -136,10 +136,12 @@ class Auth extends BaseController
             return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
         }
 
+        $password = (string) $this->request->getPost('password');
+
         $userData = [
             'full_name'     => trim($this->request->getPost('full_name')),
             'email'         => strtolower(trim($this->request->getPost('email'))),
-            'password'      => (string) $this->request->getPost('password'),
+            'password_hash' => password_hash($password, PASSWORD_DEFAULT),
             'role'          => 'peserta_b2c',
             'instansi_name' => null,
         ];
