@@ -40,6 +40,11 @@ $routes->group('admin', ['filter' => ['auth', 'role:super_admin']], static funct
     $routes->post('courses/store', 'Admin\Course::store');
     $routes->get('courses/delete/(:num)', 'Admin\Course::delete/$1');
 
+    // Manajemen Kurikulum Berbasis Sesi & Kuis
+    $routes->get('courses/(:num)/lessons', 'Admin\Lesson::index/$1');
+    $routes->post('courses/(:num)/lessons/store', 'Admin\Lesson::store/$1');
+    $routes->get('lessons/delete/(:num)', 'Admin\Lesson::delete/$1');
+
     // Manajemen Pengguna
     $routes->get('users', 'Admin\User::index');
     $routes->get('users/create', 'Admin\User::create');

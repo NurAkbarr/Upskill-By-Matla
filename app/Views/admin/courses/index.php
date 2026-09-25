@@ -98,6 +98,15 @@
                             <!-- Aksi -->
                             <td class="py-4 px-6 whitespace-nowrap text-right text-xs">
                                 <div class="inline-flex items-center gap-2">
+                                    <a 
+                                        href="<?= base_url('admin/courses/' . $c['id'] . '/lessons') ?>" 
+                                        class="inline-flex items-center gap-1 font-semibold text-upskill-pink hover:text-upskill-magenta transition-colors"
+                                    >
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                                        </svg>
+                                        Kelola Sesi
+                                    </a>
                                     <span class="text-slate-300">|</span>
                                     <a 
                                         href="<?= base_url('courses/' . $c['slug']) ?>" 

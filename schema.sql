@@ -54,15 +54,16 @@ CREATE TABLE `courses` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ----------------------------------------------------------
--- 3. Tabel lessons
--- Materi terstruktur di dalam kursus (video, teks, atau kuis)
+-- 3. Tabel lessons (Sesi Pembelajaran & Evaluasi Kuis)
+-- Materi terstruktur di dalam kursus (video YouTube atau teks/PDF) + Tautan Kuis
 -- ----------------------------------------------------------
 CREATE TABLE `lessons` (
     `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     `course_id` INT UNSIGNED NOT NULL,
-    `chapter_title` VARCHAR(150) NOT NULL,
-    `content_type` ENUM('video', 'text', 'quiz') NOT NULL,
-    `content_url_or_text` TEXT DEFAULT NULL,
+    `chapter_title` VARCHAR(150) NOT NULL COMMENT 'Nama Sesi',
+    `content_type` ENUM('video', 'text_pdf', 'text') NOT NULL DEFAULT 'video',
+    `content_url_or_text` TEXT DEFAULT NULL COMMENT 'URL Video YouTube atau Isi Konten Dokumen Teks/PDF',
+    `quiz_url` VARCHAR(255) DEFAULT NULL COMMENT 'Tautan formulir kuis / evaluasi akhir sesi (Google Form, dll)',
     `order_index` INT NOT NULL DEFAULT 1,
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     INDEX `idx_lessons_course` (`course_id`),
