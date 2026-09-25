@@ -75,6 +75,27 @@ CREATE TABLE `lessons` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ----------------------------------------------------------
+-- 4. Tabel quiz_questions (Soal Kuis Pilihan Ganda Sesi)
+-- Menyimpan butir soal kuis evaluasi manual per sesi
+-- ----------------------------------------------------------
+CREATE TABLE `quiz_questions` (
+    `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    `session_id` INT UNSIGNED NOT NULL,
+    `question_text` TEXT NOT NULL,
+    `option_a` TEXT NOT NULL,
+    `option_b` TEXT NOT NULL,
+    `option_c` TEXT NOT NULL,
+    `option_d` TEXT NOT NULL,
+    `correct_answer` ENUM('a', 'b', 'c', 'd') NOT NULL,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX `idx_quiz_session` (`session_id`),
+    CONSTRAINT `fk_quiz_session` 
+        FOREIGN KEY (`session_id`) REFERENCES `lessons` (`id`) 
+        ON DELETE CASCADE 
+        ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ----------------------------------------------------------
 -- 4. Tabel enrollments
 -- Data kepesertaan kelas serta progress belajar
 -- ----------------------------------------------------------

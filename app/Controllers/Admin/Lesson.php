@@ -33,6 +33,13 @@ class Lesson extends BaseController
         $lessons   = $this->lessonModel->getLessonsByCourse($courseId);
         $nextOrder = $this->lessonModel->getNextOrderIndex($courseId);
 
+        // Hitung total butir kuis manual yang sudah dibuat untuk tiap sesi
+        $quizModel = new \App\Models\QuizQuestionModel();
+        foreach ($lessons as &$l) {
+            $l['quiz_count'] = $quizModel->countBySession((int) $l['id']);
+        }
+        unset($l);
+
         $data = [
             'title'       => 'Manajemen Kurikulum Sesi: ' . esc($course['title']) . ' - MUSLIM UPSKILL ACADEMY',
             'course'      => $course,
@@ -46,7 +53,7 @@ class Lesson extends BaseController
     }
 
     /**
-     * Menyimpan sesi pembelajaran baru (Materi + Tautan Kuis)
+     * Menyimpan sesi pembelajaran baru (Materi Pelajaran)
      *
      * @param int $courseId
      * @return \CodeIgniter\HTTP\RedirectResponse
@@ -62,7 +69,6 @@ class Lesson extends BaseController
             'chapter_title'       => 'required|min_length[3]|max_length[150]',
             'content_type'        => 'required|in_list[video,text_pdf]',
             'content_url_or_text' => 'permit_empty',
-            'quiz_url'            => 'permit_empty',
             'order_index'         => 'required|is_natural_no_zero',
         ];
 
@@ -85,14 +91,11 @@ class Lesson extends BaseController
             return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
         }
 
-        $quizUrl = trim((string) $this->request->getPost('quiz_url'));
-
         $data = [
             'course_id'           => $courseId,
             'chapter_title'       => trim((string) $this->request->getPost('chapter_title')),
             'content_type'        => (string) $this->request->getPost('content_type'),
             'content_url_or_text' => trim((string) $this->request->getPost('content_url_or_text')),
-            'quiz_url'            => !empty($quizUrl) ? $quizUrl : null,
             'order_index'         => (int) ($this->request->getPost('order_index') ?: 1),
         ];
 

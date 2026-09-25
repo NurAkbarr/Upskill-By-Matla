@@ -142,29 +142,8 @@
                 </p>
             </div>
 
-            <!-- 4. Tautan Kuis Evaluasi Sesi -->
-            <div class="pt-2 border-t border-slate-100">
-                <div class="flex items-center gap-1.5 mb-1.5">
-                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                    <label for="quiz_url" class="block text-xs font-bold uppercase tracking-wider text-upskill-darkblue">
-                        Tautan Kuis Evaluasi (Opsional/Wajib)
-                    </label>
-                </div>
-                <input 
-                    type="url" 
-                    id="quiz_url" 
-                    name="quiz_url" 
-                    value="<?= old('quiz_url') ?>" 
-                    placeholder="https://forms.gle/... atau tautan kuis"
-                    class="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                >
-                <p class="text-[11px] text-slate-500 mt-1.5 leading-relaxed">
-                    Masukkan tautan formulir kuis yang harus diselesaikan peserta di akhir sesi ini (misal: Google Forms, Typeform, atau platform asesmen).
-                </p>
-            </div>
-
             <!-- Tombol Submit -->
-            <div class="pt-3">
+            <div class="pt-2">
                 <button 
                     type="submit" 
                     class="w-full py-2.5 px-4 inline-flex items-center justify-center gap-2 font-bold text-sm rounded-lg text-white bg-upskill-pink hover:bg-upskill-magenta transition-colors shadow-sm"
@@ -236,17 +215,17 @@
                                         </span>
                                     <?php endif; ?>
 
-                                    <!-- Indikator Kuis Evaluasi -->
-                                    <?php if (!empty($l['quiz_url'])): ?>
-                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                    <!-- Indikator Kuis Evaluasi Manual -->
+                                    <?php if (!empty($l['quiz_count']) && $l['quiz_count'] > 0): ?>
+                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-xs font-semibold bg-pink-50 text-upskill-pink border border-pink-200">
                                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                             </svg>
-                                            Kuis Terlampir
+                                            <?= $l['quiz_count'] ?> Soal Kuis
                                         </span>
                                     <?php else: ?>
                                         <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-xs font-medium bg-slate-100 text-slate-500 border border-slate-200">
-                                            Tanpa Kuis
+                                            Belum Ada Kuis
                                         </span>
                                     <?php endif; ?>
                                 </div>
@@ -256,8 +235,8 @@
                                     <?= esc($l['chapter_title']) ?>
                                 </h4>
 
-                                <!-- Preview Konten / Kuis -->
-                                <div class="text-xs text-slate-500 space-y-1">
+                                <!-- Preview Konten Sesi -->
+                                <div class="text-xs text-slate-500">
                                     <?php if ($l['content_type'] === 'video' && !empty($l['content_url_or_text'])): ?>
                                         <p class="truncate max-w-md">
                                             <span class="font-semibold text-slate-600">Video:</span> 
@@ -270,30 +249,31 @@
                                             <span class="font-semibold">Materi:</span> <?= esc($l['content_url_or_text']) ?>
                                         </p>
                                     <?php endif; ?>
-
-                                    <?php if (!empty($l['quiz_url'])): ?>
-                                        <p class="truncate max-w-md text-emerald-700">
-                                            <span class="font-semibold">Kuis:</span> 
-                                            <a href="<?= esc($l['quiz_url']) ?>" target="_blank" class="hover:underline">
-                                                <?= esc($l['quiz_url']) ?> &nearr;
-                                            </a>
-                                        </p>
-                                    <?php endif; ?>
                                 </div>
                             </div>
 
-                            <!-- Tombol Aksi Hapus -->
-                            <div class="shrink-0 flex items-center justify-end">
+                            <!-- Tombol Aksi: Kelola Kuis & Hapus Sesi -->
+                            <div class="shrink-0 flex items-center justify-end gap-2">
+                                <a 
+                                    href="<?= base_url('admin/sessions/' . $l['id'] . '/quiz') ?>" 
+                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-upskill-pink hover:text-white hover:bg-upskill-pink border border-upskill-pink transition-colors shadow-2xs"
+                                >
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+                                    </svg>
+                                    Kelola Kuis
+                                </a>
+
                                 <button 
                                     type="button" 
                                     data-href="<?= base_url('admin/lessons/delete/' . $l['id']) ?>" 
-                                    data-message="Sesi '<?= esc($l['chapter_title']) ?>' beserta lampiran materi dan kuisnya akan dihapus permanen dari kurikulum."
+                                    data-message="Sesi '<?= esc($l['chapter_title']) ?>' beserta seluruh butir soal kuisnya akan dihapus permanen dari kurikulum."
                                     class="btn-delete inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold text-rose-600 hover:text-white hover:bg-rose-600 border border-rose-200 hover:border-rose-600 transition-colors"
                                 >
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                                     </svg>
-                                    Hapus Sesi
+                                    Hapus
                                 </button>
                             </div>
                         </div>

@@ -40,10 +40,15 @@ $routes->group('admin', ['filter' => ['auth', 'role:super_admin']], static funct
     $routes->post('courses/store', 'Admin\Course::store');
     $routes->get('courses/delete/(:num)', 'Admin\Course::delete/$1');
 
-    // Manajemen Kurikulum Berbasis Sesi & Kuis
+    // Manajemen Kurikulum Berbasis Sesi
     $routes->get('courses/(:num)/lessons', 'Admin\Lesson::index/$1');
     $routes->post('courses/(:num)/lessons/store', 'Admin\Lesson::store/$1');
     $routes->get('lessons/delete/(:num)', 'Admin\Lesson::delete/$1');
+
+    // Manajemen Kuis Pilihan Ganda (Native Quiz)
+    $routes->get('sessions/(:num)/quiz', 'Admin\Quiz::index/$1');
+    $routes->post('sessions/(:num)/quiz/store', 'Admin\Quiz::store/$1');
+    $routes->get('quiz-questions/delete/(:num)', 'Admin\Quiz::delete/$1');
 
     // Manajemen Pengguna
     $routes->get('users', 'Admin\User::index');
