@@ -19,6 +19,9 @@ class LessonModel extends Model
         'content_url_or_text',
         'quiz_url',
         'order_index',
+        'quiz_start_time',
+        'quiz_end_time',
+        'quiz_duration_minutes',
         'created_at',
     ];
 

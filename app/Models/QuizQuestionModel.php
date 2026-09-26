@@ -15,6 +15,7 @@ class QuizQuestionModel extends Model
     protected $allowedFields    = [
         'session_id',
         'question_text',
+        'question_type',
         'option_a',
         'option_b',
         'option_c',

@@ -30,6 +30,10 @@ $routes->get('courses/(:segment)', 'Course::detail/$1');
 // 5. Dasbor Pengguna Reguler (Terproteksi Filter AuthGuard)
 $routes->get('dashboard', 'Dashboard::index', ['filter' => 'auth']);
 
+// 5.1. Antarmuka Ujian CBT Peserta (Timer & Anti-Cheat)
+$routes->get('sessions/(:num)/cbt', 'Quiz::cbt/$1');
+$routes->post('sessions/(:num)/cbt/submit', 'Quiz::submitCbt/$1');
+
 // 6. Area Khusus Super Admin (Terproteksi AuthGuard & RoleGuard:super_admin)
 $routes->group('admin', ['filter' => ['auth', 'role:super_admin']], static function ($routes) {
     $routes->get('dashboard', 'Admin\Dashboard::index');
@@ -47,9 +51,10 @@ $routes->group('admin', ['filter' => ['auth', 'role:super_admin']], static funct
     $routes->post('sessions/update/(:num)', 'Admin\Lesson::update/$1');
     $routes->get('lessons/delete/(:num)', 'Admin\Lesson::delete/$1');
 
-    // Manajemen Kuis Pilihan Ganda (Native Quiz)
+    // Manajemen Kuis & CBT
     $routes->get('sessions/(:num)/quiz', 'Admin\Quiz::index/$1');
     $routes->post('sessions/(:num)/quiz/store', 'Admin\Quiz::store/$1');
+    $routes->post('sessions/(:num)/quiz/settings', 'Admin\Quiz::updateSettings/$1');
     $routes->get('quiz-questions/delete/(:num)', 'Admin\Quiz::delete/$1');
 
     // Manajemen Pengguna

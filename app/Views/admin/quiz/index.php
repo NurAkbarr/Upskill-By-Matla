@@ -25,33 +25,139 @@
 
 <!-- Alert Notifikasi Flashdata -->
 <?php if (session()->getFlashdata('success')): ?>
-    <div class="p-4 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm flex items-center gap-2.5">
+    <div class="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm flex items-center gap-2.5 shadow-xs">
         <svg class="w-5 h-5 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
         </svg>
-        <span><?= esc(session()->getFlashdata('success')) ?></span>
+        <span class="font-medium"><?= esc(session()->getFlashdata('success')) ?></span>
     </div>
 <?php endif; ?>
 
 <?php if (session()->getFlashdata('error')): ?>
-    <div class="p-4 rounded-lg bg-rose-50 border border-rose-200 text-rose-800 text-sm flex items-center gap-2.5">
+    <div class="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-sm flex items-center gap-2.5 shadow-xs">
         <svg class="w-5 h-5 text-rose-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
         </svg>
-        <span><?= esc(session()->getFlashdata('error')) ?></span>
+        <span class="font-medium"><?= esc(session()->getFlashdata('error')) ?></span>
     </div>
 <?php endif; ?>
 
 <?php if (session()->getFlashdata('errors')): ?>
-    <div class="p-4 rounded-lg bg-rose-50 border border-rose-200 text-rose-800 text-sm">
-        <p class="font-bold mb-1.5">Mohon lengkapi formulir soal dengan benar:</p>
-        <ul class="list-disc list-inside space-y-1 text-xs">
+    <div class="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-sm shadow-xs">
+        <p class="font-bold mb-1.5 flex items-center gap-1.5">
+            <svg class="w-4 h-4 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            Mohon lengkapi formulir soal dengan benar:
+        </p>
+        <ul class="list-disc list-inside space-y-1 text-xs pl-1 text-rose-700">
             <?php foreach (session()->getFlashdata('errors') as $err): ?>
                 <li><?= esc($err) ?></li>
             <?php endforeach; ?>
         </ul>
     </div>
 <?php endif; ?>
+
+<!-- ============================================================== -->
+<!-- PENGATURAN CBT, JADWAL & DURASI UJIAN                          -->
+<!-- ============================================================== -->
+<div class="bg-white border border-slate-200 rounded-2xl p-5 sm:p-6 shadow-xs">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4 mb-4">
+        <div class="flex items-center gap-2.5">
+            <span class="w-8 h-8 rounded-xl bg-pink-50 text-upskill-pink flex items-center justify-center shrink-0">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+            </span>
+            <div>
+                <h3 class="text-sm font-bold text-upskill-darkblue">
+                    Pengaturan Jadwal & Durasi Ujian CBT
+                </h3>
+                <p class="text-xs text-slate-500">
+                    Atur jendela waktu mulai, batas akhir, serta timer hitung mundur untuk peserta.
+                </p>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+            <a 
+                href="<?= base_url('sessions/' . $session['id'] . '/cbt') ?>" 
+                target="_blank"
+                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-upskill-blue hover:text-white hover:bg-upskill-blue border border-upskill-blue/30 hover:border-upskill-blue transition-colors shrink-0 whitespace-nowrap shadow-2xs"
+                title="Buka tampilan CBT peserta ujian di tab baru"
+            >
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                </svg>
+                <span>Pratinjau CBT Peserta</span>
+            </a>
+        </div>
+    </div>
+
+    <form action="<?= base_url('admin/sessions/' . $session['id'] . '/quiz/settings') ?>" method="POST" class="grid grid-cols-1 sm:grid-cols-12 gap-4 items-end">
+        <?= csrf_field() ?>
+
+        <!-- Waktu Mulai -->
+        <div class="sm:col-span-4">
+            <label for="quiz_start_time" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                Waktu Mulai Kuis (Buka)
+            </label>
+            <input 
+                type="datetime-local" 
+                id="quiz_start_time" 
+                name="quiz_start_time" 
+                value="<?= !empty($session['quiz_start_time']) ? date('Y-m-d\TH:i', strtotime($session['quiz_start_time'])) : '' ?>"
+                class="w-full px-3 py-2 rounded-xl border border-slate-300 text-slate-900 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-upskill-pink/20 focus:border-upskill-pink bg-slate-50/50 focus:bg-white"
+            >
+            <span class="text-[11px] text-slate-400 mt-1 block">Kosongkan jika kuis dibuka setiap saat.</span>
+        </div>
+
+        <!-- Waktu Selesai -->
+        <div class="sm:col-span-4">
+            <label for="quiz_end_time" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                Waktu Selesai (Tutup)
+            </label>
+            <input 
+                type="datetime-local" 
+                id="quiz_end_time" 
+                name="quiz_end_time" 
+                value="<?= !empty($session['quiz_end_time']) ? date('Y-m-d\TH:i', strtotime($session['quiz_end_time'])) : '' ?>"
+                class="w-full px-3 py-2 rounded-xl border border-slate-300 text-slate-900 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-upskill-pink/20 focus:border-upskill-pink bg-slate-50/50 focus:bg-white"
+            >
+            <span class="text-[11px] text-slate-400 mt-1 block">Peserta tidak dapat memulai setelah waktu ini.</span>
+        </div>
+
+        <!-- Durasi Ujian (Menit) -->
+        <div class="sm:col-span-2">
+            <label for="quiz_duration_minutes" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                Durasi (Menit)
+            </label>
+            <input 
+                type="number" 
+                id="quiz_duration_minutes" 
+                name="quiz_duration_minutes" 
+                min="0"
+                placeholder="Misal: 30"
+                value="<?= esc($session['quiz_duration_minutes'] ?? '') ?>"
+                class="w-full px-3 py-2 rounded-xl border border-slate-300 text-slate-900 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-upskill-pink/20 focus:border-upskill-pink bg-slate-50/50 focus:bg-white font-bold text-center"
+            >
+            <span class="text-[11px] text-slate-400 mt-1 block">0 = Tanpa batas</span>
+        </div>
+
+        <!-- Tombol Simpan Pengaturan -->
+        <div class="sm:col-span-2">
+            <button 
+                type="submit" 
+                class="w-full py-2 px-3 rounded-xl font-bold text-xs text-white bg-slate-900 hover:bg-slate-800 transition-colors shadow-xs flex items-center justify-center gap-1.5 cursor-pointer h-[40px]"
+            >
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+                <span>Simpan Jadwal</span>
+            </button>
+        </div>
+    </form>
+</div>
 
 <!-- Grid 2 Kolom: Kiri (Form Input Soal), Kanan (Daftar Soal) -->
 <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
@@ -68,12 +174,36 @@
                 Tambah Butir Soal Kuis
             </h3>
             <p class="text-xs text-slate-500 mt-1">
-                Tuliskan pertanyaan, 4 opsi jawaban, dan tentukan kunci jawaban yang benar.
+                Pilih tipe soal (Pilihan Ganda atau Essay), ketik pertanyaan dan simpan.
             </p>
         </div>
 
-        <form action="<?= base_url('admin/sessions/' . $session['id'] . '/quiz/store') ?>" method="POST" class="space-y-4">
+        <form id="form_quiz_question" action="<?= base_url('admin/sessions/' . $session['id'] . '/quiz/store') ?>" method="POST" class="space-y-4">
             <?= csrf_field() ?>
+
+            <!-- Pilihan Tipe Soal (PG / Essay) -->
+            <div>
+                <label for="question_type" class="block text-xs font-bold uppercase tracking-wider text-upskill-darkblue mb-1.5">
+                    Tipe Soal <span class="text-rose-500">*</span>
+                </label>
+                <div class="relative">
+                    <select 
+                        id="question_type" 
+                        name="question_type" 
+                        required 
+                        onchange="toggleQuestionType(this.value)"
+                        class="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-upskill-pink focus:border-upskill-pink bg-white appearance-none pr-10 cursor-pointer font-medium"
+                    >
+                        <option value="pg" <?= old('question_type', 'pg') === 'pg' ? 'selected' : '' ?>>Pilihan Ganda (Opsi A - D)</option>
+                        <option value="essay" <?= old('question_type') === 'essay' ? 'selected' : '' ?>>Soal Essay (Jawaban Uraian)</option>
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-400">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
 
             <!-- 1. Teks Soal / Pertanyaan -->
             <div>
@@ -85,13 +215,13 @@
                     name="question_text" 
                     rows="3" 
                     required 
-                    placeholder="Ketik pertanyaan kuis di sini (misal: Berapakah jumlah rukun sholat yang wajib diketahui?)"
+                    placeholder="Ketik pertanyaan kuis di sini (misal: Jelaskan rukun-rukun sholat secara berurutan...)"
                     class="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-upskill-pink focus:border-upskill-pink"
                 ><?= old('question_text') ?></textarea>
             </div>
 
-            <!-- 2. Pilihan Jawaban & Penentu Kunci Jawaban (Google Forms Style) -->
-            <div class="space-y-3 pt-2 border-t border-slate-100">
+            <!-- 2. Pilihan Jawaban & Penentu Kunci Jawaban (Google Forms Style - Khusus PG) -->
+            <div id="pg_options_wrap" class="space-y-3 pt-2 border-t border-slate-100">
                 <div>
                     <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
                         Pilihan Jawaban & Kunci Jawaban <span class="text-rose-500">*</span>
@@ -103,58 +233,46 @@
                 
                 <!-- Opsi A -->
                 <div class="flex items-center gap-3 mb-3">
-                    <!-- Penentu Kunci Jawaban -->
                     <input type="radio" name="correct_answer" id="correct_a" value="a" required 
                            <?= old('correct_answer') === 'a' ? 'checked' : '' ?>
-                           class="w-5 h-5 text-upskill-pink focus:ring-upskill-pink border-gray-300 cursor-pointer accent-pink-600 shrink-0"
+                           class="pg-radio w-5 h-5 text-upskill-pink focus:ring-upskill-pink border-gray-300 cursor-pointer accent-pink-600 shrink-0"
                            title="Tandai A sebagai jawaban benar">
-                    <!-- Label Huruf -->
                     <label for="correct_a" class="font-bold text-gray-500 w-6 text-center cursor-pointer shrink-0">A</label>
-                    <!-- Input Teks Jawaban -->
-                    <input type="text" name="option_a" value="<?= old('option_a') ?>" required placeholder="Ketik pilihan jawaban A..."
-                           class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-upskill-pink focus:border-upskill-pink">
+                    <input type="text" name="option_a" id="option_a" value="<?= old('option_a') ?>" required placeholder="Ketik pilihan jawaban A..."
+                           class="pg-input w-full px-4 py-2 border border-gray-300 rounded-lg text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-upskill-pink focus:border-upskill-pink">
                 </div>
 
                 <!-- Opsi B -->
                 <div class="flex items-center gap-3 mb-3">
-                    <!-- Penentu Kunci Jawaban -->
                     <input type="radio" name="correct_answer" id="correct_b" value="b" required 
                            <?= old('correct_answer') === 'b' ? 'checked' : '' ?>
-                           class="w-5 h-5 text-upskill-pink focus:ring-upskill-pink border-gray-300 cursor-pointer accent-pink-600 shrink-0"
+                           class="pg-radio w-5 h-5 text-upskill-pink focus:ring-upskill-pink border-gray-300 cursor-pointer accent-pink-600 shrink-0"
                            title="Tandai B sebagai jawaban benar">
-                    <!-- Label Huruf -->
                     <label for="correct_b" class="font-bold text-gray-500 w-6 text-center cursor-pointer shrink-0">B</label>
-                    <!-- Input Teks Jawaban -->
-                    <input type="text" name="option_b" value="<?= old('option_b') ?>" required placeholder="Ketik pilihan jawaban B..."
-                           class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-upskill-pink focus:border-upskill-pink">
+                    <input type="text" name="option_b" id="option_b" value="<?= old('option_b') ?>" required placeholder="Ketik pilihan jawaban B..."
+                           class="pg-input w-full px-4 py-2 border border-gray-300 rounded-lg text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-upskill-pink focus:border-upskill-pink">
                 </div>
 
                 <!-- Opsi C -->
                 <div class="flex items-center gap-3 mb-3">
-                    <!-- Penentu Kunci Jawaban -->
                     <input type="radio" name="correct_answer" id="correct_c" value="c" required 
                            <?= old('correct_answer') === 'c' ? 'checked' : '' ?>
-                           class="w-5 h-5 text-upskill-pink focus:ring-upskill-pink border-gray-300 cursor-pointer accent-pink-600 shrink-0"
+                           class="pg-radio w-5 h-5 text-upskill-pink focus:ring-upskill-pink border-gray-300 cursor-pointer accent-pink-600 shrink-0"
                            title="Tandai C sebagai jawaban benar">
-                    <!-- Label Huruf -->
                     <label for="correct_c" class="font-bold text-gray-500 w-6 text-center cursor-pointer shrink-0">C</label>
-                    <!-- Input Teks Jawaban -->
-                    <input type="text" name="option_c" value="<?= old('option_c') ?>" required placeholder="Ketik pilihan jawaban C..."
-                           class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-upskill-pink focus:border-upskill-pink">
+                    <input type="text" name="option_c" id="option_c" value="<?= old('option_c') ?>" required placeholder="Ketik pilihan jawaban C..."
+                           class="pg-input w-full px-4 py-2 border border-gray-300 rounded-lg text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-upskill-pink focus:border-upskill-pink">
                 </div>
 
                 <!-- Opsi D -->
                 <div class="flex items-center gap-3 mb-3">
-                    <!-- Penentu Kunci Jawaban -->
                     <input type="radio" name="correct_answer" id="correct_d" value="d" required 
                            <?= old('correct_answer') === 'd' ? 'checked' : '' ?>
-                           class="w-5 h-5 text-upskill-pink focus:ring-upskill-pink border-gray-300 cursor-pointer accent-pink-600 shrink-0"
+                           class="pg-radio w-5 h-5 text-upskill-pink focus:ring-upskill-pink border-gray-300 cursor-pointer accent-pink-600 shrink-0"
                            title="Tandai D sebagai jawaban benar">
-                    <!-- Label Huruf -->
                     <label for="correct_d" class="font-bold text-gray-500 w-6 text-center cursor-pointer shrink-0">D</label>
-                    <!-- Input Teks Jawaban -->
-                    <input type="text" name="option_d" value="<?= old('option_d') ?>" required placeholder="Ketik pilihan jawaban D..."
-                           class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-upskill-pink focus:border-upskill-pink">
+                    <input type="text" name="option_d" id="option_d" value="<?= old('option_d') ?>" required placeholder="Ketik pilihan jawaban D..."
+                           class="pg-input w-full px-4 py-2 border border-gray-300 rounded-lg text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-upskill-pink focus:border-upskill-pink">
                 </div>
             </div>
 
@@ -188,7 +306,7 @@
                     </span>
                 </div>
                 <span class="text-xs text-slate-500">
-                    Kuis Pilihan Ganda (Native)
+                    Kuis CBT (PG & Essay)
                 </span>
             </div>
 
@@ -211,15 +329,28 @@
                     <?php foreach ($questions as $index => $q): ?>
                         <div class="p-5 sm:p-6 hover:bg-slate-50/60 transition-colors space-y-3.5">
                             
-                            <!-- Header Soal: Nomor & Tombol Hapus -->
+                            <!-- Header Soal: Nomor, Tipe, & Tombol Hapus -->
                             <div class="flex items-start justify-between gap-3">
-                                <div class="flex items-center gap-2">
-                                    <span class="w-7 h-7 rounded-lg bg-slate-900 text-white font-bold text-xs flex items-center justify-center shrink-0">
+                                <div class="flex items-start gap-2.5">
+                                    <span class="w-7 h-7 rounded-lg bg-slate-900 text-white font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">
                                         <?= $index + 1 ?>
                                     </span>
-                                    <h4 class="font-bold text-sm text-upskill-darkblue">
-                                        <?= esc($q['question_text']) ?>
-                                    </h4>
+                                    <div>
+                                        <div class="flex items-center gap-2 mb-1">
+                                            <?php if (($q['question_type'] ?? 'pg') === 'essay'): ?>
+                                                <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-amber-100 text-amber-800 border border-amber-200">
+                                                    Essay / Uraian
+                                                </span>
+                                            <?php else: ?>
+                                                <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-sky-100 text-sky-800 border border-sky-200">
+                                                    Pilihan Ganda
+                                                </span>
+                                            <?php endif; ?>
+                                        </div>
+                                        <h4 class="font-bold text-sm text-upskill-darkblue">
+                                            <?= esc($q['question_text']) ?>
+                                        </h4>
+                                    </div>
                                 </div>
                                 <button 
                                     type="button" 
@@ -234,54 +365,61 @@
                                 </button>
                             </div>
 
-                            <!-- Daftar Opsi A, B, C, D (Highlight Kunci Jawaban) -->
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-                                
-                                <!-- Opsi A -->
-                                <div class="p-2.5 rounded-lg border flex items-center gap-2.5 <?= $q['correct_answer'] === 'a' ? 'bg-emerald-50/80 border-emerald-300 text-emerald-950 font-semibold' : 'bg-slate-50 border-slate-200 text-slate-700' ?>">
-                                    <span class="w-5 h-5 rounded-md flex items-center justify-center font-bold text-[11px] shrink-0 <?= $q['correct_answer'] === 'a' ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-700' ?>">
-                                        A
-                                    </span>
-                                    <span class="flex-1"><?= esc($q['option_a']) ?></span>
-                                    <?php if ($q['correct_answer'] === 'a'): ?>
-                                        <span class="text-[10px] uppercase font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded border border-emerald-200">Kunci Jawaban</span>
-                                    <?php endif; ?>
+                            <!-- Opsi Jawaban (Jika PG) atau Kotak Uraian (Jika Essay) -->
+                            <?php if (($q['question_type'] ?? 'pg') === 'essay'): ?>
+                                <div class="p-3 bg-amber-50/60 border border-amber-200/80 rounded-lg text-xs text-amber-900 flex items-center gap-2">
+                                    <svg class="w-4 h-4 text-amber-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                    </svg>
+                                    <span>Soal Essay / Uraian terbuka — Peserta mengetikkan jawaban bebas pada aplikasi ujian CBT.</span>
                                 </div>
+                            <?php else: ?>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                                    <!-- Opsi A -->
+                                    <div class="p-2.5 rounded-lg border flex items-center gap-2.5 <?= $q['correct_answer'] === 'a' ? 'bg-emerald-50/80 border-emerald-300 text-emerald-950 font-semibold' : 'bg-slate-50 border-slate-200 text-slate-700' ?>">
+                                        <span class="w-5 h-5 rounded-md flex items-center justify-center font-bold text-[11px] shrink-0 <?= $q['correct_answer'] === 'a' ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-700' ?>">
+                                            A
+                                        </span>
+                                        <span class="flex-1"><?= esc($q['option_a']) ?></span>
+                                        <?php if ($q['correct_answer'] === 'a'): ?>
+                                            <span class="text-[10px] uppercase font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded border border-emerald-200">Kunci Jawaban</span>
+                                        <?php endif; ?>
+                                    </div>
 
-                                <!-- Opsi B -->
-                                <div class="p-2.5 rounded-lg border flex items-center gap-2.5 <?= $q['correct_answer'] === 'b' ? 'bg-emerald-50/80 border-emerald-300 text-emerald-950 font-semibold' : 'bg-slate-50 border-slate-200 text-slate-700' ?>">
-                                    <span class="w-5 h-5 rounded-md flex items-center justify-center font-bold text-[11px] shrink-0 <?= $q['correct_answer'] === 'b' ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-700' ?>">
-                                        B
-                                    </span>
-                                    <span class="flex-1"><?= esc($q['option_b']) ?></span>
-                                    <?php if ($q['correct_answer'] === 'b'): ?>
-                                        <span class="text-[10px] uppercase font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded border border-emerald-200">Kunci Jawaban</span>
-                                    <?php endif; ?>
+                                    <!-- Opsi B -->
+                                    <div class="p-2.5 rounded-lg border flex items-center gap-2.5 <?= $q['correct_answer'] === 'b' ? 'bg-emerald-50/80 border-emerald-300 text-emerald-950 font-semibold' : 'bg-slate-50 border-slate-200 text-slate-700' ?>">
+                                        <span class="w-5 h-5 rounded-md flex items-center justify-center font-bold text-[11px] shrink-0 <?= $q['correct_answer'] === 'b' ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-700' ?>">
+                                            B
+                                        </span>
+                                        <span class="flex-1"><?= esc($q['option_b']) ?></span>
+                                        <?php if ($q['correct_answer'] === 'b'): ?>
+                                            <span class="text-[10px] uppercase font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded border border-emerald-200">Kunci Jawaban</span>
+                                        <?php endif; ?>
+                                    </div>
+
+                                    <!-- Opsi C -->
+                                    <div class="p-2.5 rounded-lg border flex items-center gap-2.5 <?= $q['correct_answer'] === 'c' ? 'bg-emerald-50/80 border-emerald-300 text-emerald-950 font-semibold' : 'bg-slate-50 border-slate-200 text-slate-700' ?>">
+                                        <span class="w-5 h-5 rounded-md flex items-center justify-center font-bold text-[11px] shrink-0 <?= $q['correct_answer'] === 'c' ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-700' ?>">
+                                            C
+                                        </span>
+                                        <span class="flex-1"><?= esc($q['option_c']) ?></span>
+                                        <?php if ($q['correct_answer'] === 'c'): ?>
+                                            <span class="text-[10px] uppercase font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded border border-emerald-200">Kunci Jawaban</span>
+                                        <?php endif; ?>
+                                    </div>
+
+                                    <!-- Opsi D -->
+                                    <div class="p-2.5 rounded-lg border flex items-center gap-2.5 <?= $q['correct_answer'] === 'd' ? 'bg-emerald-50/80 border-emerald-300 text-emerald-950 font-semibold' : 'bg-slate-50 border-slate-200 text-slate-700' ?>">
+                                        <span class="w-5 h-5 rounded-md flex items-center justify-center font-bold text-[11px] shrink-0 <?= $q['correct_answer'] === 'd' ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-700' ?>">
+                                            D
+                                        </span>
+                                        <span class="flex-1"><?= esc($q['option_d']) ?></span>
+                                        <?php if ($q['correct_answer'] === 'd'): ?>
+                                            <span class="text-[10px] uppercase font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded border border-emerald-200">Kunci Jawaban</span>
+                                        <?php endif; ?>
+                                    </div>
                                 </div>
-
-                                <!-- Opsi C -->
-                                <div class="p-2.5 rounded-lg border flex items-center gap-2.5 <?= $q['correct_answer'] === 'c' ? 'bg-emerald-50/80 border-emerald-300 text-emerald-950 font-semibold' : 'bg-slate-50 border-slate-200 text-slate-700' ?>">
-                                    <span class="w-5 h-5 rounded-md flex items-center justify-center font-bold text-[11px] shrink-0 <?= $q['correct_answer'] === 'c' ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-700' ?>">
-                                        C
-                                    </span>
-                                    <span class="flex-1"><?= esc($q['option_c']) ?></span>
-                                    <?php if ($q['correct_answer'] === 'c'): ?>
-                                        <span class="text-[10px] uppercase font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded border border-emerald-200">Kunci Jawaban</span>
-                                    <?php endif; ?>
-                                </div>
-
-                                <!-- Opsi D -->
-                                <div class="p-2.5 rounded-lg border flex items-center gap-2.5 <?= $q['correct_answer'] === 'd' ? 'bg-emerald-50/80 border-emerald-300 text-emerald-950 font-semibold' : 'bg-slate-50 border-slate-200 text-slate-700' ?>">
-                                    <span class="w-5 h-5 rounded-md flex items-center justify-center font-bold text-[11px] shrink-0 <?= $q['correct_answer'] === 'd' ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-700' ?>">
-                                        D
-                                    </span>
-                                    <span class="flex-1"><?= esc($q['option_d']) ?></span>
-                                    <?php if ($q['correct_answer'] === 'd'): ?>
-                                        <span class="text-[10px] uppercase font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded border border-emerald-200">Kunci Jawaban</span>
-                                    <?php endif; ?>
-                                </div>
-
-                            </div>
+                            <?php endif; ?>
                         </div>
                     <?php endforeach; ?>
                 </div>
@@ -289,5 +427,30 @@
         </div>
     </div>
 </div>
+
+<script>
+    function toggleQuestionType(type) {
+        const wrap = document.getElementById('pg_options_wrap');
+        const radios = document.querySelectorAll('.pg-radio');
+        const inputs = document.querySelectorAll('.pg-input');
+
+        if (type === 'essay') {
+            wrap.style.display = 'none';
+            radios.forEach(r => r.removeAttribute('required'));
+            inputs.forEach(i => i.removeAttribute('required'));
+        } else {
+            wrap.style.display = 'block';
+            radios.forEach(r => r.setAttribute('required', 'required'));
+            inputs.forEach(i => i.setAttribute('required', 'required'));
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const select = document.getElementById('question_type');
+        if (select) {
+            toggleQuestionType(select.value);
+        }
+    });
+</script>
 
 <?= $this->endSection() ?>
