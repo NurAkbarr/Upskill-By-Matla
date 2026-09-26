@@ -315,8 +315,21 @@
                                 </div>
                             </div>
 
-                            <!-- Tombol Aksi: Kelola Kuis & Hapus Sesi -->
+                            <!-- Tombol Aksi: Edit, Kelola Kuis & Hapus Sesi -->
                             <div class="shrink-0 flex items-center gap-2 self-start xl:self-center pt-2 xl:pt-0">
+                                <!-- Tombol Edit Sesi -->
+                                <a 
+                                    href="<?= base_url('admin/sessions/edit/' . $l['id']) ?>" 
+                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-upskill-blue hover:text-white hover:bg-upskill-blue border border-upskill-blue/40 hover:border-upskill-blue transition-colors shrink-0 whitespace-nowrap shadow-2xs"
+                                    title="Edit Sesi Pembelajaran"
+                                >
+                                    <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                    </svg>
+                                    <span>Edit</span>
+                                </a>
+
+                                <!-- Tombol Kelola Kuis -->
                                 <a 
                                     href="<?= base_url('admin/sessions/' . $l['id'] . '/quiz') ?>" 
                                     class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-upskill-pink hover:text-white hover:bg-upskill-pink border border-upskill-pink transition-colors shrink-0 whitespace-nowrap shadow-2xs"
@@ -327,6 +340,7 @@
                                     <span>Kelola Kuis</span>
                                 </a>
 
+                                <!-- Tombol Hapus Sesi -->
                                 <button 
                                     type="button" 
                                     data-href="<?= base_url('admin/lessons/delete/' . $l['id']) ?>" 

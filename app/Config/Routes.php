@@ -43,6 +43,8 @@ $routes->group('admin', ['filter' => ['auth', 'role:super_admin']], static funct
     // Manajemen Kurikulum Berbasis Sesi
     $routes->get('courses/(:num)/lessons', 'Admin\Lesson::index/$1');
     $routes->post('courses/(:num)/lessons/store', 'Admin\Lesson::store/$1');
+    $routes->get('sessions/edit/(:num)', 'Admin\Lesson::edit/$1');
+    $routes->post('sessions/update/(:num)', 'Admin\Lesson::update/$1');
     $routes->get('lessons/delete/(:num)', 'Admin\Lesson::delete/$1');
 
     // Manajemen Kuis Pilihan Ganda (Native Quiz)
