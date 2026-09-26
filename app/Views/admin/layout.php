@@ -52,7 +52,9 @@
             <!-- Header Brand Super Admin -->
             <div class="h-20 flex items-center justify-between px-6 border-b border-slate-800/80 bg-slate-950/40">
                 <a href="<?= base_url('admin/dashboard') ?>" class="flex items-center gap-2.5">
-                    <img src="<?= base_url('assets/images/logo-removebg.png') ?>" alt="Muslim Upskill Academy" class="h-11 w-auto object-contain">
+                    <div class="bg-white/95 px-2.5 py-1.5 rounded-lg shadow-sm flex items-center">
+                        <img src="<?= base_url('assets/images/logo-removebg.png') ?>" alt="Muslim Upskill Academy" class="h-7 w-auto object-contain">
+                    </div>
                 </a>
                 <span class="text-[9px] font-bold tracking-wider uppercase px-2 py-0.5 rounded bg-pink-500/10 text-upskill-pink border border-upskill-pink/20">
                     Admin
@@ -144,7 +146,7 @@
         </header>
 
         <!-- Area Konten Utama -->
-        <div class="p-6 sm:p-10 max-w-6xl mx-auto space-y-8">
+        <div class="p-6 sm:p-8 lg:p-10 max-w-7xl mx-auto space-y-8">
             <?= $this->renderSection('content') ?>
         </div>
     </main>

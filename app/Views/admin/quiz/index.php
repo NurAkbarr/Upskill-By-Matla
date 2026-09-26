@@ -90,100 +90,72 @@
                 ><?= old('question_text') ?></textarea>
             </div>
 
-            <!-- 2. Pilihan Jawaban (A, B, C, D) -->
+            <!-- 2. Pilihan Jawaban & Penentu Kunci Jawaban (Google Forms Style) -->
             <div class="space-y-3 pt-2 border-t border-slate-100">
-                <p class="text-xs font-bold uppercase tracking-wider text-slate-600">Pilihan Jawaban (A / B / C / D):</p>
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
+                        Pilihan Jawaban & Kunci Jawaban <span class="text-rose-500">*</span>
+                    </label>
+                    <p class="text-xs text-slate-500 mb-3">
+                        Ketik pilihan jawaban dan pilih salah satu bulatan di sebelah kiri sebagai kunci jawaban yang benar.
+                    </p>
+                </div>
                 
                 <!-- Opsi A -->
-                <div>
-                    <div class="relative flex items-center">
-                        <span class="absolute left-3 w-6 h-6 rounded-md bg-slate-100 text-slate-700 font-bold text-xs flex items-center justify-center border border-slate-200">
-                            A
-                        </span>
-                        <input 
-                            type="text" 
-                            name="option_a" 
-                            value="<?= old('option_a') ?>" 
-                            required 
-                            placeholder="Jawaban Pilihan A"
-                            class="w-full pl-11 pr-3.5 py-2.5 rounded-lg border border-slate-300 text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-upskill-pink focus:border-upskill-pink"
-                        >
-                    </div>
+                <div class="flex items-center gap-3 mb-3">
+                    <!-- Penentu Kunci Jawaban -->
+                    <input type="radio" name="correct_answer" id="correct_a" value="a" required 
+                           <?= old('correct_answer') === 'a' ? 'checked' : '' ?>
+                           class="w-5 h-5 text-upskill-pink focus:ring-upskill-pink border-gray-300 cursor-pointer accent-pink-600 shrink-0"
+                           title="Tandai A sebagai jawaban benar">
+                    <!-- Label Huruf -->
+                    <label for="correct_a" class="font-bold text-gray-500 w-6 text-center cursor-pointer shrink-0">A</label>
+                    <!-- Input Teks Jawaban -->
+                    <input type="text" name="option_a" value="<?= old('option_a') ?>" required placeholder="Ketik pilihan jawaban A..."
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-upskill-pink focus:border-upskill-pink">
                 </div>
 
                 <!-- Opsi B -->
-                <div>
-                    <div class="relative flex items-center">
-                        <span class="absolute left-3 w-6 h-6 rounded-md bg-slate-100 text-slate-700 font-bold text-xs flex items-center justify-center border border-slate-200">
-                            B
-                        </span>
-                        <input 
-                            type="text" 
-                            name="option_b" 
-                            value="<?= old('option_b') ?>" 
-                            required 
-                            placeholder="Jawaban Pilihan B"
-                            class="w-full pl-11 pr-3.5 py-2.5 rounded-lg border border-slate-300 text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-upskill-pink focus:border-upskill-pink"
-                        >
-                    </div>
+                <div class="flex items-center gap-3 mb-3">
+                    <!-- Penentu Kunci Jawaban -->
+                    <input type="radio" name="correct_answer" id="correct_b" value="b" required 
+                           <?= old('correct_answer') === 'b' ? 'checked' : '' ?>
+                           class="w-5 h-5 text-upskill-pink focus:ring-upskill-pink border-gray-300 cursor-pointer accent-pink-600 shrink-0"
+                           title="Tandai B sebagai jawaban benar">
+                    <!-- Label Huruf -->
+                    <label for="correct_b" class="font-bold text-gray-500 w-6 text-center cursor-pointer shrink-0">B</label>
+                    <!-- Input Teks Jawaban -->
+                    <input type="text" name="option_b" value="<?= old('option_b') ?>" required placeholder="Ketik pilihan jawaban B..."
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-upskill-pink focus:border-upskill-pink">
                 </div>
 
                 <!-- Opsi C -->
-                <div>
-                    <div class="relative flex items-center">
-                        <span class="absolute left-3 w-6 h-6 rounded-md bg-slate-100 text-slate-700 font-bold text-xs flex items-center justify-center border border-slate-200">
-                            C
-                        </span>
-                        <input 
-                            type="text" 
-                            name="option_c" 
-                            value="<?= old('option_c') ?>" 
-                            required 
-                            placeholder="Jawaban Pilihan C"
-                            class="w-full pl-11 pr-3.5 py-2.5 rounded-lg border border-slate-300 text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-upskill-pink focus:border-upskill-pink"
-                        >
-                    </div>
+                <div class="flex items-center gap-3 mb-3">
+                    <!-- Penentu Kunci Jawaban -->
+                    <input type="radio" name="correct_answer" id="correct_c" value="c" required 
+                           <?= old('correct_answer') === 'c' ? 'checked' : '' ?>
+                           class="w-5 h-5 text-upskill-pink focus:ring-upskill-pink border-gray-300 cursor-pointer accent-pink-600 shrink-0"
+                           title="Tandai C sebagai jawaban benar">
+                    <!-- Label Huruf -->
+                    <label for="correct_c" class="font-bold text-gray-500 w-6 text-center cursor-pointer shrink-0">C</label>
+                    <!-- Input Teks Jawaban -->
+                    <input type="text" name="option_c" value="<?= old('option_c') ?>" required placeholder="Ketik pilihan jawaban C..."
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-upskill-pink focus:border-upskill-pink">
                 </div>
 
                 <!-- Opsi D -->
-                <div>
-                    <div class="relative flex items-center">
-                        <span class="absolute left-3 w-6 h-6 rounded-md bg-slate-100 text-slate-700 font-bold text-xs flex items-center justify-center border border-slate-200">
-                            D
-                        </span>
-                        <input 
-                            type="text" 
-                            name="option_d" 
-                            value="<?= old('option_d') ?>" 
-                            required 
-                            placeholder="Jawaban Pilihan D"
-                            class="w-full pl-11 pr-3.5 py-2.5 rounded-lg border border-slate-300 text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-upskill-pink focus:border-upskill-pink"
-                        >
-                    </div>
+                <div class="flex items-center gap-3 mb-3">
+                    <!-- Penentu Kunci Jawaban -->
+                    <input type="radio" name="correct_answer" id="correct_d" value="d" required 
+                           <?= old('correct_answer') === 'd' ? 'checked' : '' ?>
+                           class="w-5 h-5 text-upskill-pink focus:ring-upskill-pink border-gray-300 cursor-pointer accent-pink-600 shrink-0"
+                           title="Tandai D sebagai jawaban benar">
+                    <!-- Label Huruf -->
+                    <label for="correct_d" class="font-bold text-gray-500 w-6 text-center cursor-pointer shrink-0">D</label>
+                    <!-- Input Teks Jawaban -->
+                    <input type="text" name="option_d" value="<?= old('option_d') ?>" required placeholder="Ketik pilihan jawaban D..."
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-upskill-pink focus:border-upskill-pink">
                 </div>
-            </div>
-
-            <!-- 3. Kunci Jawaban yang Benar -->
-            <div class="pt-2 border-t border-slate-100">
-                <label for="correct_answer" class="block text-xs font-bold uppercase tracking-wider text-upskill-darkblue mb-1.5 flex items-center gap-1.5">
-                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                    Kunci Jawaban yang Benar <span class="text-rose-500">*</span>
-                </label>
-                <select 
-                    id="correct_answer" 
-                    name="correct_answer" 
-                    required 
-                    class="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white"
-                >
-                    <option value="" disabled <?= old('correct_answer') ? '' : 'selected' ?>>-- Tentukan Kunci Jawaban Benar --</option>
-                    <option value="a" <?= old('correct_answer') === 'a' ? 'selected' : '' ?>>Pilihan A</option>
-                    <option value="b" <?= old('correct_answer') === 'b' ? 'selected' : '' ?>>Pilihan B</option>
-                    <option value="c" <?= old('correct_answer') === 'c' ? 'selected' : '' ?>>Pilihan C</option>
-                    <option value="d" <?= old('correct_answer') === 'd' ? 'selected' : '' ?>>Pilihan D</option>
-                </select>
-                <p class="text-[11px] text-slate-400 mt-1">
-                    Sistem akan mencocokkan jawaban peserta dengan kunci jawaban ini secara otomatis.
-                </p>
             </div>
 
             <!-- Tombol Submit -->
@@ -207,9 +179,14 @@
     <div class="lg:col-span-7 space-y-4">
         <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
             <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/75">
-                <h3 class="text-sm font-bold text-upskill-darkblue uppercase tracking-wider">
-                    Daftar Butir Soal Sesi Ini
-                </h3>
+                <div class="flex items-center gap-2.5">
+                    <h3 class="text-sm font-bold text-upskill-darkblue uppercase tracking-wider">
+                        Daftar Butir Soal Sesi Ini
+                    </h3>
+                    <span class="px-2 py-0.5 rounded-full text-xs font-semibold bg-upskill-pink/10 text-upskill-pink border border-upskill-pink/20">
+                        <?= count($questions) ?> Soal
+                    </span>
+                </div>
                 <span class="text-xs text-slate-500">
                     Kuis Pilihan Ganda (Native)
                 </span>
@@ -267,7 +244,7 @@
                                     </span>
                                     <span class="flex-1"><?= esc($q['option_a']) ?></span>
                                     <?php if ($q['correct_answer'] === 'a'): ?>
-                                        <span class="text-[10px] uppercase font-bold text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded">Kunci</span>
+                                        <span class="text-[10px] uppercase font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded border border-emerald-200">Kunci Jawaban</span>
                                     <?php endif; ?>
                                 </div>
 
@@ -278,7 +255,7 @@
                                     </span>
                                     <span class="flex-1"><?= esc($q['option_b']) ?></span>
                                     <?php if ($q['correct_answer'] === 'b'): ?>
-                                        <span class="text-[10px] uppercase font-bold text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded">Kunci</span>
+                                        <span class="text-[10px] uppercase font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded border border-emerald-200">Kunci Jawaban</span>
                                     <?php endif; ?>
                                 </div>
 
@@ -289,7 +266,7 @@
                                     </span>
                                     <span class="flex-1"><?= esc($q['option_c']) ?></span>
                                     <?php if ($q['correct_answer'] === 'c'): ?>
-                                        <span class="text-[10px] uppercase font-bold text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded">Kunci</span>
+                                        <span class="text-[10px] uppercase font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded border border-emerald-200">Kunci Jawaban</span>
                                     <?php endif; ?>
                                 </div>
 
@@ -300,7 +277,7 @@
                                     </span>
                                     <span class="flex-1"><?= esc($q['option_d']) ?></span>
                                     <?php if ($q['correct_answer'] === 'd'): ?>
-                                        <span class="text-[10px] uppercase font-bold text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded">Kunci</span>
+                                        <span class="text-[10px] uppercase font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded border border-emerald-200">Kunci Jawaban</span>
                                     <?php endif; ?>
                                 </div>
 
