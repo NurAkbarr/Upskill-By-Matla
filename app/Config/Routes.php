@@ -42,6 +42,8 @@ $routes->group('admin', ['filter' => ['auth', 'role:super_admin']], static funct
     $routes->get('courses', 'Admin\Course::index');
     $routes->get('courses/create', 'Admin\Course::create');
     $routes->post('courses/store', 'Admin\Course::store');
+    $routes->get('courses/edit/(:num)', 'Admin\Course::edit/$1');
+    $routes->post('courses/update/(:num)', 'Admin\Course::update/$1');
     $routes->get('courses/delete/(:num)', 'Admin\Course::delete/$1');
 
     // Manajemen Kurikulum Berbasis Sesi

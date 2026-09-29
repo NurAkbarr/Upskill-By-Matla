@@ -109,9 +109,18 @@
                                     </a>
                                     <span class="text-slate-300">|</span>
                                     <a 
+                                        href="<?= base_url('admin/courses/edit/' . $c['id']) ?>" 
+                                        class="font-semibold text-upskill-blue hover:text-upskill-pink transition-colors"
+                                        title="Edit Katalog Kelas"
+                                    >
+                                        Edit
+                                    </a>
+                                    <span class="text-slate-300">|</span>
+                                    <a 
                                         href="<?= base_url('courses/' . $c['slug']) ?>" 
                                         target="_blank" 
-                                        class="font-semibold text-upskill-blue hover:text-upskill-pink transition-colors"
+                                        class="font-semibold text-slate-500 hover:text-slate-800 transition-colors"
+                                        title="Pratinjau Halaman Publik"
                                     >
                                         Lihat
                                     </a>
