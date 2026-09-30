@@ -2,6 +2,8 @@
 
 namespace App\Controllers;
 
+use App\Models\EnrollmentModel;
+
 class Dashboard extends BaseController
 {
     /**
@@ -15,58 +17,42 @@ class Dashboard extends BaseController
         }
 
         // Ambil informasi pengguna aktif dari session
+        $userId       = (int) (session()->get('user_id') ?? 0);
         $userName     = session()->get('full_name') ?? 'Pengguna';
         $userRole     = session()->get('role') ?? 'peserta_b2c';
         $userEmail    = session()->get('email') ?? '';
         $instansiName = session()->get('instansi_name') ?? null;
 
-        /**
-         * Struktur Switch-Case untuk Query Data Berdasarkan Role (Tahap Mendatang)
-         * Data statistik dan daftar kelas akan disesuaikan dengan peran masing-masing:
-         */
-        $dashboardData = [];
+        // Ambil daftar kelas yang diikuti oleh user aktif melalui EnrollmentModel
+        $enrollmentModel  = new EnrollmentModel();
+        $enrolled_courses = $userId > 0 ? $enrollmentModel->getEnrolledCoursesByUser($userId) : [];
 
-        switch ($userRole) {
-            case 'super_admin':
-                // TODO (Tahap Administrasi):
-                // - Query total users (mentor, peserta B2C, peserta B2B)
-                // - Query total courses & revenue transaksi platform
-                // - Log aktivitas sistem terbaru
-                $dashboardData['role_label'] = 'Super Administrator';
-                break;
+        // Hitung statistik
+        $total_active = count($enrolled_courses);
+        $total_progress_sum = 0;
+        foreach ($enrolled_courses as $ec) {
+            $total_progress_sum += (int) ($ec['progress_percentage'] ?? 0);
+        }
+        $avg_progress = $total_active > 0 ? round($total_progress_sum / $total_active) : 0;
 
-            case 'mentor':
-                // TODO (Tahap Mentor):
-                // - Query kursus yang dibuat oleh mentor ini (courses WHERE mentor_id = user_id)
-                // - Query total siswa yang terdaftar di kelas mentor
-                // - Query statistik performa materi & penugasan
-                $dashboardData['role_label'] = 'Mentor Praktisi';
-                break;
-
-            case 'peserta_b2b':
-                // TODO (Tahap Peserta B2B / Institusi):
-                // - Query kelas yang ditugaskan oleh instansi terkait
-                // - Query rekap progres pelatihan karyawan / delegasi
-                $dashboardData['role_label'] = 'Peserta B2B (' . ($instansiName ?? 'Institusi') . ')';
-                break;
-
-            case 'peserta_b2c':
-            default:
-                // TODO (Tahap Peserta B2C / Individu):
-                // - Query kelas aktif yang sedang diikuti (enrollments WHERE user_id = user_id)
-                // - Query persentase progres belajar materi
-                // - Query sertifikat kelulusan yang telah diterbitkan
-                $dashboardData['role_label'] = 'Peserta Mandiri';
-                break;
+        // Penyesuaian label role pengguna
+        $role_label = 'Peserta Mandiri';
+        if ($userRole === 'mentor') {
+            $role_label = 'Mentor Praktisi';
+        } elseif ($userRole === 'peserta_b2b') {
+            $role_label = 'Peserta B2B (' . ($instansiName ?? 'Institusi') . ')';
         }
 
         $data = [
-            'title'        => 'Dasbor - UPSKILL by MATLA',
-            'user_name'    => $userName,
-            'user_role'    => $userRole,
-            'role_label'   => $dashboardData['role_label'],
-            'user_email'   => $userEmail,
-            'instansi_name'=> $instansiName,
+            'title'            => 'Dasbor Pembelajaran - MUSLIM UPSKILL ACADEMY',
+            'user_name'        => $userName,
+            'user_role'        => $userRole,
+            'role_label'       => $role_label,
+            'user_email'       => $userEmail,
+            'instansi_name'    => $instansiName,
+            'enrolled_courses' => $enrolled_courses,
+            'total_active'     => $total_active,
+            'avg_progress'     => $avg_progress,
         ];
 
         return view('dashboard/index', $data);

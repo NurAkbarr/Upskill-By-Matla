@@ -123,6 +123,25 @@
 
         <!-- Wadah Konten Utama dengan Ruang Kosong Luas -->
         <div class="p-6 sm:p-10 max-w-6xl mx-auto space-y-8">
+
+            <!-- Flashdata Alert -->
+            <?php if (session()->getFlashdata('success')): ?>
+                <div class="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm flex items-center gap-2.5 shadow-xs">
+                    <svg class="w-5 h-5 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                    </svg>
+                    <span class="font-medium"><?= esc(session()->getFlashdata('success')) ?></span>
+                </div>
+            <?php endif; ?>
+
+            <?php if (session()->getFlashdata('error')): ?>
+                <div class="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-sm flex items-center gap-2.5 shadow-xs">
+                    <svg class="w-5 h-5 text-rose-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                    </svg>
+                    <span class="font-medium"><?= esc(session()->getFlashdata('error')) ?></span>
+                </div>
+            <?php endif; ?>
             
             <!-- Kartu Sapaan Pengguna (Clean & Minimalist) -->
             <div class="bg-white border border-slate-200 rounded-xl p-6 sm:p-8">
@@ -144,28 +163,28 @@
                 </div>
             </div>
 
-            <!-- Ringkasan Statistik Singkat -->
+            <!-- Ringkasan Statistik Singkat (Dinamis dari Controller) -->
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
                 <!-- Kartu 1: Kelas Berjalan -->
-                <div class="bg-white border border-slate-200 rounded-xl p-6 hover:border-upskill-pink/30 transition-colors">
+                <div class="bg-white border border-slate-200 rounded-xl p-6 hover:border-upskill-pink/30 transition-colors shadow-2xs">
                     <p class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Kelas Aktif</p>
                     <div class="flex items-baseline justify-between">
-                        <span class="text-2xl font-extrabold text-upskill-darkblue">0</span>
+                        <span class="text-2xl font-extrabold text-upskill-darkblue"><?= (int) $total_active ?></span>
                         <span class="text-xs text-slate-400">Program Terdaftar</span>
                     </div>
                 </div>
 
-                <!-- Kartu 2: Materi Selesai -->
-                <div class="bg-white border border-slate-200 rounded-xl p-6 hover:border-upskill-pink/30 transition-colors">
+                <!-- Kartu 2: Progres Rata-Rata -->
+                <div class="bg-white border border-slate-200 rounded-xl p-6 hover:border-upskill-pink/30 transition-colors shadow-2xs">
                     <p class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Progres Rata-rata</p>
                     <div class="flex items-baseline justify-between">
-                        <span class="text-2xl font-extrabold text-upskill-darkblue">0%</span>
+                        <span class="text-2xl font-extrabold text-upskill-darkblue"><?= (int) $avg_progress ?>%</span>
                         <span class="text-xs text-slate-400">Penyelesaian</span>
                     </div>
                 </div>
 
                 <!-- Kartu 3: Sertifikat -->
-                <div class="bg-white border border-slate-200 rounded-xl p-6 hover:border-upskill-pink/30 transition-colors">
+                <div class="bg-white border border-slate-200 rounded-xl p-6 hover:border-upskill-pink/30 transition-colors shadow-2xs">
                     <p class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Sertifikat Kelulusan</p>
                     <div class="flex items-baseline justify-between">
                         <span class="text-2xl font-extrabold text-upskill-darkblue">0</span>
@@ -175,29 +194,107 @@
             </div>
 
             <!-- Area Konten Materi Belajar Terkini -->
-            <div class="bg-white border border-slate-200 rounded-xl p-6 sm:p-8">
+            <div class="bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 shadow-xs">
                 <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-6">
-                    <h3 class="text-base font-bold text-upskill-darkblue">Program Belajar Anda</h3>
-                    <a href="<?= base_url('/#program-kelas') ?>" class="text-xs font-semibold text-upskill-pink hover:underline">
-                        Jelajahi Kelas Baru
+                    <div class="flex items-center gap-2.5">
+                        <h3 class="text-base font-bold text-upskill-darkblue">Program Belajar Anda</h3>
+                        <?php if (!empty($enrolled_courses)): ?>
+                            <span class="px-2 py-0.5 rounded-full text-xs font-bold bg-pink-50 text-upskill-pink border border-pink-100">
+                                <?= count($enrolled_courses) ?> Kelas
+                            </span>
+                        <?php endif; ?>
+                    </div>
+                    <a href="<?= base_url('/#program-kelas') ?>" class="text-xs font-semibold text-upskill-pink hover:underline flex items-center gap-1">
+                        <span>Jelajahi Kelas Baru</span>
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                        </svg>
                     </a>
                 </div>
 
-                <!-- Empty State Bersih & Nyaman -->
-                <div class="text-center py-12 px-4">
-                    <div class="w-12 h-12 mx-auto rounded-full bg-pink-50 flex items-center justify-center text-upskill-pink mb-3">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
-                        </svg>
+                <?php if (empty($enrolled_courses)): ?>
+                    <!-- Empty State Bersih & Nyaman -->
+                    <div class="text-center py-12 px-4">
+                        <div class="w-12 h-12 mx-auto rounded-full bg-pink-50 flex items-center justify-center text-upskill-pink mb-3">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                            </svg>
+                        </div>
+                        <h4 class="text-sm font-bold text-upskill-darkblue">Belum ada kelas yang diikuti</h4>
+                        <p class="text-xs text-slate-500 max-w-sm mx-auto mt-1 mb-6 leading-relaxed">
+                            Pilih program pelatihan yang tersedia untuk mulai meningkatkan keterampilan praktis Anda.
+                        </p>
+                        <a href="<?= base_url('/#program-kelas') ?>" class="inline-flex items-center justify-center px-5 py-2.5 text-xs font-semibold rounded-lg text-white bg-upskill-pink hover:bg-upskill-magenta transition-colors shadow-sm">
+                            Lihat Katalog Kelas
+                        </a>
                     </div>
-                    <h4 class="text-sm font-bold text-upskill-darkblue">Belum ada kelas yang diikuti</h4>
-                    <p class="text-xs text-slate-500 max-w-sm mx-auto mt-1 mb-6 leading-relaxed">
-                        Pilih program pelatihan yang tersedia untuk mulai meningkatkan keterampilan praktis Anda.
-                    </p>
-                    <a href="<?= base_url('/#program-kelas') ?>" class="inline-flex items-center justify-center px-5 py-2.5 text-xs font-semibold rounded-lg text-white bg-upskill-pink hover:bg-upskill-magenta transition-colors shadow-sm">
-                        Lihat Katalog Kelas
-                    </a>
-                </div>
+                <?php else: ?>
+                    <!-- Grid Kartu Kelas Terdaftar (macOS Style) -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <?php foreach ($enrolled_courses as $c): ?>
+                            <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xs hover:shadow-md hover:border-slate-300 transition-all flex flex-col group">
+                                
+                                <!-- Header macOS 3 Titik -->
+                                <div class="flex items-center justify-between px-4 py-2.5 bg-slate-50/80 border-b border-slate-100">
+                                    <div class="flex items-center gap-1.5">
+                                        <span class="w-2.5 h-2.5 rounded-full bg-rose-500 inline-block"></span>
+                                        <span class="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block"></span>
+                                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span>
+                                    </div>
+                                    <span class="text-[10px] font-mono font-semibold text-slate-400 uppercase tracking-wider">
+                                        <?= esc($c['status'] ?? 'Aktif') ?>
+                                    </span>
+                                </div>
+
+                                <!-- Banner Gambar Kelas -->
+                                <div class="relative aspect-video overflow-hidden bg-slate-100">
+                                    <img 
+                                        src="<?= base_url('uploads/courses/' . esc($c['banner_image'])) ?>" 
+                                        alt="<?= esc($c['title']) ?>" 
+                                        class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                        onerror="this.src='https://placehold.co/600x340/1C21AC/FFFFFF?text=<?= urlencode(esc($c['title'])) ?>'"
+                                    >
+                                </div>
+
+                                <!-- Detail Kelas & Progress Bar -->
+                                <div class="p-5 flex-1 flex flex-col justify-between space-y-4">
+                                    <div class="space-y-1">
+                                        <h4 class="font-bold text-sm sm:text-base text-upskill-darkblue line-clamp-2 leading-snug group-hover:text-upskill-pink transition-colors">
+                                            <?= esc($c['title']) ?>
+                                        </h4>
+                                        <p class="text-xs text-slate-500">
+                                            Mentor: <span class="font-medium text-slate-700"><?= esc($c['mentor_name'] ?? 'Instruktur MATLA') ?></span>
+                                        </p>
+                                    </div>
+
+                                    <!-- Progress Bar (bg-upskill-pink) -->
+                                    <div class="space-y-1.5 pt-1">
+                                        <div class="flex items-center justify-between text-xs font-semibold">
+                                            <span class="text-slate-500">Progres Belajar</span>
+                                            <span class="text-upskill-pink font-bold"><?= (int) ($c['progress_percentage'] ?? 0) ?>%</span>
+                                        </div>
+                                        <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden border border-slate-200/60">
+                                            <div class="bg-upskill-pink h-2 rounded-full transition-all duration-500" style="width: <?= min(100, max(0, (int) ($c['progress_percentage'] ?? 0))) ?>%"></div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Tombol Lanjutkan Belajar -->
+                                    <div class="pt-2 border-t border-slate-100">
+                                        <a 
+                                            href="<?= base_url('courses/' . $c['slug']) ?>" 
+                                            class="w-full py-2.5 px-4 rounded-xl font-bold text-xs text-white bg-upskill-blue hover:bg-upskill-darkblue transition-colors flex items-center justify-center gap-1.5 shadow-xs"
+                                        >
+                                            <span>Lanjutkan Belajar</span>
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+                                            </svg>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
             </div>
 
         </div>

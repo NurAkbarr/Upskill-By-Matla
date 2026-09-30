@@ -23,8 +23,10 @@ $routes->get('register', 'Auth::register');
 $routes->post('register', 'Auth::processRegister');
 $routes->get('logout', 'Auth::logout');
 
-// 4. Eksplorasi & Katalog Kursus
+// 4. Eksplorasi & Pendaftaran Kursus
 $routes->get('courses', 'Course::index');
+$routes->get('courses/(:num)/enroll', 'Course::enroll/$1', ['filter' => 'auth']);
+$routes->post('courses/(:num)/enroll', 'Course::enroll/$1', ['filter' => 'auth']);
 $routes->get('courses/(:segment)', 'Course::detail/$1');
 
 // 5. Dasbor Pengguna Reguler (Terproteksi Filter AuthGuard)
