@@ -8,7 +8,9 @@
 SET FOREIGN_KEY_CHECKS = 0;
 
 DROP TABLE IF EXISTS `transactions`;
+DROP TABLE IF EXISTS `session_progress`;
 DROP TABLE IF EXISTS `enrollments`;
+DROP TABLE IF EXISTS `quiz_questions`;
 DROP TABLE IF EXISTS `lessons`;
 DROP TABLE IF EXISTS `courses`;
 DROP TABLE IF EXISTS `users`;
@@ -42,6 +44,7 @@ CREATE TABLE `courses` (
     `slug` VARCHAR(255) NOT NULL,
     `description` TEXT DEFAULT NULL,
     `price` DECIMAL(10, 2) NOT NULL DEFAULT 0.00 COMMENT '0.00 menandakan kursus gratis',
+    `banner_image` VARCHAR(255) DEFAULT NULL,
     `status` ENUM('draft', 'published') NOT NULL DEFAULT 'draft',
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     UNIQUE KEY `uk_courses_slug` (`slug`),
@@ -55,7 +58,7 @@ CREATE TABLE `courses` (
 
 -- ----------------------------------------------------------
 -- 3. Tabel lessons (Sesi Pembelajaran & Evaluasi Kuis)
--- Materi terstruktur di dalam kursus (video YouTube atau teks/PDF) + Tautan Kuis
+-- Materi terstruktur di dalam kursus (video YouTube atau teks/PDF) + CBT Kuis
 -- ----------------------------------------------------------
 CREATE TABLE `lessons` (
     `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -63,8 +66,11 @@ CREATE TABLE `lessons` (
     `chapter_title` VARCHAR(150) NOT NULL COMMENT 'Nama Sesi',
     `content_type` ENUM('video', 'text_pdf', 'text') NOT NULL DEFAULT 'video',
     `content_url_or_text` TEXT DEFAULT NULL COMMENT 'URL Video YouTube atau Isi Konten Dokumen Teks/PDF',
-    `quiz_url` VARCHAR(255) DEFAULT NULL COMMENT 'Tautan formulir kuis / evaluasi akhir sesi (Google Form, dll)',
+    `quiz_url` VARCHAR(255) DEFAULT NULL COMMENT 'Tautan formulir kuis / evaluasi akhir sesi',
     `order_index` INT NOT NULL DEFAULT 1,
+    `quiz_start_time` DATETIME DEFAULT NULL,
+    `quiz_end_time` DATETIME DEFAULT NULL,
+    `quiz_duration_minutes` INT DEFAULT 0,
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     INDEX `idx_lessons_course` (`course_id`),
     INDEX `idx_lessons_order` (`course_id`, `order_index`),
@@ -75,18 +81,19 @@ CREATE TABLE `lessons` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ----------------------------------------------------------
--- 4. Tabel quiz_questions (Soal Kuis Pilihan Ganda Sesi)
--- Menyimpan butir soal kuis evaluasi manual per sesi
+-- 4. Tabel quiz_questions (Soal Kuis Sesi)
+-- Menyimpan butir soal kuis evaluasi per sesi
 -- ----------------------------------------------------------
 CREATE TABLE `quiz_questions` (
     `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     `session_id` INT UNSIGNED NOT NULL,
     `question_text` TEXT NOT NULL,
-    `option_a` TEXT NOT NULL,
-    `option_b` TEXT NOT NULL,
-    `option_c` TEXT NOT NULL,
-    `option_d` TEXT NOT NULL,
-    `correct_answer` ENUM('a', 'b', 'c', 'd') NOT NULL,
+    `question_type` ENUM('pg', 'essay') NOT NULL DEFAULT 'pg',
+    `option_a` TEXT DEFAULT NULL,
+    `option_b` TEXT DEFAULT NULL,
+    `option_c` TEXT DEFAULT NULL,
+    `option_d` TEXT DEFAULT NULL,
+    `correct_answer` ENUM('a', 'b', 'c', 'd') DEFAULT NULL,
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     INDEX `idx_quiz_session` (`session_id`),
     CONSTRAINT `fk_quiz_session` 
@@ -96,7 +103,7 @@ CREATE TABLE `quiz_questions` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ----------------------------------------------------------
--- 4. Tabel enrollments
+-- 5. Tabel enrollments
 -- Data kepesertaan kelas serta progress belajar
 -- ----------------------------------------------------------
 CREATE TABLE `enrollments` (
@@ -121,7 +128,34 @@ CREATE TABLE `enrollments` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ----------------------------------------------------------
--- 5. Tabel transactions
+-- 6. Tabel session_progress
+-- Pelacakan progres belajar materi sesi dan evaluasi kuis peserta
+-- ----------------------------------------------------------
+CREATE TABLE `session_progress` (
+    `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    `user_id` INT UNSIGNED NOT NULL,
+    `session_id` INT UNSIGNED NOT NULL,
+    `is_completed` TINYINT(1) NOT NULL DEFAULT 0,
+    `quiz_completed` TINYINT(1) NOT NULL DEFAULT 0,
+    `quiz_score` DECIMAL(5, 2) DEFAULT NULL,
+    `quiz_completed_at` DATETIME DEFAULT NULL,
+    `completed_at` DATETIME DEFAULT NULL,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY `user_session_idx` (`user_id`, `session_id`),
+    INDEX `idx_user` (`user_id`),
+    INDEX `idx_session` (`session_id`),
+    CONSTRAINT `fk_progress_user` 
+        FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) 
+        ON DELETE CASCADE 
+        ON UPDATE CASCADE,
+    CONSTRAINT `fk_progress_session` 
+        FOREIGN KEY (`session_id`) REFERENCES `lessons` (`id`) 
+        ON DELETE CASCADE 
+        ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ----------------------------------------------------------
+-- 7. Tabel transactions
 -- Pencatatan riwayat transaksi dan pembayaran
 -- ----------------------------------------------------------
 CREATE TABLE `transactions` (
