@@ -197,7 +197,7 @@
             <div class="bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 shadow-xs">
                 <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-6">
                     <div class="flex items-center gap-2.5">
-                        <h3 class="text-base font-bold text-upskill-darkblue">Program Belajar Anda</h3>
+                        <h3 class="text-base font-bold text-upskill-darkblue">Katalog Program Belajar</h3>
                         <?php if (!empty($enrolled_courses)): ?>
                             <span class="px-2 py-0.5 rounded-full text-xs font-bold bg-pink-50 text-upskill-pink border border-pink-100">
                                 <?= count($enrolled_courses) ?> Kelas
@@ -205,7 +205,7 @@
                         <?php endif; ?>
                     </div>
                     <a href="<?= base_url('/#program-kelas') ?>" class="text-xs font-semibold text-upskill-pink hover:underline flex items-center gap-1">
-                        <span>Jelajahi Kelas Baru</span>
+                        <span>Lihat Semua Katalog</span>
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                         </svg>
@@ -213,37 +213,46 @@
                 </div>
 
                 <?php if (empty($enrolled_courses)): ?>
-                    <!-- Empty State Bersih & Nyaman -->
+                    <!-- Empty State saat Katalog Belum Ada Kelas -->
                     <div class="text-center py-12 px-4">
-                        <div class="w-12 h-12 mx-auto rounded-full bg-pink-50 flex items-center justify-center text-upskill-pink mb-3">
+                        <div class="w-12 h-12 mx-auto rounded-full bg-slate-100 flex items-center justify-center text-slate-400 mb-3">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
                             </svg>
                         </div>
-                        <h4 class="text-sm font-bold text-upskill-darkblue">Belum ada kelas yang diikuti</h4>
-                        <p class="text-xs text-slate-500 max-w-sm mx-auto mt-1 mb-6 leading-relaxed">
-                            Pilih program pelatihan yang tersedia untuk mulai meningkatkan keterampilan praktis Anda.
+                        <h4 class="text-sm font-bold text-upskill-darkblue">Belum ada kelas yang tersedia</h4>
+                        <p class="text-xs text-slate-500 max-w-sm mx-auto mt-1 mb-2 leading-relaxed">
+                            Katalog kelas saat ini belum memiliki program pelatihan yang ditambahkan oleh admin.
                         </p>
-                        <a href="<?= base_url('/#program-kelas') ?>" class="inline-flex items-center justify-center px-5 py-2.5 text-xs font-semibold rounded-lg text-white bg-upskill-pink hover:bg-upskill-magenta transition-colors shadow-sm">
-                            Lihat Katalog Kelas
-                        </a>
                     </div>
                 <?php else: ?>
-                    <!-- Grid Kartu Kelas Terdaftar (macOS Style) -->
+                    <!-- Grid Kartu Kelas dari Katalog Admin -->
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         <?php foreach ($enrolled_courses as $c): ?>
                             <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xs hover:shadow-md hover:border-slate-300 transition-all flex flex-col group">
                                 
-                                <!-- Header macOS 3 Titik -->
+                                <!-- Header macOS 3 Titik & Status -->
                                 <div class="flex items-center justify-between px-4 py-2.5 bg-slate-50/80 border-b border-slate-100">
                                     <div class="flex items-center gap-1.5">
                                         <span class="w-2.5 h-2.5 rounded-full bg-rose-500 inline-block"></span>
                                         <span class="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block"></span>
                                         <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span>
                                     </div>
-                                    <span class="text-[10px] font-mono font-semibold text-slate-400 uppercase tracking-wider">
-                                        <?= esc($c['status'] ?? 'Aktif') ?>
-                                    </span>
+                                    <div>
+                                        <?php if (!empty($c['is_enrolled']) && (int)($c['progress_percentage'] ?? 0) > 0): ?>
+                                            <span class="text-[10px] font-mono font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 uppercase tracking-wider">
+                                                Sedang Belajar
+                                            </span>
+                                        <?php elseif (!empty($c['is_enrolled'])): ?>
+                                            <span class="text-[10px] font-mono font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded border border-blue-200 uppercase tracking-wider">
+                                                Terdaftar
+                                            </span>
+                                        <?php else: ?>
+                                            <span class="text-[10px] font-mono font-semibold text-slate-600 bg-slate-100 px-2 py-0.5 rounded border border-slate-200 uppercase tracking-wider">
+                                                Tersedia
+                                            </span>
+                                        <?php endif; ?>
+                                    </div>
                                 </div>
 
                                 <!-- Banner Gambar Kelas -->
@@ -278,13 +287,14 @@
                                         </div>
                                     </div>
 
-                                    <!-- Tombol Lanjutkan Belajar -->
+                                    <!-- Tombol Mulai / Lanjutkan Belajar -->
                                     <div class="pt-2 border-t border-slate-100">
+                                        <?php $isContinuing = (!empty($c['is_enrolled']) && (int)($c['progress_percentage'] ?? 0) > 0); ?>
                                         <a 
                                             href="<?= base_url('courses/' . $c['slug']) ?>" 
-                                            class="w-full py-2.5 px-4 rounded-xl font-bold text-xs text-white bg-upskill-blue hover:bg-upskill-darkblue transition-colors flex items-center justify-center gap-1.5 shadow-xs"
+                                            class="w-full py-2.5 px-4 rounded-xl font-bold text-xs text-white <?= $isContinuing ? 'bg-upskill-pink hover:bg-upskill-magenta' : 'bg-upskill-blue hover:bg-upskill-darkblue' ?> transition-colors flex items-center justify-center gap-1.5 shadow-xs"
                                         >
-                                            <span>Lanjutkan Belajar</span>
+                                            <span><?= $isContinuing ? 'Lanjutkan Belajar' : 'Mulai Belajar' ?></span>
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
                                             </svg>

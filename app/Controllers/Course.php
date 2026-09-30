@@ -24,6 +24,12 @@ class Course extends BaseController
         $course = $courseModel->where('slug', $slug)->first();
 
         if ($course) {
+            $userId = (int) (session()->get('user_id') ?? 0);
+            if ($userId > 0) {
+                $enrollmentModel = new EnrollmentModel();
+                $enrollmentModel->enrollUser($userId, (int) $course['id']);
+            }
+
             $lessonModel = new \App\Models\LessonModel();
             $sessions = $lessonModel->getLessonsByCourse((int) $course['id']);
 

@@ -2,6 +2,7 @@
 
 namespace App\Controllers;
 
+use App\Models\CourseModel;
 use App\Models\EnrollmentModel;
 
 class Dashboard extends BaseController
@@ -23,17 +24,49 @@ class Dashboard extends BaseController
         $userEmail    = session()->get('email') ?? '';
         $instansiName = session()->get('instansi_name') ?? null;
 
-        // Ambil daftar kelas yang diikuti oleh user aktif melalui EnrollmentModel
-        $enrollmentModel  = new EnrollmentModel();
-        $enrolled_courses = $userId > 0 ? $enrollmentModel->getEnrolledCoursesByUser($userId) : [];
+        // Ambil seluruh kelas yang telah dipublikasikan oleh Admin dari katalog kursus
+        $courseModel     = new CourseModel();
+        $enrollmentModel = new EnrollmentModel();
+
+        $allCourses = $courseModel->select('courses.*, users.full_name as mentor_name')
+                                  ->join('users', 'users.id = courses.mentor_id', 'left')
+                                  ->where('courses.status', 'published')
+                                  ->orderBy('courses.id', 'DESC')
+                                  ->findAll();
+
+        // Ambil riwayat pendaftaran aktif user jika ada
+        $userEnrollments = [];
+        if ($userId > 0) {
+            $enrolled = $enrollmentModel->where('user_id', $userId)->findAll();
+            foreach ($enrolled as $en) {
+                $userEnrollments[(int) $en['course_id']] = $en;
+            }
+        }
+
+        // Gabungkan status pendaftaran dan progres untuk setiap kelas katalog
+        $enrolled_courses   = [];
+        $total_progress_sum = 0;
+        $total_enrolled     = 0;
+
+        foreach ($allCourses as $c) {
+            $cid = (int) $c['id'];
+            if (isset($userEnrollments[$cid])) {
+                $c['is_enrolled']          = true;
+                $c['progress_percentage']  = (int) ($userEnrollments[$cid]['progress_percentage'] ?? 0);
+                $c['enrollment_status']    = $userEnrollments[$cid]['status'] ?? 'active';
+                $total_progress_sum       += $c['progress_percentage'];
+                $total_enrolled++;
+            } else {
+                $c['is_enrolled']          = false;
+                $c['progress_percentage']  = 0;
+                $c['enrollment_status']    = 'available';
+            }
+            $enrolled_courses[] = $c;
+        }
 
         // Hitung statistik
         $total_active = count($enrolled_courses);
-        $total_progress_sum = 0;
-        foreach ($enrolled_courses as $ec) {
-            $total_progress_sum += (int) ($ec['progress_percentage'] ?? 0);
-        }
-        $avg_progress = $total_active > 0 ? round($total_progress_sum / $total_active) : 0;
+        $avg_progress = $total_enrolled > 0 ? round($total_progress_sum / $total_enrolled) : 0;
 
         // Penyesuaian label role pengguna
         $role_label = 'Peserta Mandiri';
