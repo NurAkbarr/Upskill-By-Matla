@@ -37,6 +37,7 @@ $routes->get('dashboard/course/(:num)', 'Dashboard::course/$1', ['filter' => 'au
 $routes->get('dashboard/learn/(:num)', 'Dashboard::learn/$1', ['filter' => 'auth']);
 $routes->get('dashboard/access_material/(:num)', 'Dashboard::access_material/$1', ['filter' => 'auth']);
 $routes->get('dashboard/quiz/(:num)', 'Quiz::cbt/$1', ['filter' => 'auth']);
+$routes->post('dashboard/mark_completed/(:num)', 'Dashboard::mark_completed/$1', ['filter' => 'auth']);
 $routes->match(['get', 'post'], 'dashboard/session/(:num)/complete', 'Dashboard::completeSession/$1', ['filter' => 'auth']);
 
 // 5.1. Antarmuka Ujian CBT Peserta (Timer & Anti-Cheat)

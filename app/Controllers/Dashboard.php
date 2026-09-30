@@ -448,12 +448,22 @@ class Dashboard extends BaseController
         $progressModel = new SessionProgressModel();
         $isCompleted   = $progressModel->isCompleted($userId, $sessionId);
 
+        // Ekstraksi Embed URL untuk Dokumen / PDF (Google Drive preview)
+        $embedUrl = trim($session['content_url_or_text'] ?? '');
+        if (!empty($embedUrl) && strpos($embedUrl, 'drive.google.com') !== false) {
+            $embedUrl = preg_replace('/\/view(\?usp=[^\s&]+)?.*$/', '/preview', $embedUrl);
+            if (strpos($embedUrl, '/preview') === false && strpos($embedUrl, '/d/') !== false) {
+                $embedUrl = rtrim($embedUrl, '/') . '/preview';
+            }
+        }
+
         $data = [
             'title'        => 'Ruang Belajar: ' . esc($session['chapter_title']) . ' - ' . esc($course['title']),
             'session'      => $session,
             'course'       => $course,
             'allSessions'  => $allSessions,
             'videoId'      => $videoId,
+            'embedUrl'     => $embedUrl,
             'quizCount'    => $quizCount,
             'currentIndex' => $currentIndex,
             'prevSession'  => $prevSession,
@@ -464,6 +474,65 @@ class Dashboard extends BaseController
         ];
 
         return view('dashboard/learn', $data);
+    }
+
+    /**
+     * Endpoint AJAX untuk menandai materi sesi selesai 100% dan membuka kunci kuis (Tahap 22)
+     *
+     * @param int|string $sessionId
+     * @return \CodeIgniter\HTTP\ResponseInterface
+     */
+    public function mark_completed($sessionId)
+    {
+        $sessionId = (int) $sessionId;
+        $userId    = (int) (session()->get('user_id') ?? 0);
+
+        if (!$userId) {
+            return $this->response->setStatusCode(401)->setJSON([
+                'status'  => 'error',
+                'message' => 'Sesi autentikasi telah berakhir. Silakan login kembali.',
+            ]);
+        }
+
+        // Method ini hanya menerima request AJAX (POST)
+        if (!$this->request->isAJAX() || strtolower($this->request->getMethod()) !== 'post') {
+            return $this->response->setStatusCode(400)->setJSON([
+                'status'  => 'error',
+                'message' => 'Permintaan tidak valid, wajib menggunakan AJAX POST.',
+            ]);
+        }
+
+        $lessonModel = new \App\Models\LessonModel();
+        $session = $lessonModel->find($sessionId);
+        if (!$session) {
+            return $this->response->setStatusCode(404)->setJSON([
+                'status'  => 'error',
+                'message' => 'Sesi pembelajaran tidak ditemukan.',
+            ]);
+        }
+
+        // 1. Update tabel session_progress untuk user_id ini menjadi 100%
+        $progressModel = new SessionProgressModel();
+        $progressModel->markCompleted($userId, $sessionId);
+
+        // 2. Perbarui progres persentase kelas di tabel enrollments
+        $courseId    = (int) $session['course_id'];
+        $allSessions = $lessonModel->getLessonsByCourse($courseId);
+        $allIds      = array_column($allSessions, 'id');
+        $progressMap = $progressModel->getProgressMap($userId, $allIds);
+        $completed   = count(array_filter($progressMap));
+        $pct         = count($allIds) > 0 ? round(($completed / count($allIds)) * 100) : 0;
+
+        $enrollmentModel = new EnrollmentModel();
+        $enr = $enrollmentModel->where('user_id', $userId)->where('course_id', $courseId)->first();
+        if ($enr) {
+            $enrollmentModel->update($enr['id'], ['progress_percentage' => $pct]);
+        }
+
+        return $this->response->setJSON([
+            'status'  => 'success',
+            'message' => 'Kuis dibuka',
+        ]);
     }
 
     /**
