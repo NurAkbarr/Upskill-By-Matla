@@ -115,6 +115,13 @@ class Quiz extends BaseController
 
         $score = $totalPg > 0 ? round(($correctPg / $totalPg) * 100) : 100;
 
+        // Simpan hasil pengerjaan kuis peserta ke tabel session_progress
+        $userId = (int) (session()->get('user_id') ?? 0);
+        if ($userId > 0) {
+            $progressModel = new \App\Models\SessionProgressModel();
+            $progressModel->markQuizCompleted($userId, $sessionId, $score);
+        }
+
         $data = [
             'title'      => 'Hasil Ujian CBT - ' . esc($session['chapter_title']),
             'session'    => $session,

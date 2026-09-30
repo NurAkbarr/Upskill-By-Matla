@@ -4,7 +4,9 @@ namespace App\Controllers;
 
 use App\Models\CourseModel;
 use App\Models\EnrollmentModel;
+use App\Models\QuizQuestionModel;
 use App\Models\SessionProgressModel;
+use App\Models\UserModel;
 
 class Dashboard extends BaseController
 {
@@ -77,19 +79,133 @@ class Dashboard extends BaseController
             $role_label = 'Peserta B2B (' . ($instansiName ?? 'Institusi') . ')';
         }
 
+        // Hitung statistik kuis (Tahap 21)
+        $courseIds = array_column($allCourses, 'id');
+        $allSessionIds = [];
+        if (!empty($courseIds)) {
+            $lessonModel = new \App\Models\LessonModel();
+            $allSessionsInCourses = $lessonModel->whereIn('course_id', $courseIds)->findAll();
+            $allSessionIds = array_column($allSessionsInCourses, 'id');
+        }
+
+        // Cari sesi mana saja yang memiliki butir soal kuis
+        $quizModel = new QuizQuestionModel();
+        $sessionsWithQuizzes = [];
+        if (!empty($allSessionIds)) {
+            $quizQuestions = $quizModel->select('DISTINCT(session_id) as session_id')->whereIn('session_id', $allSessionIds)->findAll();
+            $sessionsWithQuizzes = array_column($quizQuestions, 'session_id');
+        }
+        $total_available_quizzes = count($sessionsWithQuizzes);
+
+        // Kuis yang sudah dikerjakan oleh user
+        $progressModel = new SessionProgressModel();
+        $quizzes_completed = 0;
+        if ($userId > 0 && !empty($sessionsWithQuizzes)) {
+            $completedRows = $progressModel->where('user_id', $userId)
+                                           ->where('quiz_completed', 1)
+                                           ->whereIn('session_id', $sessionsWithQuizzes)
+                                           ->findAll();
+            $quizzes_completed = count($completedRows);
+        }
+        $quizzes_pending = max(0, $total_available_quizzes - $quizzes_completed);
+
         $data = [
-            'title'            => 'Dasbor Pembelajaran - MUSLIM UPSKILL ACADEMY',
-            'user_name'        => $userName,
-            'user_role'        => $userRole,
-            'role_label'       => $role_label,
-            'user_email'       => $userEmail,
-            'instansi_name'    => $instansiName,
-            'enrolled_courses' => $enrolled_courses,
-            'total_active'     => $total_active,
-            'avg_progress'     => $avg_progress,
+            'title'             => 'Dasbor Pembelajaran - MUSLIM UPSKILL ACADEMY',
+            'user_name'         => $userName,
+            'user_role'         => $userRole,
+            'role_label'        => $role_label,
+            'user_email'        => $userEmail,
+            'instansi_name'     => $instansiName,
+            'enrolled_courses'  => $enrolled_courses,
+            'total_active'      => $total_active,
+            'avg_progress'      => $avg_progress,
+            'quizzes_completed' => $quizzes_completed,
+            'quizzes_pending'   => $quizzes_pending,
+            'total_quizzes'     => $total_available_quizzes,
         ];
 
         return view('dashboard/index', $data);
+    }
+
+    /**
+     * Halaman Pengaturan Akun Peserta (Tahap 21)
+     */
+    public function account()
+    {
+        $userId = (int) (session()->get('user_id') ?? 0);
+        $userModel = new UserModel();
+        $user = $userModel->find($userId);
+
+        if (!$user) {
+            return redirect()->to(base_url('login'))->with('error', 'Sesi Anda telah berakhir.');
+        }
+
+        $userName     = $user['full_name'] ?? session()->get('full_name') ?? 'Pengguna';
+        $userRole     = $user['role'] ?? session()->get('role') ?? 'peserta_b2c';
+        $userEmail    = $user['email'] ?? session()->get('email') ?? '';
+        $instansiName = $user['instansi_name'] ?? session()->get('instansi_name') ?? null;
+
+        $role_label = 'Peserta Mandiri';
+        if ($userRole === 'mentor') {
+            $role_label = 'Mentor Praktisi';
+        } elseif ($userRole === 'peserta_b2b') {
+            $role_label = 'Peserta B2B (' . ($instansiName ?? 'Institusi') . ')';
+        }
+
+        $data = [
+            'title'         => 'Pengaturan Akun - MUSLIM UPSKILL ACADEMY',
+            'user'          => $user,
+            'user_name'     => $userName,
+            'user_role'     => $userRole,
+            'role_label'    => $role_label,
+            'user_email'    => $userEmail,
+            'instansi_name' => $instansiName,
+        ];
+
+        return view('dashboard/account', $data);
+    }
+
+    /**
+     * Memproses pembaruan nama profil & password peserta (Tahap 21)
+     */
+    public function updateAccount()
+    {
+        $userId = (int) (session()->get('user_id') ?? 0);
+        if (!$userId) {
+            return redirect()->to(base_url('login'))->with('error', 'Silakan masuk terlebih dahulu.');
+        }
+
+        $userModel = new UserModel();
+        $user = $userModel->find($userId);
+        if (!$user) {
+            return redirect()->to(base_url('login'))->with('error', 'Pengguna tidak ditemukan.');
+        }
+
+        $fullName = trim((string) $this->request->getPost('full_name'));
+        $password = (string) $this->request->getPost('password');
+
+        if (empty($fullName)) {
+            return redirect()->back()->with('error', 'Nama pengguna tidak boleh kosong.')->withInput();
+        }
+
+        $updateData = [
+            'full_name' => $fullName,
+        ];
+
+        // Jika input password diisi, lakukan hashing dan update
+        if (!empty($password)) {
+            if (strlen($password) < 6) {
+                return redirect()->back()->with('error', 'Password baru minimal harus 6 karakter.')->withInput();
+            }
+            $updateData['password_hash'] = password_hash($password, PASSWORD_BCRYPT);
+        }
+
+        $userModel->update($userId, $updateData);
+
+        // Perbarui session nama pengguna
+        session()->set('full_name', $fullName);
+
+        return redirect()->to(base_url('dashboard/account'))->with('success', 'Data profil akun Anda berhasil diperbarui!');
     }
 
     /**

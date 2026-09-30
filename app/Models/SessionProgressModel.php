@@ -16,6 +16,9 @@ class SessionProgressModel extends Model
         'user_id',
         'session_id',
         'is_completed',
+        'quiz_completed',
+        'quiz_score',
+        'quiz_completed_at',
         'completed_at',
     ];
 
@@ -76,5 +79,40 @@ class SessionProgressModel extends Model
         }
 
         return $map;
+    }
+
+    /**
+     * Menandai kuis sesi telah diselesaikan oleh user
+     */
+    public function markQuizCompleted(int $userId, int $sessionId, float $score): bool
+    {
+        $existing = $this->where('user_id', $userId)
+                         ->where('session_id', $sessionId)
+                         ->first();
+
+        $data = [
+            'user_id'           => $userId,
+            'session_id'        => $sessionId,
+            'is_completed'      => 1,
+            'quiz_completed'    => 1,
+            'quiz_score'        => $score,
+            'quiz_completed_at' => date('Y-m-d H:i:s'),
+        ];
+
+        if ($existing) {
+            return (bool) $this->update($existing['id'], $data);
+        }
+
+        return (bool) $this->insert($data);
+    }
+
+    /**
+     * Menghitung total kuis yang telah dikerjakan oleh user
+     */
+    public function getCompletedQuizCount(int $userId): int
+    {
+        return $this->where('user_id', $userId)
+                    ->where('quiz_completed', 1)
+                    ->countAllResults();
     }
 }

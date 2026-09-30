@@ -31,6 +31,8 @@ $routes->get('courses/(:segment)', 'Course::detail/$1');
 
 // 5. Dasbor Pengguna Reguler (Terproteksi Filter AuthGuard)
 $routes->get('dashboard', 'Dashboard::index', ['filter' => 'auth']);
+$routes->get('dashboard/account', 'Dashboard::account', ['filter' => 'auth']);
+$routes->post('dashboard/account/update', 'Dashboard::updateAccount', ['filter' => 'auth']);
 $routes->get('dashboard/course/(:num)', 'Dashboard::course/$1', ['filter' => 'auth']);
 $routes->get('dashboard/learn/(:num)', 'Dashboard::learn/$1', ['filter' => 'auth']);
 $routes->get('dashboard/access_material/(:num)', 'Dashboard::access_material/$1', ['filter' => 'auth']);

@@ -39,9 +39,9 @@
 <body class="h-full bg-slate-50 text-slate-900 flex overflow-hidden">
 
     <!-- ============================================================== -->
-    <!-- 1. SIDEBAR NAVIGASI (Kiri)                                    -->
+    <!-- 1. SIDEBAR NAVIGASI (Desktop - Kiri)                           -->
     <!-- ============================================================== -->
-    <aside class="w-64 bg-white border-r border-slate-200 flex flex-col justify-between shrink-0 h-screen select-none">
+    <aside class="hidden md:flex w-64 bg-white border-r border-slate-200 flex-col justify-between shrink-0 h-screen select-none">
         
         <!-- Bagian Atas: Logo & Menu Utama -->
         <div>
@@ -62,20 +62,20 @@
                     Ringkasan
                 </a>
 
-                <!-- 2. Kelas Saya -->
-                <a href="#" class="flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-semibold text-upskill-darkblue hover:text-upskill-pink hover:bg-slate-50 transition-colors">
+                <!-- 2. Katalog Program -->
+                <a href="#katalog-program" class="flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-semibold text-upskill-darkblue hover:text-upskill-pink hover:bg-slate-50 transition-colors">
                     <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
                     </svg>
-                    Kelas Saya
+                    Katalog Program
                 </a>
 
-                <!-- 3. Sertifikat -->
-                <a href="#" class="flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-semibold text-upskill-darkblue hover:text-upskill-pink hover:bg-slate-50 transition-colors">
+                <!-- 3. Pengaturan Akun -->
+                <a href="<?= base_url('dashboard/account') ?>" class="flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-semibold text-upskill-darkblue hover:text-upskill-pink hover:bg-slate-50 transition-colors">
                     <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                     </svg>
-                    Sertifikat
+                    Pengaturan Akun
                 </a>
             </nav>
         </div>
@@ -83,7 +83,7 @@
         <!-- Bagian Bawah: Profil Singkat & Menu Keluar -->
         <div class="p-4 border-t border-slate-100">
             <!-- Profil Singkat -->
-            <div class="px-3.5 py-3 mb-2 rounded-lg bg-slate-50 border border-slate-200/70">
+            <a href="<?= base_url('dashboard/account') ?>" class="block px-3.5 py-3 mb-2 rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-200/70 transition-colors">
                 <p class="text-xs font-bold text-upskill-darkblue truncate">
                     <?= esc($user_name) ?>
                 </p>
@@ -91,8 +91,9 @@
                     <span class="inline-flex items-center text-[10px] font-semibold text-upskill-pink bg-pink-50 px-2 py-0.5 rounded border border-pink-100">
                         <?= esc($role_label) ?>
                     </span>
+                    <span class="text-[10px] text-slate-400 font-medium">Ubah &rarr;</span>
                 </div>
-            </div>
+            </a>
 
             <!-- 4. Tombol Keluar (Logout) -->
             <a href="<?= base_url('logout') ?>" class="flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-semibold text-rose-600 hover:bg-rose-50 transition-colors">
@@ -122,7 +123,7 @@
         </header>
 
         <!-- Wadah Konten Utama dengan Ruang Kosong Luas -->
-        <div class="p-6 sm:p-10 max-w-6xl mx-auto space-y-8">
+        <div class="p-6 sm:p-10 max-w-6xl mx-auto space-y-8 pb-24 md:pb-10">
 
             <!-- Flashdata Alert -->
             <?php if (session()->getFlashdata('success')): ?>
@@ -148,10 +149,10 @@
                 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <div>
                         <h2 class="text-xl sm:text-2xl font-extrabold text-upskill-darkblue tracking-tight">
-                            Selamat datang kembali, <span class="text-upskill-pink"><?= esc($user_name) ?></span>
+                            Ahlan wa sahlan, <span class="text-upskill-pink"><?= esc($user_name) ?></span>
                         </h2>
                         <p class="text-sm text-slate-500 mt-1 leading-relaxed">
-                            Pantau aktivitas belajar, kurikulum materi aktif, dan capaian sertifikasi kompetensi Anda di Muslim Upskill Academy.
+                            Pantau aktivitas belajar, kurikulum materi aktif, dan capaian evaluasi kompetensi Anda di Muslim Upskill Academy.
                         </p>
                     </div>
                     <div>
@@ -183,18 +184,35 @@
                     </div>
                 </div>
 
-                <!-- Kartu 3: Sertifikat -->
+                <!-- Kartu 3: Total Kuis (Tahap 21) -->
                 <div class="bg-white border border-slate-200 rounded-xl p-6 hover:border-upskill-pink/30 transition-colors shadow-2xs">
-                    <p class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Sertifikat Kelulusan</p>
-                    <div class="flex items-baseline justify-between">
-                        <span class="text-2xl font-extrabold text-upskill-darkblue">0</span>
-                        <span class="text-xs text-slate-400">Diterbitkan</span>
+                    <div class="flex items-center justify-between mb-2">
+                        <p class="text-xs font-bold uppercase tracking-wider text-slate-400">Total Kuis</p>
+                        <span class="text-[11px] font-mono font-bold text-upskill-darkblue bg-slate-100 px-2 py-0.5 rounded">
+                            <?= (int) ($quizzes_completed ?? 0) + (int) ($quizzes_pending ?? 0) ?> Sesi
+                        </span>
+                    </div>
+                    <div class="space-y-1.5 pt-0.5">
+                        <div class="flex items-center justify-between text-xs">
+                            <span class="text-emerald-700 font-semibold flex items-center gap-1.5">
+                                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                                Kuis Dikerjakan:
+                            </span>
+                            <strong class="text-slate-800 font-bold"><?= (int) ($quizzes_completed ?? 0) ?></strong>
+                        </div>
+                        <div class="flex items-center justify-between text-xs">
+                            <span class="text-amber-700 font-semibold flex items-center gap-1.5">
+                                <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+                                Kuis Belum Dikerjakan:
+                            </span>
+                            <strong class="text-slate-800 font-bold"><?= (int) ($quizzes_pending ?? 0) ?></strong>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <!-- Area Konten Materi Belajar Terkini -->
-            <div class="bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 shadow-xs">
+            <div id="katalog-program" class="bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 shadow-xs scroll-mt-6">
                 <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-6">
                     <div class="flex items-center gap-2.5">
                         <h3 class="text-base font-bold text-upskill-darkblue">Katalog Program Belajar</h3>
@@ -308,6 +326,34 @@
 
         </div>
     </main>
+
+    <!-- Bottom Navigation Bar untuk Mobile (Tahap 21) -->
+    <nav class="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-t border-slate-200 px-4 py-2 flex items-center justify-around shadow-lg">
+        <a href="<?= base_url('dashboard') ?>" class="flex flex-col items-center gap-1 text-upskill-pink font-semibold">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+            </svg>
+            <span class="text-[10px]">Ringkasan</span>
+        </a>
+        <a href="<?= base_url('dashboard#katalog-program') ?>" class="flex flex-col items-center gap-1 text-slate-500 hover:text-upskill-darkblue">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+            </svg>
+            <span class="text-[10px]">Katalog</span>
+        </a>
+        <a href="<?= base_url('dashboard/account') ?>" class="flex flex-col items-center gap-1 text-slate-500 hover:text-upskill-darkblue">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+            </svg>
+            <span class="text-[10px]">Akun</span>
+        </a>
+        <a href="<?= base_url('logout') ?>" class="flex flex-col items-center gap-1 text-rose-500 hover:text-rose-700">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+            </svg>
+            <span class="text-[10px]">Keluar</span>
+        </a>
+    </nav>
 
 </body>
 </html>
