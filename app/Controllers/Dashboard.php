@@ -223,6 +223,57 @@ class Dashboard extends BaseController
     }
 
     /**
+     * Mengakses materi eksternal & menandai progres sesi 100% di backend (Tahap 20)
+     *
+     * @param int|string $sessionId
+     * @return \CodeIgniter\HTTP\RedirectResponse
+     */
+    public function access_material($sessionId)
+    {
+        $sessionId = (int) $sessionId;
+        $userId    = (int) (session()->get('user_id') ?? 0);
+
+        if (!$userId) {
+            return redirect()->to(base_url('login'))->with('error', 'Silakan masuk terlebih dahulu.');
+        }
+
+        $lessonModel = new \App\Models\LessonModel();
+        $session = $lessonModel->find($sessionId);
+
+        if (!$session) {
+            return redirect()->to(base_url('dashboard'))->with('error', 'Sesi materi tidak ditemukan.');
+        }
+
+        // 1. Simpan status selesai 100% ke tabel session_progress untuk user ini
+        $progressModel = new SessionProgressModel();
+        $progressModel->markCompleted($userId, $sessionId);
+
+        // 2. Perbarui progres persentase kelas di tabel enrollments
+        $courseId    = (int) $session['course_id'];
+        $allSessions = $lessonModel->getLessonsByCourse($courseId);
+        $allIds      = array_column($allSessions, 'id');
+        $progressMap = $progressModel->getProgressMap($userId, $allIds);
+        $completed   = count(array_filter($progressMap));
+        $pct         = count($allIds) > 0 ? round(($completed / count($allIds)) * 100) : 0;
+
+        $enrollmentModel = new EnrollmentModel();
+        $enr = $enrollmentModel->where('user_id', $userId)->where('course_id', $courseId)->first();
+        if ($enr) {
+            $enrollmentModel->update($enr['id'], ['progress_percentage' => $pct]);
+        }
+
+        // 3. Ambil URL materi dan lakukan redirect langsung
+        $targetUrl = trim($session['content_url_or_text'] ?? '');
+
+        // Jaring pengaman jika URL kosong atau bukan link eksternal yang valid
+        if (empty($targetUrl) || (!str_starts_with($targetUrl, 'http://') && !str_starts_with($targetUrl, 'https://'))) {
+            return redirect()->to(base_url('dashboard/learn/' . $sessionId));
+        }
+
+        return redirect()->to($targetUrl);
+    }
+
+    /**
      * Halaman Ruang Belajar Peserta (Tahap 18)
      * Menampilkan konten materi (Video YouTube atau Teks/PDF) dengan sistem pelacak progres
      *

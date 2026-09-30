@@ -33,6 +33,7 @@ $routes->get('courses/(:segment)', 'Course::detail/$1');
 $routes->get('dashboard', 'Dashboard::index', ['filter' => 'auth']);
 $routes->get('dashboard/course/(:num)', 'Dashboard::course/$1', ['filter' => 'auth']);
 $routes->get('dashboard/learn/(:num)', 'Dashboard::learn/$1', ['filter' => 'auth']);
+$routes->get('dashboard/access_material/(:num)', 'Dashboard::access_material/$1', ['filter' => 'auth']);
 $routes->get('dashboard/quiz/(:num)', 'Quiz::cbt/$1', ['filter' => 'auth']);
 $routes->match(['get', 'post'], 'dashboard/session/(:num)/complete', 'Dashboard::completeSession/$1', ['filter' => 'auth']);
 
