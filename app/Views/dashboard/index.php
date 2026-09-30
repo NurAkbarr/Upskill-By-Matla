@@ -287,14 +287,13 @@
                                         </div>
                                     </div>
 
-                                    <!-- Tombol Mulai / Lanjutkan Belajar -->
+                                    <!-- Tombol Menuju Detail Kelas (Tahap 19) -->
                                     <div class="pt-2 border-t border-slate-100">
-                                        <?php $isContinuing = (!empty($c['is_enrolled']) && (int)($c['progress_percentage'] ?? 0) > 0); ?>
                                         <a 
-                                            href="<?= base_url('courses/' . $c['slug']) ?>" 
-                                            class="w-full py-2.5 px-4 rounded-xl font-bold text-xs text-white <?= $isContinuing ? 'bg-upskill-pink hover:bg-upskill-magenta' : 'bg-upskill-blue hover:bg-upskill-darkblue' ?> transition-colors flex items-center justify-center gap-1.5 shadow-xs"
+                                            href="<?= base_url('dashboard/course/' . $c['id']) ?>" 
+                                            class="w-full py-2.5 px-4 rounded-xl font-bold text-xs text-white bg-upskill-blue hover:bg-upskill-darkblue transition-colors flex items-center justify-center gap-1.5 shadow-xs"
                                         >
-                                            <span><?= $isContinuing ? 'Lanjutkan Belajar' : 'Mulai Belajar' ?></span>
+                                            <span>Selengkapnya</span>
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
                                             </svg>

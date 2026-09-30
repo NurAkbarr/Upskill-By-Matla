@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use App\Models\CourseModel;
 use App\Models\EnrollmentModel;
+use App\Models\SessionProgressModel;
 
 class Dashboard extends BaseController
 {
@@ -92,6 +93,136 @@ class Dashboard extends BaseController
     }
 
     /**
+     * Halaman Detail Kelas & Accordion Sesi Kurikulum (Tahap 19)
+     *
+     * @param int|string $id
+     * @return \CodeIgniter\HTTP\RedirectResponse|string
+     */
+    public function course($id)
+    {
+        $courseId = (int) $id;
+        $courseModel = new CourseModel();
+
+        $course = $courseModel->select('courses.*, users.full_name as mentor_name')
+                              ->join('users', 'users.id = courses.mentor_id', 'left')
+                              ->find($courseId);
+
+        if (!$course) {
+            return redirect()->to(base_url('dashboard'))->with('error', 'Program kelas tidak ditemukan.');
+        }
+
+        // Ambil data user aktif
+        $userId       = (int) (session()->get('user_id') ?? 0);
+        $userName     = session()->get('full_name') ?? 'Pengguna';
+        $userRole     = session()->get('role') ?? 'peserta_b2c';
+        $userEmail    = session()->get('email') ?? '';
+        $instansiName = session()->get('instansi_name') ?? null;
+
+        // Auto-enroll user jika belum terdaftar
+        $enrollmentModel = new EnrollmentModel();
+        if ($userId > 0) {
+            $enrollmentModel->enrollUser($userId, $courseId);
+        }
+
+        // Ambil semua data sessions yang terkait dengan kelas tersebut
+        $lessonModel = new \App\Models\LessonModel();
+        $sessions    = $lessonModel->getLessonsByCourse($courseId);
+
+        // Kumpulkan ID sesi
+        $sessionIds = array_column($sessions, 'id');
+
+        // Query pengecekan ke tabel pelacakan progres (session_progress) untuk mengetahui status 100% tiap sesi
+        $progressModel   = new SessionProgressModel();
+        $progress_status = $progressModel->getProgressMap($userId, $sessionIds);
+
+        // Tambahkan info kuis dan tipe materi per sesi
+        $quizModel = new \App\Models\QuizQuestionModel();
+        foreach ($sessions as &$s) {
+            $s['quiz_count'] = $quizModel->countBySession((int) $s['id']);
+        }
+        unset($s);
+
+        // Hitung persentase progres kelas
+        $totalSessions     = count($sessions);
+        $completedSessions = 0;
+        foreach ($sessions as $s) {
+            if (!empty($progress_status[(int) $s['id']])) {
+                $completedSessions++;
+            }
+        }
+        $courseProgress = $totalSessions > 0 ? round(($completedSessions / $totalSessions) * 100) : 0;
+
+        // Update progres di enrollments
+        if ($userId > 0) {
+            $enrollment = $enrollmentModel->where('user_id', $userId)->where('course_id', $courseId)->first();
+            if ($enrollment) {
+                $enrollmentModel->update($enrollment['id'], ['progress_percentage' => $courseProgress]);
+            }
+        }
+
+        // Penyesuaian label role
+        $role_label = 'Peserta Mandiri';
+        if ($userRole === 'mentor') {
+            $role_label = 'Mentor Praktisi';
+        } elseif ($userRole === 'peserta_b2b') {
+            $role_label = 'Peserta B2B (' . ($instansiName ?? 'Institusi') . ')';
+        }
+
+        $data = [
+            'title'             => 'Detail Program: ' . esc($course['title']) . ' - MUSLIM UPSKILL ACADEMY',
+            'course'            => $course,
+            'sessions'          => $sessions,
+            'progress_status'   => $progress_status,
+            'courseProgress'    => $courseProgress,
+            'completedSessions' => $completedSessions,
+            'totalSessions'     => $totalSessions,
+            'user_name'         => $userName,
+            'user_role'         => $userRole,
+            'role_label'        => $role_label,
+            'user_email'        => $userEmail,
+        ];
+
+        return view('dashboard/course', $data);
+    }
+
+    /**
+     * Menandai progres sesi sebagai selesai 100%
+     */
+    public function completeSession($sessionId)
+    {
+        $userId    = (int) (session()->get('user_id') ?? 0);
+        $sessionId = (int) $sessionId;
+
+        if ($userId > 0 && $sessionId > 0) {
+            $progressModel = new SessionProgressModel();
+            $progressModel->markCompleted($userId, $sessionId);
+
+            $lessonModel = new \App\Models\LessonModel();
+            $session = $lessonModel->find($sessionId);
+            if ($session) {
+                $courseId    = (int) $session['course_id'];
+                $allSessions = $lessonModel->getLessonsByCourse($courseId);
+                $allIds      = array_column($allSessions, 'id');
+                $progressMap = $progressModel->getProgressMap($userId, $allIds);
+                $completed   = count(array_filter($progressMap));
+                $pct         = count($allIds) > 0 ? round(($completed / count($allIds)) * 100) : 0;
+
+                $enrollmentModel = new EnrollmentModel();
+                $enr = $enrollmentModel->where('user_id', $userId)->where('course_id', $courseId)->first();
+                if ($enr) {
+                    $enrollmentModel->update($enr['id'], ['progress_percentage' => $pct]);
+                }
+            }
+
+            if ($this->request->isAJAX()) {
+                return $this->response->setJSON(['status' => 'success', 'message' => 'Materi selesai 100%']);
+            }
+        }
+
+        return redirect()->back();
+    }
+
+    /**
      * Halaman Ruang Belajar Peserta (Tahap 18)
      * Menampilkan konten materi (Video YouTube atau Teks/PDF) dengan sistem pelacak progres
      *
@@ -146,6 +277,10 @@ class Dashboard extends BaseController
             }
         }
 
+        // Cek status apakah sesi ini sudah diselesaikan sebelumnya
+        $progressModel = new SessionProgressModel();
+        $isCompleted   = $progressModel->isCompleted($userId, $sessionId);
+
         $data = [
             'title'        => 'Ruang Belajar: ' . esc($session['chapter_title']) . ' - ' . esc($course['title']),
             'session'      => $session,
@@ -156,6 +291,7 @@ class Dashboard extends BaseController
             'currentIndex' => $currentIndex,
             'prevSession'  => $prevSession,
             'nextSession'  => $nextSession,
+            'isCompleted'  => $isCompleted,
             'user_name'    => $userName,
             'user_role'    => $userRole,
         ];

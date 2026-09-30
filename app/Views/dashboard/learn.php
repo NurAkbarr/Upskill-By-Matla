@@ -450,6 +450,12 @@
         btn.disabled = false;
         btn.className = "bg-upskill-pink hover:bg-upskill-magenta text-white px-6 py-3 rounded-lg transition-colors cursor-pointer font-bold text-sm shadow-md flex items-center justify-center gap-2 transform active:scale-95";
         
+        // Simpan status progres 100% ke database secara asinkron
+        fetch('<?= base_url("dashboard/session/" . $session["id"] . "/complete") ?>', {
+            method: 'POST',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        }).catch(() => {});
+
         // Tambahkan aksi onclick untuk redirect ke URL Kuis CBT
         btn.onclick = () => window.location.href = '<?= base_url("dashboard/quiz/" . $session["id"]) ?>';
 
@@ -483,6 +489,13 @@
             `;
         }
     }
+
+    <?php if (!empty($isCompleted)): ?>
+    // Jika peserta sudah menyelesaikan materi sesi ini sebelumnya, langsung buka kunci kuis
+    window.addEventListener('DOMContentLoaded', () => {
+        setTimeout(unlockQuizButton, 300);
+    });
+    <?php endif; ?>
     </script>
 
     <?php if ($session['content_type'] === 'video'): ?>
