@@ -211,12 +211,12 @@
             <!-- DAFTAR SESI KURIKULUM (ACCORDION UI)                       -->
             <!-- ========================================================== -->
             <div class="space-y-4">
-                <div class="flex items-center justify-between">
+                <div class="flex items-start sm:items-center justify-between gap-3">
                     <div>
                         <h3 class="text-base sm:text-lg font-bold text-upskill-darkblue">Daftar Sesi Pembelajaran</h3>
-                        <p class="text-xs text-slate-500 mt-0.5">Buka masing-masing sesi untuk mengakses materi dan kuis evaluasi pemahaman.</p>
+                        <p class="text-xs text-slate-500 mt-0.5 leading-relaxed">Buka masing-masing sesi untuk mengakses materi dan kuis evaluasi pemahaman.</p>
                     </div>
-                    <span class="text-xs font-mono font-semibold text-slate-400 bg-white px-3 py-1 rounded-lg border border-slate-200">
+                    <span class="text-xs font-mono font-semibold text-slate-500 bg-white px-3 py-1 rounded-lg border border-slate-200 shrink-0 whitespace-nowrap self-start sm:self-center shadow-2xs">
                         <?= count($sessions) ?> Modul
                     </span>
                 </div>
@@ -244,11 +244,11 @@
                                 <!-- Header Accordion -->
                                 <div 
                                     onclick="toggleAccordion(<?= (int) $s['id'] ?>)" 
-                                    class="p-4 sm:p-5 flex items-center justify-between gap-4 cursor-pointer select-none bg-white hover:bg-slate-50/70 transition-colors"
+                                    class="p-4 sm:p-5 flex items-center justify-between gap-3 sm:gap-4 cursor-pointer select-none bg-white hover:bg-slate-50/70 transition-colors"
                                 >
-                                    <!-- Judul Sesi -->
-                                    <div class="flex items-center gap-3.5 min-w-0">
-                                        <div class="w-8 h-8 rounded-xl flex items-center justify-center text-xs font-bold shrink-0 <?= $isCompleted ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' : 'bg-pink-50 text-upskill-pink border border-pink-100' ?>">
+                                    <!-- Judul & Badge Sesi -->
+                                    <div class="flex items-start sm:items-center gap-3 min-w-0 flex-1">
+                                        <div class="w-8 h-8 rounded-xl flex items-center justify-center text-xs font-bold shrink-0 mt-0.5 sm:mt-0 <?= $isCompleted ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' : 'bg-pink-50 text-upskill-pink border border-pink-100' ?>">
                                             <?php if ($isCompleted): ?>
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
@@ -258,55 +258,53 @@
                                             <?php endif; ?>
                                         </div>
 
-                                        <div class="min-w-0">
-                                            <h4 class="text-xs sm:text-sm font-bold text-upskill-darkblue truncate">
+                                        <div class="min-w-0 flex-1">
+                                            <h4 class="text-xs sm:text-sm font-bold text-upskill-darkblue leading-snug line-clamp-2">
                                                 Sesi <?= $sessionNum ?>: <?= esc($s['chapter_title']) ?>
                                             </h4>
-                                            <div class="flex items-center gap-2 mt-0.5 text-[11px] text-slate-400">
+                                            
+                                            <!-- Metadata & Status Pelacakan -->
+                                            <div class="flex flex-wrap items-center gap-1.5 mt-1 text-[10px] sm:text-[11px]">
                                                 <?php if ($s['content_type'] === 'video'): ?>
-                                                    <span class="flex items-center gap-1 text-blue-600 font-medium">
-                                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <span class="inline-flex items-center gap-1 text-blue-700 bg-blue-50 px-2 py-0.5 rounded font-medium border border-blue-100/60 whitespace-nowrap">
+                                                        <svg class="w-3 h-3 text-blue-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
                                                         </svg>
-                                                        Video
+                                                        <span>Video</span>
                                                     </span>
                                                 <?php else: ?>
-                                                    <span class="flex items-center gap-1 text-emerald-600 font-medium">
-                                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <span class="inline-flex items-center gap-1 text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded font-medium border border-emerald-100/60 whitespace-nowrap">
+                                                        <svg class="w-3 h-3 text-emerald-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                                                         </svg>
-                                                        Teks / Dokumen
+                                                        <span>Teks/PDF</span>
                                                     </span>
                                                 <?php endif; ?>
 
-                                                <span>&bull;</span>
-
                                                 <?php if ($isCompleted): ?>
-                                                    <span class="text-emerald-600 font-semibold flex items-center gap-1">
+                                                    <span class="inline-flex items-center gap-1 text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded font-semibold border border-emerald-200 whitespace-nowrap">
                                                         <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                                                        Materi Selesai 100%
+                                                        <span>Selesai 100%</span>
                                                     </span>
                                                 <?php else: ?>
-                                                    <span class="text-amber-600 font-medium flex items-center gap-1">
-                                                        <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
-                                                        Belum Diselesaikan
+                                                    <span class="inline-flex items-center gap-1 text-amber-700 bg-amber-50 px-2 py-0.5 rounded font-semibold border border-amber-200 whitespace-nowrap">
+                                                        <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                                                        <span>Belum Selesai</span>
                                                     </span>
                                                 <?php endif; ?>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <!-- Tombol Biru 'Selengkapnya' Sesuai Instruksi -->
-                                    <div class="flex items-center gap-2 shrink-0">
-                                        <button 
-                                            type="button" 
-                                            class="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold rounded-lg text-white bg-upskill-blue hover:bg-upskill-darkblue transition-colors shadow-xs"
-                                        >
-                                            <span>Selengkapnya</span>
-                                            <svg id="accordion-arrow-<?= (int) $s['id'] ?>" class="w-3.5 h-3.5 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <!-- Tombol Biru 'Selengkapnya' (Responsif HP) -->
+                                    <div class="shrink-0 flex items-center self-center">
+                                        <div class="inline-flex items-center gap-1.5 px-3 py-1.5 sm:px-3.5 sm:py-2 text-xs font-bold rounded-xl text-white bg-upskill-blue hover:bg-upskill-darkblue transition-all shadow-xs">
+                                            <span class="hidden sm:inline">Selengkapnya</span>
+                                            <span class="sm:hidden text-[11px]">Buka</span>
+                                            <svg id="accordion-arrow-<?= (int) $s['id'] ?>" class="w-3.5 h-3.5 transition-transform duration-200 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                                             </svg>
-                                        </button>
+                                        </div>
                                     </div>
                                 </div>
 
