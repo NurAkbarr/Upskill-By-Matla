@@ -6,6 +6,7 @@ use App\Controllers\BaseController;
 use App\Models\CourseModel;
 use App\Models\LessonModel;
 use App\Models\QuizQuestionModel;
+use CodeIgniter\I18n\Time;
 
 class Quiz extends BaseController
 {
@@ -38,30 +39,37 @@ class Quiz extends BaseController
             return redirect()->to(base_url('courses'))->with('error', 'Kelas tidak ditemukan.');
         }
 
-        $currentTime = date('Y-m-d H:i:s');
+        // Ambil waktu sekarang secara akurat berdasarkan zona waktu Asia/Jakarta (Tahap 23)
+        $now = Time::now('Asia/Jakarta');
 
         // Cek Pembatasan Waktu Mulai (Jadwal Buka)
-        if (!empty($session['quiz_start_time']) && $currentTime < $session['quiz_start_time']) {
-            $data = [
-                'title'   => 'Kuis Belum Dibuka - ' . esc($session['chapter_title']),
-                'session' => $session,
-                'course'  => $course,
-                'status'  => 'not_started',
-                'message' => 'Ujian CBT ini dijadwalkan dibuka pada: ' . date('d M Y, H:i', strtotime($session['quiz_start_time'])) . ' WIB.',
-            ];
-            return view('quiz/cbt_notice', $data);
+        if (!empty($session['quiz_start_time'])) {
+            $startTime = Time::parse($session['quiz_start_time'], 'Asia/Jakarta');
+            if ($now->isBefore($startTime)) {
+                $data = [
+                    'title'   => 'Kuis Belum Dibuka - ' . esc($session['chapter_title']),
+                    'session' => $session,
+                    'course'  => $course,
+                    'status'  => 'not_started',
+                    'message' => 'Ujian CBT ini dijadwalkan dibuka pada: ' . date('d M Y, H:i', strtotime($session['quiz_start_time'])) . ' WIB.',
+                ];
+                return view('quiz/cbt_notice', $data);
+            }
         }
 
         // Cek Pembatasan Waktu Selesai (Jadwal Tutup)
-        if (!empty($session['quiz_end_time']) && $currentTime > $session['quiz_end_time']) {
-            $data = [
-                'title'   => 'Kuis Telah Berakhir - ' . esc($session['chapter_title']),
-                'session' => $session,
-                'course'  => $course,
-                'status'  => 'ended',
-                'message' => 'Ujian CBT ini telah resmi ditutup pada: ' . date('d M Y, H:i', strtotime($session['quiz_end_time'])) . ' WIB.',
-            ];
-            return view('quiz/cbt_notice', $data);
+        if (!empty($session['quiz_end_time'])) {
+            $endTime = Time::parse($session['quiz_end_time'], 'Asia/Jakarta');
+            if ($now->isAfter($endTime)) {
+                $data = [
+                    'title'   => 'Kuis Telah Berakhir - ' . esc($session['chapter_title']),
+                    'session' => $session,
+                    'course'  => $course,
+                    'status'  => 'ended',
+                    'message' => 'Ujian CBT ini telah resmi ditutup pada: ' . date('d M Y, H:i', strtotime($session['quiz_end_time'])) . ' WIB.',
+                ];
+                return view('quiz/cbt_notice', $data);
+            }
         }
 
         $questions = $this->quizModel->getQuestionsBySession($sessionId);
