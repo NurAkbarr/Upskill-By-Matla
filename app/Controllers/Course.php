@@ -16,11 +16,24 @@ class Course extends BaseController
     }
 
     /**
-     * Menampilkan detail kelas berdasarkan slug
+     * Menampilkan detail kelas atau mengarahkan ke sesi belajar pertama
      */
     public function detail(string $slug)
     {
-        // Alihkan ke katalog program di beranda
+        $courseModel = new CourseModel();
+        $course = $courseModel->where('slug', $slug)->first();
+
+        if ($course) {
+            $lessonModel = new \App\Models\LessonModel();
+            $sessions = $lessonModel->getLessonsByCourse((int) $course['id']);
+
+            if (!empty($sessions)) {
+                return redirect()->to(base_url('dashboard/learn/' . $sessions[0]['id']));
+            }
+
+            return redirect()->to(base_url('dashboard'))->with('error', 'Materi untuk kelas ini sedang dipersiapkan oleh instruktur.');
+        }
+
         return redirect()->to(base_url('/#program-kelas'));
     }
 

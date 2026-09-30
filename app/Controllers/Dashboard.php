@@ -57,4 +57,97 @@ class Dashboard extends BaseController
 
         return view('dashboard/index', $data);
     }
+
+    /**
+     * Halaman Ruang Belajar Peserta (Tahap 18)
+     * Menampilkan konten materi (Video YouTube atau Teks/PDF) dengan sistem pelacak progres
+     *
+     * @param int|string $sessionId
+     * @return \CodeIgniter\HTTP\RedirectResponse|string
+     */
+    public function learn($sessionId)
+    {
+        $sessionId = (int) $sessionId;
+        $lessonModel = new \App\Models\LessonModel();
+        $session = $lessonModel->find($sessionId);
+
+        if (!$session) {
+            return redirect()->to(base_url('dashboard'))->with('error', 'Sesi pembelajaran tidak ditemukan.');
+        }
+
+        $courseModel = new \App\Models\CourseModel();
+        $course = $courseModel->find((int) $session['course_id']);
+
+        if (!$course) {
+            return redirect()->to(base_url('dashboard'))->with('error', 'Kelas tidak ditemukan.');
+        }
+
+        // Ambil data user aktif
+        $userId    = (int) (session()->get('user_id') ?? 0);
+        $userName  = session()->get('full_name') ?? 'Peserta';
+        $userRole  = session()->get('role') ?? 'peserta_b2c';
+
+        // Ambil daftar kurikulum seluruh sesi untuk kelas ini
+        $allSessions = $lessonModel->getLessonsByCourse((int) $course['id']);
+
+        // Ekstraksi Video ID jika tipe materi adalah video
+        $videoId = '';
+        if ($session['content_type'] === 'video') {
+            $videoId = $this->extractYouTubeId($session['content_url_or_text'] ?? '');
+        }
+
+        // Cek jumlah soal kuis yang tersedia untuk sesi ini
+        $quizModel = new \App\Models\QuizQuestionModel();
+        $quizCount = $quizModel->countBySession($sessionId);
+
+        // Cari sesi sebelum dan sesudahnya untuk navigasi
+        $prevSession = null;
+        $nextSession = null;
+        $currentIndex = 1;
+        foreach ($allSessions as $idx => $s) {
+            if ((int) $s['id'] === $sessionId) {
+                $currentIndex = $idx + 1;
+                $prevSession = $allSessions[$idx - 1] ?? null;
+                $nextSession = $allSessions[$idx + 1] ?? null;
+                break;
+            }
+        }
+
+        $data = [
+            'title'        => 'Ruang Belajar: ' . esc($session['chapter_title']) . ' - ' . esc($course['title']),
+            'session'      => $session,
+            'course'       => $course,
+            'allSessions'  => $allSessions,
+            'videoId'      => $videoId,
+            'quizCount'    => $quizCount,
+            'currentIndex' => $currentIndex,
+            'prevSession'  => $prevSession,
+            'nextSession'  => $nextSession,
+            'user_name'    => $userName,
+            'user_role'    => $userRole,
+        ];
+
+        return view('dashboard/learn', $data);
+    }
+
+    /**
+     * Helper untuk mengekstrak 11 karakter YouTube Video ID dari berbagai format URL
+     * Mendukung: https://www.youtube.com/watch?v=xxx, https://youtu.be/xxx, embed/xxx, atau raw ID
+     */
+    private function extractYouTubeId(?string $url): string
+    {
+        if (empty($url)) {
+            return '';
+        }
+        $url = trim($url);
+        if (preg_match('/^[a-zA-Z0-9_-]{11}$/', $url)) {
+            return $url;
+        }
+        $pattern = '%(?:youtube(?:-nocookie)?\.com/(?:[^/]+/.+/|(?:v|e(?:mbed)?)/|.*[?&]v=)|youtu\.be/)([^"&?/\s]{11})%i';
+        if (preg_match($pattern, $url, $matches)) {
+            return $matches[1];
+        }
+        return '';
+    }
 }
+

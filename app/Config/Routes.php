@@ -31,6 +31,8 @@ $routes->get('courses/(:segment)', 'Course::detail/$1');
 
 // 5. Dasbor Pengguna Reguler (Terproteksi Filter AuthGuard)
 $routes->get('dashboard', 'Dashboard::index', ['filter' => 'auth']);
+$routes->get('dashboard/learn/(:num)', 'Dashboard::learn/$1', ['filter' => 'auth']);
+$routes->get('dashboard/quiz/(:num)', 'Quiz::cbt/$1', ['filter' => 'auth']);
 
 // 5.1. Antarmuka Ujian CBT Peserta (Timer & Anti-Cheat)
 $routes->get('sessions/(:num)/cbt', 'Quiz::cbt/$1');
