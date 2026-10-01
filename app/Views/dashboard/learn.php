@@ -275,8 +275,11 @@
     <!-- ============================================================== -->
     <!-- 4. LOGIKA JAVASCRIPT: PENGAWAS PROGRES & AJAX UNLOCK KUIS       -->
     <!-- ============================================================== -->
+    <!-- ============================================================== -->
+    <!-- 4. LOGIKA JAVASCRIPT: PENGAWAS PROGRES & AJAX UNLOCK KUIS       -->
+    <!-- ============================================================== -->
     <script>
-    // Flag status apakah materi telah diselesaikan
+    const sessionId          = <?= (int) $session['id'] ?>;
     const isAlreadyCompleted = <?= !empty($isCompleted) ? 'true' : 'false' ?>;
     const contentType        = '<?= esc($session['content_type']) ?>';
     const markCompletedUrl   = '<?= base_url("dashboard/mark_completed/" . $session["id"]) ?>';
@@ -284,80 +287,101 @@
     const csrfToken          = '<?= csrf_token() ?>';
     const csrfHash           = '<?= csrf_hash() ?>';
 
-    let isUnlocking = false;
+    const storageKey         = 'upskill_session_completed_' + sessionId;
+    const timerSessionKey    = 'upskill_session_timer_' + sessionId;
 
     /**
-     * Fungsi AJAX untuk membuka kunci kuis di backend secara aman
+     * Memperbarui UI menjadi status Kuis Terbuka (Materi Selesai)
      */
-    function unlockQuiz() {
-        if (isUnlocking || isAlreadyCompleted) return;
-        isUnlocking = true;
-
+    function renderUnlockedUI() {
         const btn = document.getElementById('btn-quiz');
         if (btn) {
-            btn.innerHTML = `
-                <span class="flex items-center gap-2">
-                    <svg class="w-4 h-4 animate-spin text-slate-500" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
-                    </svg>
-                    <span>Membuka Akses Kuis...</span>
-                </span>
-            `;
+            btn.disabled = false;
+            btn.innerHTML = '<span>Mulai Kuis Sekarang</span> <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>';
+            btn.className = 'w-full bg-upskill-pink text-white font-bold py-3.5 px-6 rounded-xl hover:bg-pink-600 transition-all flex items-center justify-center gap-2 shadow-sm cursor-pointer select-none';
+            btn.onclick = () => window.location.href = quizUrl;
         }
 
-        // Panggil backend secara diam-diam
+        const banner = document.getElementById('unlocked-banner');
+        if (banner) banner.classList.remove('hidden');
+
+        const badge = document.getElementById('badge-status-completed');
+        if (badge) {
+            badge.classList.remove('hidden');
+            badge.classList.add('inline-flex');
+        }
+
+        const warningEl = document.getElementById('timer-warning');
+        if (warningEl) warningEl.classList.add('hidden');
+    }
+
+    /**
+     * Mengirimkan notifikasi penyelesaian ke backend secara aman
+     */
+    function syncCompletedToBackend() {
+        const formData = new FormData();
+        formData.append(csrfToken, csrfHash);
+
         fetch(markCompletedUrl, {
             method: 'POST',
             headers: {
                 'X-Requested-With': 'XMLHttpRequest',
-                [csrfToken]: csrfHash
-            }
+                'X-CSRF-TOKEN': csrfHash
+            },
+            body: formData
         })
         .then(response => response.json())
         .then(data => {
-            if (data.status === 'success') {
-                if (btn) {
-                    btn.disabled = false;
-                    btn.innerHTML = '<span>Mulai Kuis Sekarang</span> <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>';
-                    btn.className = 'w-full bg-upskill-pink text-white font-bold py-3.5 px-6 rounded-xl hover:bg-pink-600 transition-all flex items-center justify-center gap-2 shadow-sm cursor-pointer';
-                    btn.onclick = () => window.location.href = quizUrl;
-                }
-
-                // Tampilkan banner sukses
-                const banner = document.getElementById('unlocked-banner');
-                if (banner) banner.classList.remove('hidden');
-
-                const badge = document.getElementById('badge-status-completed');
-                if (badge) {
-                    badge.classList.remove('hidden');
-                    badge.classList.add('inline-flex');
-                }
-            } else {
-                isUnlocking = false;
-                if (btn) {
-                    btn.innerHTML = 'Gagal membuka kuis. Silakan coba lagi.';
-                }
+            if (data && data.status === 'success') {
+                localStorage.setItem(storageKey, 'done');
             }
         })
         .catch(err => {
-            console.error('Error unlocking quiz:', err);
-            isUnlocking = false;
+            console.warn('Sync background completed:', err);
         });
     }
 
-    // Inisialisasi Pengawas Progres berdasarkan Tipe Konten
-    if (!isAlreadyCompleted) {
-        
-        // -------------------------------------------------------------
-        // A. PENGADAAN UNTUK PDF / TEKS (TIMER KETAT 180 DETIK)
-        // -------------------------------------------------------------
+    /**
+     * Dipanggil saat peserta tuntas membaca materi atau menonton video
+     */
+    function onContentFinished() {
+        localStorage.setItem(storageKey, 'done');
+        sessionStorage.removeItem(timerSessionKey);
+        renderUnlockedUI();
+        syncCompletedToBackend();
+    }
+
+    // Alias unlockQuiz untuk kompatibilitas
+    function unlockQuiz() {
+        onContentFinished();
+    }
+
+    // -------------------------------------------------------------
+    // PENGECEKAN STATUS AWAL
+    // -------------------------------------------------------------
+    const isSavedLocally = localStorage.getItem(storageKey) === 'done';
+
+    if (isAlreadyCompleted || isSavedLocally) {
+        // Jika sudah pernah tuntas membaca (di server atau di perangkat ini),
+        // langsung buka kunci kuis tanpa perlu mengulang nunggu 3 menit!
+        renderUnlockedUI();
+        if (!isAlreadyCompleted) {
+            syncCompletedToBackend();
+        }
+    } else {
+        // Jika belum pernah selesai, jalankan pengawas progres
         if (contentType !== 'video') {
-            let timeLeft = 180; // 3 menit
+            // Timer Ketat 180 Detik (3 Menit) untuk Dokumen / Teks / PDF
+            let timeLeft = 180;
+            const savedTimer = sessionStorage.getItem(timerSessionKey);
+            if (savedTimer !== null && parseInt(savedTimer, 10) > 0) {
+                timeLeft = parseInt(savedTimer, 10);
+            }
+
             let isTabActive = !document.hidden;
             const warningEl = document.getElementById('timer-warning');
 
-            // Visibility API: Jeda timer jika peserta berpindah tab
+            // Visibility API: Jeda timer jika peserta beralih tab
             document.addEventListener('visibilitychange', function() {
                 isTabActive = !document.hidden;
                 if (warningEl) {
@@ -375,10 +399,16 @@
                 return (m < 10 ? '0' + m : m) + ':' + (s < 10 ? '0' + s : s);
             }
 
+            const label = document.getElementById('countdown-label');
+            if (label) {
+                label.innerText = 'Kuis terbuka dalam ' + formatCountdown(timeLeft);
+            }
+
             const countdownInterval = setInterval(function() {
                 if (isTabActive && timeLeft > 0) {
                     timeLeft--;
-                    const label = document.getElementById('countdown-label');
+                    sessionStorage.setItem(timerSessionKey, timeLeft);
+
                     if (label) {
                         label.innerText = 'Kuis terbuka dalam ' + formatCountdown(timeLeft);
                     }
@@ -386,7 +416,7 @@
                     if (timeLeft <= 0) {
                         clearInterval(countdownInterval);
                         if (warningEl) warningEl.classList.add('hidden');
-                        unlockQuiz();
+                        onContentFinished();
                     }
                 }
             }, 1000);
@@ -419,7 +449,7 @@
         function onPlayerStateChange(event) {
             // YT.PlayerState.ENDED bernilai 0
             if (event.data === YT.PlayerState.ENDED) {
-                unlockQuiz();
+                onContentFinished();
             }
         }
         </script>

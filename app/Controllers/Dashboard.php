@@ -494,14 +494,8 @@ class Dashboard extends BaseController
             ]);
         }
 
-        // Method ini hanya menerima request AJAX (POST)
-        if (!$this->request->isAJAX() || strtolower($this->request->getMethod()) !== 'post') {
-            return $this->response->setStatusCode(400)->setJSON([
-                'status'  => 'error',
-                'message' => 'Permintaan tidak valid, wajib menggunakan AJAX POST.',
-            ]);
-        }
-
+        // Autentikasi user sudah dipastikan oleh filter auth
+        // Validasi sesi pembelajaran
         $lessonModel = new \App\Models\LessonModel();
         $session = $lessonModel->find($sessionId);
         if (!$session) {

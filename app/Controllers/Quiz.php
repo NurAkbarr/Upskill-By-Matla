@@ -72,6 +72,27 @@ class Quiz extends BaseController
             }
         }
 
+        // Pastikan status materi sesi ini otomatis tercatat selesai 100% di database
+        $userId = (int) (session()->get('user_id') ?? 0);
+        if ($userId > 0) {
+            $progressModel = new \App\Models\SessionProgressModel();
+            $progressModel->markCompleted($userId, $sessionId);
+
+            // Update persentase kemajuan kelas di tabel enrollments
+            $courseId    = (int) $session['course_id'];
+            $allSessions = $this->lessonModel->getLessonsByCourse($courseId);
+            $allIds      = array_column($allSessions, 'id');
+            $progressMap = $progressModel->getProgressMap($userId, $allIds);
+            $completed   = count(array_filter($progressMap));
+            $pct         = count($allIds) > 0 ? round(($completed / count($allIds)) * 100) : 0;
+
+            $enrollmentModel = new \App\Models\EnrollmentModel();
+            $enr = $enrollmentModel->where('user_id', $userId)->where('course_id', $courseId)->first();
+            if ($enr) {
+                $enrollmentModel->update($enr['id'], ['progress_percentage' => $pct]);
+            }
+        }
+
         $questions = $this->quizModel->getQuestionsBySession($sessionId);
         $duration  = !empty($session['quiz_duration_minutes']) ? (int) $session['quiz_duration_minutes'] : 30;
 
