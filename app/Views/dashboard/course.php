@@ -12,6 +12,8 @@
 
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- SweetAlert2 CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
       tailwind.config = {
         theme: {
@@ -135,6 +137,34 @@
                 <span>/</span>
                 <span class="text-upskill-darkblue font-bold truncate max-w-sm"><?= esc($course['title']) ?></span>
             </nav>
+ 
+            <!-- Flash Message Alerts -->
+            <?php if (session()->getFlashdata('info')): ?>
+                <div class="p-4 rounded-xl bg-blue-50 border border-blue-200 text-blue-800 text-xs sm:text-sm flex items-center gap-2.5 shadow-2xs">
+                    <svg class="w-5 h-5 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <span class="font-medium"><?= esc(session()->getFlashdata('info')) ?></span>
+                </div>
+            <?php endif; ?>
+
+            <?php if (session()->getFlashdata('error')): ?>
+                <div class="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs sm:text-sm flex items-center gap-2.5 shadow-2xs">
+                    <svg class="w-5 h-5 text-rose-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                    </svg>
+                    <span class="font-medium"><?= esc(session()->getFlashdata('error')) ?></span>
+                </div>
+            <?php endif; ?>
+
+            <?php if (session()->getFlashdata('success')): ?>
+                <div class="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs sm:text-sm flex items-center gap-2.5 shadow-2xs">
+                    <svg class="w-5 h-5 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                    </svg>
+                    <span class="font-medium"><?= esc(session()->getFlashdata('success')) ?></span>
+                </div>
+            <?php endif; ?>
 
             <!-- ========================================================== -->
             <!-- HEADER KELAS (Hero Card)                                   -->
@@ -235,8 +265,11 @@
                     <div class="space-y-3">
                         <?php foreach ($sessions as $idx => $s): ?>
                             <?php 
-                                $isCompleted = !empty($progress_status[(int) $s['id']]);
-                                $sessionNum  = $idx + 1;
+                                $isCompleted     = !empty($progress_status[(int) $s['id']]);
+                                $sessionQuiz     = $quiz_status[(int) $s['id']] ?? null;
+                                $isQuizCompleted = !empty($sessionQuiz['quiz_completed']);
+                                $quizScore       = $sessionQuiz['quiz_score'] ?? null;
+                                $sessionNum      = $idx + 1;
                             ?>
                             <!-- Item Accordion Per Sesi -->
                             <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xs transition-all hover:border-slate-300">
@@ -248,8 +281,8 @@
                                 >
                                     <!-- Judul & Badge Sesi -->
                                     <div class="flex items-start sm:items-center gap-3 min-w-0 flex-1">
-                                        <div class="w-8 h-8 rounded-xl flex items-center justify-center text-xs font-bold shrink-0 mt-0.5 sm:mt-0 <?= $isCompleted ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' : 'bg-pink-50 text-upskill-pink border border-pink-100' ?>">
-                                            <?php if ($isCompleted): ?>
+                                        <div class="w-8 h-8 rounded-xl flex items-center justify-center text-xs font-bold shrink-0 mt-0.5 sm:mt-0 <?= $isQuizCompleted ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' : ($isCompleted ? 'bg-blue-100 text-blue-700 border border-blue-200' : 'bg-pink-50 text-upskill-pink border border-pink-100') ?>">
+                                            <?php if ($isQuizCompleted || $isCompleted): ?>
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
                                                 </svg>
@@ -281,10 +314,15 @@
                                                     </span>
                                                 <?php endif; ?>
 
-                                                <?php if ($isCompleted): ?>
+                                                <?php if ($isQuizCompleted): ?>
                                                     <span class="inline-flex items-center gap-1 text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded font-semibold border border-emerald-200 whitespace-nowrap">
                                                         <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                                                        <span>Selesai 100%</span>
+                                                        <span>Kuis Selesai <?= $quizScore !== null ? '(' . (int) $quizScore . ')' : '' ?></span>
+                                                    </span>
+                                                <?php elseif ($isCompleted): ?>
+                                                    <span class="inline-flex items-center gap-1 text-blue-700 bg-blue-50 px-2 py-0.5 rounded font-semibold border border-blue-200 whitespace-nowrap">
+                                                        <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+                                                        <span>Materi 100%</span>
                                                     </span>
                                                 <?php else: ?>
                                                     <span class="inline-flex items-center gap-1 text-amber-700 bg-amber-50 px-2 py-0.5 rounded font-semibold border border-amber-200 whitespace-nowrap">
@@ -354,48 +392,65 @@
                                             </a>
 
                                             <!-- ============================================== -->
-                                            <!-- TOMBOL 2 (KUIS): Logika PHP Berdasarkan Status -->
+                                            <!-- TOMBOL 2 (KUIS): Logika Berdasarkan Status (Tahap 24) -->
                                             <!-- ============================================== -->
-                                            <?php if (!$isCompleted): ?>
-                                                <!-- Kuis Belum Selesai (Terkunci) -->
+                                            <?php if ($isQuizCompleted): ?>
+                                                <!-- Kondisi 1: Kuis SUDAH Dikerjakan (1x Attempt Selesai) -->
                                                 <div class="flex flex-col">
-                                                    <button 
-                                                        disabled 
-                                                        class="w-full py-3 px-4 rounded-xl font-bold text-xs sm:text-sm bg-gray-300 text-gray-500 cursor-not-allowed pointer-events-none flex items-center justify-center gap-2 shadow-xs"
-                                                    >
-                                                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                                                    <div class="w-full py-3 px-4 rounded-xl font-bold text-xs sm:text-sm bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center justify-center gap-2 shadow-xs cursor-default">
+                                                        <svg class="w-4 h-4 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
                                                         </svg>
-                                                        <span>Mulai Kuis Evaluasi</span>
-                                                    </button>
-                                                    <!-- Peringatan wajib selesaikan materi 100% -->
-                                                    <span class="text-[11px] text-rose-500 font-medium mt-1.5 flex items-center gap-1">
-                                                        <svg class="w-3 h-3 text-rose-400 shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                                                        <span>✓ Kuis Telah Diselesaikan <?= $quizScore !== null ? '(Nilai: ' . (int)$quizScore . ')' : '' ?></span>
+                                                    </div>
+                                                    <span class="text-[11px] text-emerald-600 font-medium mt-1.5 flex items-center gap-1">
+                                                        <svg class="w-3 h-3 text-emerald-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                                                         </svg>
-                                                        Selesaikan materi 100% untuk membuka kuis
+                                                        Evaluasi sesi ini telah selesai dan terekam (1x pengerjaan).
                                                     </span>
                                                 </div>
-                                            <?php else: ?>
-                                                <!-- Kuis Terbuka (Materi Selesai 100%) -->
+                                            <?php elseif ($isCompleted): ?>
+                                                <!-- Kondisi 2: Materi Selesai 100% & Kuis BELUM Dikerjakan -->
                                                 <div class="flex flex-col">
-                                                    <a 
-                                                        href="<?= base_url('dashboard/quiz/' . $s['id']) ?>" 
-                                                        class="w-full py-3 px-4 rounded-xl font-bold text-xs sm:text-sm bg-upskill-pink hover:bg-upskill-magenta text-white transition-colors flex items-center justify-center gap-2 shadow-xs group"
+                                                    <button 
+                                                        type="button"
+                                                        data-url="<?= base_url('dashboard/quiz/' . $s['id']) ?>" 
+                                                        class="btn-start-quiz w-full py-3 px-4 rounded-xl font-bold text-xs sm:text-sm bg-upskill-pink hover:bg-upskill-magenta text-white transition-all duration-200 flex items-center justify-center gap-2 shadow-sm hover:shadow active:scale-[0.99] group cursor-pointer"
                                                     >
-                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                                         </svg>
                                                         <span>Mulai Kuis Evaluasi</span>
-                                                        <svg class="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <svg class="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
                                                         </svg>
-                                                    </a>
+                                                    </button>
                                                     <span class="text-[11px] text-emerald-600 font-semibold mt-1.5 flex items-center gap-1">
                                                         <svg class="w-3 h-3 text-emerald-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                                                         </svg>
                                                         Materi telah diselesaikan. Kuis siap dikerjakan!
+                                                    </span>
+                                                </div>
+                                            <?php else: ?>
+                                                <!-- Kondisi 3: Kuis Masih Terkunci (Materi Belum 100%) -->
+                                                <div class="flex flex-col">
+                                                    <button 
+                                                        type="button"
+                                                        disabled 
+                                                        class="w-full py-3 px-4 rounded-xl font-bold text-xs sm:text-sm bg-gray-200 text-gray-400 cursor-not-allowed pointer-events-none flex items-center justify-center gap-2 shadow-xs"
+                                                    >
+                                                        <svg class="w-4 h-4 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                                                        </svg>
+                                                        <span>Mulai Kuis Evaluasi</span>
+                                                    </button>
+                                                    <span class="text-[11px] text-rose-500 font-medium mt-1.5 flex items-center gap-1">
+                                                        <svg class="w-3 h-3 text-rose-400 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                                                        </svg>
+                                                        Selesaikan materi 100% untuk membuka kuis
                                                     </span>
                                                 </div>
                                             <?php endif; ?>
@@ -431,6 +486,52 @@
             arrow.classList.toggle('rotate-180');
         }
     }
+
+    // ==============================================================
+    // 4. SCRIPT KONFIRMASI PAKTA INTEGRITAS & PRA-KUIS (TAHAP 24)
+    // ==============================================================
+    document.querySelectorAll('.btn-start-quiz').forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            const quizUrl = this.getAttribute('data-url');
+
+            Swal.fire({
+                title: 'Persiapan Evaluasi Kuis',
+                html: `
+                    <div class="text-left text-sm text-slate-600 space-y-3 mt-2">
+                        <p class="font-semibold text-upskill-darkblue">Sebelum memulai, perhatikan ketentuan berikut:</p>
+                        <ul class="list-disc pl-5 space-y-1.5">
+                            <li>Pastikan Anda sudah membaca dan memahami materi dengan baik dan benar.</li>
+                            <li>Awali dengan membaca <b>Bismillah</b>.</li>
+                            <li>Kerjakan soal dengan teliti dan <b>jujur</b> (dilarang membuka tab/bantuan lain).</li>
+                            <li class="text-red-600 font-semibold">Kuis ini hanya dapat dikerjakan 1 (satu) kali!</li>
+                        </ul>
+                        <label class="flex items-start gap-2.5 mt-4 p-3 bg-slate-50 rounded-xl border border-slate-200 cursor-pointer">
+                            <input type="checkbox" id="agree-check" class="mt-1 w-4 h-4 text-upskill-pink rounded focus:ring-upskill-pink">
+                            <span class="text-xs font-medium text-slate-700 select-none">Saya sudah membaca materi, siap mengerjakan dengan jujur, dan paham kuis hanya bisa diakses sekali.</span>
+                        </label>
+                    </div>
+                `,
+                icon: 'info',
+                showCancelButton: true,
+                confirmButtonColor: '#FA1886',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: 'Bismillah, Mulai Kuis →',
+                cancelButtonText: 'Batal',
+                preConfirm: () => {
+                    const isChecked = document.getElementById('agree-check').checked;
+                    if (!isChecked) {
+                        Swal.showValidationMessage('Anda wajib mencentang kotak persetujuan di atas terlebih dahulu!');
+                    }
+                    return isChecked;
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = quizUrl;
+                }
+            });
+        });
+    });
     </script>
 
     <!-- Bottom Navigation Bar untuk Mobile (Tahap 21) -->

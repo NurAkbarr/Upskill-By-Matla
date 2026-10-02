@@ -72,10 +72,17 @@ class Quiz extends BaseController
             }
         }
 
-        // Pastikan status materi sesi ini otomatis tercatat selesai 100% di database
         $userId = (int) (session()->get('user_id') ?? 0);
+        $progressModel = new \App\Models\SessionProgressModel();
+
+        // Proteksi 1x Pengerjaan Kuis (Tahap 24): Tolak jika user sudah menyelesaikan kuis
+        if ($userId > 0 && $progressModel->isQuizCompleted($userId, $sessionId)) {
+            return redirect()->to(base_url('dashboard/course/' . $course['id']))
+                             ->with('info', 'Anda sudah menyelesaikan kuis evaluasi untuk sesi ini.');
+        }
+
+        // Pastikan status materi sesi ini otomatis tercatat selesai 100% di database
         if ($userId > 0) {
-            $progressModel = new \App\Models\SessionProgressModel();
             $progressModel->markCompleted($userId, $sessionId);
 
             // Update persentase kemajuan kelas di tabel enrollments
@@ -121,7 +128,17 @@ class Quiz extends BaseController
             return redirect()->to(base_url('courses'))->with('error', 'Sesi kuis tidak ditemukan.');
         }
 
-        $course    = $this->courseModel->find((int) $session['course_id']);
+        $course = $this->courseModel->find((int) $session['course_id']);
+
+        $userId = (int) (session()->get('user_id') ?? 0);
+        $progressModel = new \App\Models\SessionProgressModel();
+
+        // Cegah pengiriman jawaban ganda jika kuis sudah dikerjakan (Tahap 24)
+        if ($userId > 0 && $progressModel->isQuizCompleted($userId, $sessionId)) {
+            $courseRedirectId = $course ? $course['id'] : $session['course_id'];
+            return redirect()->to(base_url('dashboard/course/' . $courseRedirectId))
+                             ->with('info', 'Anda sudah menyelesaikan kuis evaluasi untuk sesi ini.');
+        }
         $questions = $this->quizModel->getQuestionsBySession($sessionId);
         $answers   = $this->request->getPost('answers') ?? [];
 

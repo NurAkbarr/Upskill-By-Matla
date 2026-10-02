@@ -247,9 +247,10 @@ class Dashboard extends BaseController
         // Kumpulkan ID sesi
         $sessionIds = array_column($sessions, 'id');
 
-        // Query pengecekan ke tabel pelacakan progres (session_progress) untuk mengetahui status 100% tiap sesi
+        // Query pengecekan ke tabel pelacakan progres (session_progress) untuk status materi dan kuis
         $progressModel   = new SessionProgressModel();
         $progress_status = $progressModel->getProgressMap($userId, $sessionIds);
+        $quiz_status     = $progressModel->getQuizProgressMap($userId, $sessionIds);
 
         // Tambahkan info kuis dan tipe materi per sesi
         $quizModel = new \App\Models\QuizQuestionModel();
@@ -289,6 +290,7 @@ class Dashboard extends BaseController
             'course'            => $course,
             'sessions'          => $sessions,
             'progress_status'   => $progress_status,
+            'quiz_status'       => $quiz_status,
             'courseProgress'    => $courseProgress,
             'completedSessions' => $completedSessions,
             'totalSessions'     => $totalSessions,

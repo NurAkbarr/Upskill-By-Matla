@@ -115,4 +115,42 @@ class SessionProgressModel extends Model
                     ->where('quiz_completed', 1)
                     ->countAllResults();
     }
+
+    /**
+     * Memeriksa apakah user sudah menyelesaikan kuis untuk sesi tertentu (Tahap 24)
+     */
+    public function isQuizCompleted(int $userId, int $sessionId): bool
+    {
+        $row = $this->where('user_id', $userId)
+                    ->where('session_id', $sessionId)
+                    ->first();
+
+        return !empty($row['quiz_completed']);
+    }
+
+    /**
+     * Mengambil detail status kuis dan nilai untuk user pada daftar sesi (Tahap 24)
+     * Mengembalikan associative array: [ session_id => ['quiz_completed' => bool, 'quiz_score' => float|null] ]
+     */
+    public function getQuizProgressMap(int $userId, array $sessionIds): array
+    {
+        if (empty($sessionIds)) {
+            return [];
+        }
+
+        $records = $this->where('user_id', $userId)
+                        ->whereIn('session_id', $sessionIds)
+                        ->findAll();
+
+        $map = [];
+        foreach ($records as $r) {
+            $map[(int) $r['session_id']] = [
+                'quiz_completed'    => !empty($r['quiz_completed']),
+                'quiz_score'        => $r['quiz_score'] !== null ? (float) $r['quiz_score'] : null,
+                'quiz_completed_at' => $r['quiz_completed_at'] ?? null,
+            ];
+        }
+
+        return $map;
+    }
 }
