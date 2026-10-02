@@ -16,10 +16,24 @@
                 Susun butir soal pilihan ganda sebagai evaluasi pemahaman peserta di akhir sesi ini.
             </p>
         </div>
-        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white border border-slate-200 text-slate-700 shadow-sm self-start sm:self-auto">
-            <span class="w-2 h-2 rounded-full bg-upskill-pink"></span>
-            Total Butir Soal: <strong><?= count($questions) ?></strong>
-        </span>
+        <div class="flex items-center gap-2 self-start sm:self-auto flex-wrap">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white border border-slate-200 text-slate-700 shadow-sm">
+                <span class="w-2 h-2 rounded-full bg-upskill-pink"></span>
+                Total Butir Soal: <strong><?= count($questions) ?></strong>
+            </span>
+            <button 
+                type="button" 
+                id="btn-reset-quiz-attempts"
+                data-href="<?= base_url('admin/sessions/' . $session['id'] . '/quiz/reset') ?>"
+                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-500 hover:bg-amber-600 text-white shadow-xs transition-colors cursor-pointer"
+                title="Reset riwayat ujian peserta pada sesi ini agar dapat dikerjakan ulang"
+            >
+                <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                </svg>
+                <span>Reset Riwayat Ujian Peserta</span>
+            </button>
+        </div>
     </div>
 </div>
 
@@ -449,6 +463,31 @@
         const select = document.getElementById('question_type');
         if (select) {
             toggleQuestionType(select.value);
+        }
+
+        // Tahap 25: Konfirmasi Reset Riwayat Ujian Peserta dengan SweetAlert2
+        const btnResetAttempts = document.getElementById('btn-reset-quiz-attempts');
+        if (btnResetAttempts) {
+            btnResetAttempts.addEventListener('click', function(e) {
+                e.preventDefault();
+                const resetUrl = this.getAttribute('data-href');
+
+                Swal.fire({
+                    title: 'Yakin ingin mereset hasil ujian?',
+                    text: 'Seluruh peserta akan dapat mengerjakan ulang kuis di sesi ini dari awal.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#F59E0B',
+                    cancelButtonColor: '#64748B',
+                    confirmButtonText: 'Ya, Reset Riwayat!',
+                    cancelButtonText: 'Batal',
+                    reverseButtons: true
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = resetUrl;
+                    }
+                });
+            });
         }
     });
 </script>

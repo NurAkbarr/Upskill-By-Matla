@@ -6,18 +6,21 @@ use App\Controllers\BaseController;
 use App\Models\CourseModel;
 use App\Models\LessonModel;
 use App\Models\QuizQuestionModel;
+use App\Models\SessionProgressModel;
 
 class Quiz extends BaseController
 {
     protected CourseModel $courseModel;
     protected LessonModel $lessonModel;
     protected QuizQuestionModel $quizModel;
+    protected SessionProgressModel $progressModel;
 
     public function __construct()
     {
-        $this->courseModel = new CourseModel();
-        $this->lessonModel = new LessonModel();
-        $this->quizModel   = new QuizQuestionModel();
+        $this->courseModel   = new CourseModel();
+        $this->lessonModel   = new LessonModel();
+        $this->quizModel     = new QuizQuestionModel();
+        $this->progressModel = new SessionProgressModel();
     }
 
     /**
@@ -159,7 +162,7 @@ class Quiz extends BaseController
     }
 
     /**
-     * Menghapus butir soal kuis berdasarkan ID
+     * Menghapus butir soal kuis berdasarkan ID (Tahap 25: Auto-reset jika sisa 0)
      *
      * @param int $id
      * @return \CodeIgniter\HTTP\RedirectResponse
@@ -174,7 +177,36 @@ class Quiz extends BaseController
         $sessionId = (int) $question['session_id'];
         $this->quizModel->delete($id);
 
+        // Tahap 25: Auto-Reset jika semua butir soal pada sesi ini telah habis dihapus (sisa 0)
+        $remainingQuestions = $this->quizModel->countBySession($sessionId);
+        if ($remainingQuestions === 0) {
+            $this->progressModel->resetQuizAttemptsBySession($sessionId);
+
+            return redirect()->to(base_url('admin/sessions/' . $sessionId . '/quiz'))
+                             ->with('success', 'Butir soal kuis berhasil dihapus. Seluruh butir soal telah habis, riwayat pengerjaan kuis peserta otomatis direset.');
+        }
+
         return redirect()->to(base_url('admin/sessions/' . $sessionId . '/quiz'))
                          ->with('success', 'Butir soal kuis berhasil dihapus.');
+    }
+
+    /**
+     * Mereset riwayat pengerjaan kuis peserta untuk sesi tertentu secara manual (Tahap 25)
+     * Status penyelesaian materi baca/video tetap dipertahankan.
+     *
+     * @param int $sessionId
+     * @return \CodeIgniter\HTTP\RedirectResponse
+     */
+    public function reset_attempts(int $sessionId)
+    {
+        $session = $this->lessonModel->find($sessionId);
+        if (!$session) {
+            return redirect()->to(base_url('admin/courses'))->with('error', 'Sesi pembelajaran tidak ditemukan.');
+        }
+
+        $this->progressModel->resetQuizAttemptsBySession($sessionId);
+
+        return redirect()->to(base_url('admin/sessions/' . $sessionId . '/quiz'))
+                         ->with('success', 'Riwayat pengerjaan kuis berhasil direset. Peserta kini dapat mengerjakan ulang.');
     }
 }

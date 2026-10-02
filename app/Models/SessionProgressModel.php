@@ -153,4 +153,22 @@ class SessionProgressModel extends Model
 
         return $map;
     }
+
+    /**
+     * Mereset status kuis untuk semua peserta pada sesi tertentu (Tahap 25)
+     * Status baca materi (is_completed) tetap dipertahankan (tidak dihapus/diubah).
+     *
+     * @param int $sessionId
+     * @return bool
+     */
+    public function resetQuizAttemptsBySession(int $sessionId): bool
+    {
+        return (bool) $this->where('session_id', $sessionId)
+                           ->set([
+                               'quiz_completed'    => 0,
+                               'quiz_score'        => null,
+                               'quiz_completed_at' => null,
+                           ])
+                           ->update();
+    }
 }
