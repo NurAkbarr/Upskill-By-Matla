@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="id" class="h-full bg-slate-900">
+<html lang="id" class="h-full bg-slate-50">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,10 +9,10 @@
     <link rel="icon" type="image/png" href="<?= base_url('assets/images/logo.png') ?>">
     <link rel="shortcut icon" href="<?= base_url('favicon.ico') ?>">
     
-    <!-- Google Fonts: Inter -->
+    <!-- Google Fonts: Inter & JetBrains Mono -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@600;700;800&display=swap" rel="stylesheet">
     
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -46,81 +46,64 @@
             -moz-user-select: none;
             -ms-user-select: none;
         }
-        /* Efek fokus lembut pada kartu pilihan */
-        .option-card:hover {
-            border-color: #FA1886;
-        }
-        .option-radio:checked + .option-box {
-            border-color: #FA1886;
-            background-color: rgba(250, 24, 134, 0.05);
-        }
-        .option-radio:checked + .option-box .badge-letter {
+        /* Aktifkan badge huruf saat opsi terpilih */
+        label:has(input:checked) .badge-letter {
             background-color: #FA1886;
             color: #ffffff;
+            border-color: #FA1886;
         }
     </style>
 </head>
 
-<body class="bg-slate-100 min-h-screen flex flex-col font-sans text-slate-800" oncontextmenu="return false;" oncopy="return false;" oncut="return false;" onpaste="return false;">
+<body class="bg-slate-50 min-h-screen flex flex-col font-sans text-slate-800" oncontextmenu="return false;" oncopy="return false;" oncut="return false;" onpaste="return false;">
 
     <!-- ============================================================== -->
-    <!-- TOPBAR CBT: TIMER & STATUS KEAMANAN                            -->
+    <!-- 1. STICKY HEADER PUTIH BERSIH (TAHAP 27)                       -->
     <!-- ============================================================== -->
-    <header class="sticky top-0 z-50 bg-slate-900 text-white shadow-md border-b border-slate-800 px-4 sm:px-8 py-3.5">
-        <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
+    <header class="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-200 px-6 py-4">
+        <div class="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
             
-            <!-- Info Kelas & Sesi -->
+            <!-- Bagian Kiri: Badge CBT, Judul Sesi & Nama Kelas -->
             <div class="flex items-center gap-3 w-full sm:w-auto">
-                <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-upskill-pink to-upskill-magenta flex items-center justify-center font-bold text-white text-sm shadow-xs shrink-0">
+                <span class="bg-pink-50 text-upskill-pink font-extrabold px-3 py-1.5 rounded-xl border border-pink-100 text-xs shrink-0 tracking-wider">
                     CBT
-                </div>
+                </span>
                 <div class="min-w-0">
-                    <h1 class="text-sm font-bold text-white truncate">
+                    <h1 class="font-bold text-slate-800 text-sm sm:text-base truncate">
                         <?= esc($session['chapter_title']) ?>
                     </h1>
-                    <p class="text-xs text-slate-400 truncate">
+                    <p class="text-xs text-slate-500 truncate">
                         <?= esc($course['title']) ?> &bull; <?= esc($studentName) ?>
                     </p>
                 </div>
             </div>
 
-            <!-- Status Anti-Cheat & Timer -->
-            <div class="flex items-center justify-between sm:justify-end gap-4 w-full sm:w-auto">
-                
-                <!-- Indikator Anti-Cheat -->
-                <div class="hidden md:flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700 text-[11px] text-emerald-400">
-                    <span class="relative flex h-2 w-2">
-                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                        <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+            <!-- Bagian Kanan: Tampilan Sisa Waktu (Timer Elegan) -->
+            <div class="bg-slate-50 border border-slate-200 px-4 py-2 rounded-xl flex items-center gap-2.5 self-end sm:self-auto shrink-0 shadow-2xs">
+                <svg class="w-4 h-4 text-upskill-pink shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <div>
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block leading-none">
+                        SISA WAKTU
                     </span>
-                    <span class="font-medium tracking-wide">Anti-Cheat Terproteksi</span>
+                    <span id="countdown-timer" class="text-lg font-extrabold text-upskill-pink font-mono tracking-wider leading-none mt-0.5 block">
+                        --:--
+                    </span>
                 </div>
-
-                <!-- Timer Hitung Mundur Prominen -->
-                <div class="flex items-center gap-2.5 bg-slate-800 px-3.5 py-1.5 rounded-xl border border-slate-700 shadow-inner">
-                    <svg class="w-4 h-4 text-upskill-pink animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                    <div class="text-right">
-                        <span class="text-[9px] uppercase tracking-wider text-slate-400 block font-semibold leading-none">Sisa Waktu</span>
-                        <span id="countdown-timer" class="font-mono text-base font-bold text-white tracking-widest leading-none mt-0.5 block">
-                            --:--
-                        </span>
-                    </div>
-                </div>
-
             </div>
+
         </div>
     </header>
 
     <!-- ============================================================== -->
-    <!-- KONTEN UTAMA: LEMBAR SOAL UJIAN CBT                            -->
+    <!-- KONTEN UTAMA: LEMBAR SOAL CBT                                  -->
     <!-- ============================================================== -->
     <main class="flex-1 max-w-4xl w-full mx-auto p-4 sm:p-6 lg:p-8">
         
         <?php if (empty($questions)): ?>
             <!-- State Belum Ada Soal -->
-            <div class="bg-white rounded-2xl border border-slate-200 p-10 text-center shadow-xs">
+            <div class="bg-white rounded-2xl border border-slate-200/80 p-10 text-center shadow-sm">
                 <div class="w-16 h-16 mx-auto rounded-full bg-slate-100 flex items-center justify-center text-slate-400 mb-4">
                     <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -131,8 +114,8 @@
                     Pengajar belum menambahkan butir soal evaluasi untuk sesi pembelajaran ini.
                 </p>
                 <div class="mt-6">
-                    <a href="<?= base_url('courses') ?>" class="px-5 py-2.5 rounded-xl bg-slate-900 text-white font-bold text-xs hover:bg-slate-800 transition-colors">
-                        Kembali ke Katalog
+                    <a href="<?= base_url('dashboard/course/' . $session['course_id']) ?>" class="px-5 py-2.5 rounded-xl bg-slate-900 text-white font-bold text-xs hover:bg-slate-800 transition-colors">
+                        Kembali ke Detail Kelas
                     </a>
                 </div>
             </div>
@@ -141,116 +124,117 @@
             <form id="form-kuis" action="<?= base_url('sessions/' . $session['id'] . '/cbt/submit') ?>" method="POST" class="space-y-6">
                 <?= csrf_field() ?>
 
-                <!-- Banner Informasi Ujian -->
-                <div class="bg-gradient-to-r from-upskill-darkblue to-slate-900 text-white p-5 rounded-2xl shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <!-- ============================================================== -->
+                <!-- 2. BANNER INSTRUKSI RINGKAS (TAHAP 27)                         -->
+                <!-- ============================================================== -->
+                <div class="bg-white border border-slate-200/80 rounded-2xl p-5 mb-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
-                        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-white/10 text-pink-300 mb-1 border border-white/10">
-                            Lembar Jawaban Peserta
-                        </span>
-                        <h2 class="text-base font-bold">Jawab Seluruh Soal dengan Teliti</h2>
-                        <p class="text-xs text-slate-300 mt-0.5">
+                        <h2 class="text-base font-bold text-slate-800">Lembar Evaluasi Peserta</h2>
+                        <p class="text-xs text-slate-500 mt-0.5">
                             Jumlah Soal: <strong><?= count($questions) ?> Butir</strong> &bull; Durasi: <strong><?= esc($duration) ?> Menit</strong>
                         </p>
                     </div>
-                    <div class="text-xs text-slate-300 bg-white/5 border border-white/10 p-3 rounded-xl max-w-xs">
-                        <strong class="text-pink-300 block mb-0.5">Tata Tertib CBT:</strong>
-                        Membuka tab baru atau berpindah aplikasi lebih dari 3 kali akan menyebabkan ujian otomatis terkumpul.
+                    <div class="bg-amber-50/70 border border-amber-200/60 text-amber-800 text-xs px-4 py-2.5 rounded-xl flex items-center gap-2">
+                        <svg class="w-4 h-4 text-amber-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                        </svg>
+                        <span><strong>Perhatian:</strong> Dilarang berpindah tab/aplikasi selama ujian berlangsung agar jawaban tidak terkumpul otomatis.</span>
                     </div>
                 </div>
 
-                <!-- Loop Daftar Butir Soal -->
-                <div class="space-y-5">
+                <!-- ============================================================== -->
+                <!-- 3. KARTU BUTIR SOAL KUIS (PG & ESSAY) (TAHAP 27)               -->
+                <!-- ============================================================== -->
+                <div>
                     <?php foreach ($questions as $idx => $q): ?>
-                        <div class="bg-white rounded-2xl border border-slate-200/80 p-5 sm:p-7 shadow-xs space-y-4">
+                        <div class="bg-white rounded-2xl border border-slate-200/80 p-6 md:p-8 shadow-sm mb-6 transition-all hover:border-slate-300">
                             
-                            <!-- Header Butir Soal -->
-                            <div class="flex items-start gap-3">
-                                <span class="w-8 h-8 rounded-xl bg-slate-900 text-white font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">
+                            <!-- Header Butir Soal: Nomor & Tipe -->
+                            <div class="flex items-center gap-2.5">
+                                <span class="w-8 h-8 rounded-lg bg-slate-900 text-white font-bold text-sm flex items-center justify-center shrink-0">
                                     <?= $idx + 1 ?>
                                 </span>
-                                <div class="flex-1">
-                                    <div class="mb-1">
-                                        <?php if (($q['question_type'] ?? 'pg') === 'essay'): ?>
-                                            <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-amber-100 text-amber-800 border border-amber-200">
-                                                Tipe: Soal Essay (Uraian)
-                                            </span>
-                                        <?php else: ?>
-                                            <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-sky-100 text-sky-800 border border-sky-200">
-                                                Tipe: Pilihan Ganda (PG)
-                                            </span>
-                                        <?php endif; ?>
-                                    </div>
-                                    <p class="text-sm sm:text-base font-semibold text-slate-800 leading-relaxed whitespace-pre-line">
-                                        <?= esc($q['question_text']) ?>
-                                    </p>
-                                </div>
+                                <?php if (($q['question_type'] ?? 'pg') === 'essay'): ?>
+                                    <span class="bg-slate-100 text-slate-600 text-[11px] font-semibold px-2.5 py-1 rounded-md uppercase tracking-wide">
+                                        Soal Essay / Uraian
+                                    </span>
+                                <?php else: ?>
+                                    <span class="bg-slate-100 text-slate-600 text-[11px] font-semibold px-2.5 py-1 rounded-md uppercase tracking-wide">
+                                        Pilihan Ganda
+                                    </span>
+                                <?php endif; ?>
                             </div>
 
-                            <!-- Opsi Jawaban (Pilihan Ganda) -->
+                            <!-- Teks Pertanyaan -->
+                            <p class="text-slate-800 font-semibold text-base md:text-lg leading-relaxed my-4 whitespace-pre-line">
+                                <?= esc($q['question_text']) ?>
+                            </p>
+
+                            <!-- Pilihan Ganda -->
                             <?php if (($q['question_type'] ?? 'pg') === 'pg'): ?>
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
                                     
-                                    <!-- Pilihan A -->
-                                    <label class="cursor-pointer relative block">
-                                        <input type="radio" name="answers[<?= $q['id'] ?>]" value="a" class="sr-only option-radio">
-                                        <div class="option-box flex items-center gap-3 p-3.5 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-slate-50 transition-all">
-                                            <span class="badge-letter w-7 h-7 rounded-lg bg-white border border-slate-300 text-slate-700 font-bold text-xs flex items-center justify-center shrink-0 transition-colors shadow-2xs">
+                                    <!-- Opsi A -->
+                                    <?php if (!empty($q['option_a'])): ?>
+                                        <label class="flex items-center gap-3.5 p-4 rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-50 transition-all has-[:checked]:border-upskill-pink has-[:checked]:bg-pink-50/30 has-[:checked]:ring-2 has-[:checked]:ring-pink-500/10">
+                                            <input type="radio" name="answers[<?= $q['id'] ?>]" value="a" class="sr-only">
+                                            <span class="badge-letter w-7 h-7 rounded-lg bg-slate-100 text-slate-700 font-bold text-xs flex items-center justify-center shrink-0 border border-slate-200/80 uppercase transition-colors">
                                                 A
                                             </span>
-                                            <span class="text-xs sm:text-sm text-slate-700 flex-1 leading-snug">
+                                            <span class="text-sm text-slate-700 flex-1 leading-snug">
                                                 <?= esc($q['option_a']) ?>
                                             </span>
-                                        </div>
-                                    </label>
+                                        </label>
+                                    <?php endif; ?>
 
-                                    <!-- Pilihan B -->
-                                    <label class="cursor-pointer relative block">
-                                        <input type="radio" name="answers[<?= $q['id'] ?>]" value="b" class="sr-only option-radio">
-                                        <div class="option-box flex items-center gap-3 p-3.5 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-slate-50 transition-all">
-                                            <span class="badge-letter w-7 h-7 rounded-lg bg-white border border-slate-300 text-slate-700 font-bold text-xs flex items-center justify-center shrink-0 transition-colors shadow-2xs">
+                                    <!-- Opsi B -->
+                                    <?php if (!empty($q['option_b'])): ?>
+                                        <label class="flex items-center gap-3.5 p-4 rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-50 transition-all has-[:checked]:border-upskill-pink has-[:checked]:bg-pink-50/30 has-[:checked]:ring-2 has-[:checked]:ring-pink-500/10">
+                                            <input type="radio" name="answers[<?= $q['id'] ?>]" value="b" class="sr-only">
+                                            <span class="badge-letter w-7 h-7 rounded-lg bg-slate-100 text-slate-700 font-bold text-xs flex items-center justify-center shrink-0 border border-slate-200/80 uppercase transition-colors">
                                                 B
                                             </span>
-                                            <span class="text-xs sm:text-sm text-slate-700 flex-1 leading-snug">
+                                            <span class="text-sm text-slate-700 flex-1 leading-snug">
                                                 <?= esc($q['option_b']) ?>
                                             </span>
-                                        </div>
-                                    </label>
+                                        </label>
+                                    <?php endif; ?>
 
-                                    <!-- Pilihan C -->
-                                    <label class="cursor-pointer relative block">
-                                        <input type="radio" name="answers[<?= $q['id'] ?>]" value="c" class="sr-only option-radio">
-                                        <div class="option-box flex items-center gap-3 p-3.5 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-slate-50 transition-all">
-                                            <span class="badge-letter w-7 h-7 rounded-lg bg-white border border-slate-300 text-slate-700 font-bold text-xs flex items-center justify-center shrink-0 transition-colors shadow-2xs">
+                                    <!-- Opsi C -->
+                                    <?php if (!empty($q['option_c'])): ?>
+                                        <label class="flex items-center gap-3.5 p-4 rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-50 transition-all has-[:checked]:border-upskill-pink has-[:checked]:bg-pink-50/30 has-[:checked]:ring-2 has-[:checked]:ring-pink-500/10">
+                                            <input type="radio" name="answers[<?= $q['id'] ?>]" value="c" class="sr-only">
+                                            <span class="badge-letter w-7 h-7 rounded-lg bg-slate-100 text-slate-700 font-bold text-xs flex items-center justify-center shrink-0 border border-slate-200/80 uppercase transition-colors">
                                                 C
                                             </span>
-                                            <span class="text-xs sm:text-sm text-slate-700 flex-1 leading-snug">
+                                            <span class="text-sm text-slate-700 flex-1 leading-snug">
                                                 <?= esc($q['option_c']) ?>
                                             </span>
-                                        </div>
-                                    </label>
+                                        </label>
+                                    <?php endif; ?>
 
-                                    <!-- Pilihan D -->
-                                    <label class="cursor-pointer relative block">
-                                        <input type="radio" name="answers[<?= $q['id'] ?>]" value="d" class="sr-only option-radio">
-                                        <div class="option-box flex items-center gap-3 p-3.5 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-slate-50 transition-all">
-                                            <span class="badge-letter w-7 h-7 rounded-lg bg-white border border-slate-300 text-slate-700 font-bold text-xs flex items-center justify-center shrink-0 transition-colors shadow-2xs">
+                                    <!-- Opsi D -->
+                                    <?php if (!empty($q['option_d'])): ?>
+                                        <label class="flex items-center gap-3.5 p-4 rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-50 transition-all has-[:checked]:border-upskill-pink has-[:checked]:bg-pink-50/30 has-[:checked]:ring-2 has-[:checked]:ring-pink-500/10">
+                                            <input type="radio" name="answers[<?= $q['id'] ?>]" value="d" class="sr-only">
+                                            <span class="badge-letter w-7 h-7 rounded-lg bg-slate-100 text-slate-700 font-bold text-xs flex items-center justify-center shrink-0 border border-slate-200/80 uppercase transition-colors">
                                                 D
                                             </span>
-                                            <span class="text-xs sm:text-sm text-slate-700 flex-1 leading-snug">
+                                            <span class="text-sm text-slate-700 flex-1 leading-snug">
                                                 <?= esc($q['option_d']) ?>
                                             </span>
-                                        </div>
-                                    </label>
+                                        </label>
+                                    <?php endif; ?>
 
                                 </div>
                             <?php else: ?>
-                                <!-- Opsi Jawaban (Essay) -->
-                                <div class="pt-2">
+                                <!-- Input Jawaban Essay -->
+                                <div class="pt-1">
                                     <textarea 
                                         name="answers[<?= $q['id'] ?>]" 
                                         rows="4" 
                                         placeholder="Ketik jawaban essay Anda di sini secara lengkap..."
-                                        class="w-full px-4 py-3 rounded-xl border border-slate-300 text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-upskill-pink/20 focus:border-upskill-pink transition-all bg-slate-50/50 focus:bg-white resize-y"
+                                        class="w-full rounded-xl border border-slate-200 bg-slate-50/50 p-4 text-sm text-slate-700 focus:bg-white focus:border-upskill-pink focus:ring-4 focus:ring-pink-500/10 transition-all outline-none resize-y"
                                     ></textarea>
                                 </div>
                             <?php endif; ?>
@@ -259,15 +243,20 @@
                     <?php endforeach; ?>
                 </div>
 
-                <!-- Tombol Submit Ujian -->
-                <div class="bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4">
-                    <div class="text-xs text-slate-500 text-center sm:text-left">
-                        Pastikan semua soal telah Anda jawab sebelum mengklik tombol selesai.
+                <!-- ============================================================== -->
+                <!-- 4. FOOTER PENGUMPULAN (SUBMIT BAR) (TAHAP 27)                  -->
+                <!-- ============================================================== -->
+                <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div class="text-xs text-slate-500 text-center sm:text-left flex items-center gap-2">
+                        <svg class="w-4 h-4 text-emerald-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <span>Pastikan semua soal telah Anda jawab dan periksa sebelum mengumpulkan ujian.</span>
                     </div>
                     <button 
                         type="button" 
                         onclick="confirmSubmission()"
-                        class="w-full sm:w-auto px-7 py-3 rounded-xl font-bold text-sm text-white bg-gradient-to-r from-upskill-pink to-upskill-magenta hover:opacity-95 transition-all shadow-md shadow-pink-500/20 active:scale-[0.99] cursor-pointer"
+                        class="w-full sm:w-auto bg-upskill-pink hover:bg-pink-600 text-white font-bold text-sm px-7 py-3.5 rounded-xl shadow-sm hover:shadow transition-all cursor-pointer"
                     >
                         Selesaikan & Kumpulkan Ujian
                     </button>
@@ -319,8 +308,8 @@
                 
                 // Berikan warna merah jika waktu kurang dari 5 menit
                 if (totalSeconds < 300) {
-                    timerElement.classList.add('text-rose-400');
-                    timerElement.classList.remove('text-white');
+                    timerElement.classList.add('text-rose-500');
+                    timerElement.classList.remove('text-upskill-pink');
                 }
             }
 
