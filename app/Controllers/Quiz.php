@@ -169,13 +169,14 @@ class Quiz extends BaseController
         }
 
         $data = [
-            'title'      => 'Hasil Ujian CBT - ' . esc($session['chapter_title']),
-            'session'    => $session,
-            'course'     => $course,
-            'totalPg'    => $totalPg,
-            'correctPg'  => $correctPg,
-            'totalEssay' => $totalEssay,
-            'score'      => $score,
+            'title'       => 'Ujian Berhasil Dikumpulkan - ' . esc($session['chapter_title']),
+            'session'     => $session,
+            'course'      => $course,
+            'totalPg'     => $totalPg,
+            'correctPg'   => $correctPg,
+            'totalEssay'  => $totalEssay,
+            'essay_count' => $totalEssay,
+            'score'       => $score,
         ];
 
         return view('quiz/cbt_result', $data);
