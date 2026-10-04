@@ -100,6 +100,11 @@ class Quiz extends BaseController
             }
         }
 
+        // Simpan timestamp awal mulai kuis jika belum tercatat (Tahap 28)
+        if (!session()->has('quiz_start_timestamp_' . $sessionId)) {
+            session()->set('quiz_start_timestamp_' . $sessionId, time());
+        }
+
         $questions = $this->quizModel->getQuestionsBySession($sessionId);
         $duration  = !empty($session['quiz_duration_minutes']) ? (int) $session['quiz_duration_minutes'] : 30;
 
@@ -139,6 +144,12 @@ class Quiz extends BaseController
             return redirect()->to(base_url('dashboard/course/' . $courseRedirectId))
                              ->with('info', 'Anda sudah menyelesaikan kuis evaluasi untuk sesi ini.');
         }
+
+        // Hitung durasi pengerjaan kuis dalam detik (Tahap 28)
+        $startTimestamp  = session()->get('quiz_start_timestamp_' . $sessionId);
+        $durationSeconds = $startTimestamp ? max(0, time() - (int) $startTimestamp) : 0;
+        session()->remove('quiz_start_timestamp_' . $sessionId);
+
         $questions = $this->quizModel->getQuestionsBySession($sessionId);
         $answers   = $this->request->getPost('answers') ?? [];
 
@@ -160,12 +171,18 @@ class Quiz extends BaseController
         }
 
         $score = $totalPg > 0 ? round(($correctPg / $totalPg) * 100) : 100;
+        $totalQuestions = count($questions);
 
-        // Simpan hasil pengerjaan kuis peserta ke tabel session_progress
-        $userId = (int) (session()->get('user_id') ?? 0);
+        // Simpan hasil pengerjaan kuis peserta ke tabel session_progress (Tahap 28: skor, benar, total, durasi)
         if ($userId > 0) {
-            $progressModel = new \App\Models\SessionProgressModel();
-            $progressModel->markQuizCompleted($userId, $sessionId, $score);
+            $progressModel->markQuizCompleted(
+                $userId,
+                $sessionId,
+                (float) $score,
+                $correctPg,
+                $totalQuestions,
+                $durationSeconds
+            );
         }
 
         $data = [

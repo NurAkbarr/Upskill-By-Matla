@@ -71,6 +71,9 @@ $routes->group('admin', ['filter' => ['auth', 'role:super_admin']], static funct
     $routes->post('quiz/update/(:num)', 'Admin\Quiz::update/$1');
     $routes->get('quiz-questions/delete/(:num)', 'Admin\Quiz::delete/$1');
 
+    // Laporan Nilai & Peringkat (Leaderboard)
+    $routes->get('reports', 'Admin\Report::index');
+
     // Manajemen Pengguna
     $routes->get('users', 'Admin\User::index');
     $routes->get('users/create', 'Admin\User::create');

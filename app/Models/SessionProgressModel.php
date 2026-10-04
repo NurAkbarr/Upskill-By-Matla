@@ -18,6 +18,9 @@ class SessionProgressModel extends Model
         'is_completed',
         'quiz_completed',
         'quiz_score',
+        'correct_count',
+        'total_questions',
+        'duration_seconds',
         'quiz_completed_at',
         'completed_at',
     ];
@@ -84,7 +87,14 @@ class SessionProgressModel extends Model
     /**
      * Menandai kuis sesi telah diselesaikan oleh user
      */
-    public function markQuizCompleted(int $userId, int $sessionId, float $score): bool
+    public function markQuizCompleted(
+        int $userId, 
+        int $sessionId, 
+        float $score, 
+        int $correctCount = 0, 
+        int $totalQuestions = 0, 
+        int $durationSeconds = 0
+    ): bool
     {
         $existing = $this->where('user_id', $userId)
                          ->where('session_id', $sessionId)
@@ -96,7 +106,11 @@ class SessionProgressModel extends Model
             'is_completed'      => 1,
             'quiz_completed'    => 1,
             'quiz_score'        => $score,
+            'correct_count'     => $correctCount,
+            'total_questions'   => $totalQuestions,
+            'duration_seconds'  => $durationSeconds,
             'quiz_completed_at' => date('Y-m-d H:i:s'),
+            'completed_at'      => date('Y-m-d H:i:s'),
         ];
 
         if ($existing) {
@@ -167,6 +181,9 @@ class SessionProgressModel extends Model
                            ->set([
                                'quiz_completed'    => 0,
                                'quiz_score'        => null,
+                               'correct_count'     => 0,
+                               'total_questions'   => 0,
+                               'duration_seconds'  => 0,
                                'quiz_completed_at' => null,
                            ])
                            ->update();
