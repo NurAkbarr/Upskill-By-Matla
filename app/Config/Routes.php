@@ -68,6 +68,7 @@ $routes->group('admin', ['filter' => ['auth', 'role:super_admin']], static funct
     $routes->post('sessions/(:num)/quiz/store', 'Admin\Quiz::store/$1');
     $routes->post('sessions/(:num)/quiz/settings', 'Admin\Quiz::updateSettings/$1');
     $routes->get('sessions/(:num)/quiz/reset', 'Admin\Quiz::reset_attempts/$1');
+    $routes->post('quiz/update/(:num)', 'Admin\Quiz::update/$1');
     $routes->get('quiz-questions/delete/(:num)', 'Admin\Quiz::delete/$1');
 
     // Manajemen Pengguna

@@ -133,6 +133,86 @@ class Quiz extends BaseController
     }
 
     /**
+     * Memperbarui butir soal kuis (Tahap 26: Fitur Edit Soal PG & Essay)
+     *
+     * @param int $id
+     * @return \CodeIgniter\HTTP\RedirectResponse
+     */
+    public function update(int $id)
+    {
+        $question = $this->quizModel->find($id);
+        if (!$question) {
+            return redirect()->back()->with('error', 'Butir soal tidak ditemukan.');
+        }
+
+        $sessionId    = (int) $question['session_id'];
+        $questionType = $this->request->getPost('question_type') === 'essay' ? 'essay' : 'pg';
+
+        if ($questionType === 'essay') {
+            $rules = [
+                'question_text' => 'required|min_length[5]',
+            ];
+            $messages = [
+                'question_text' => [
+                    'required'   => 'Teks pertanyaan/soal essay wajib diisi.',
+                    'min_length' => 'Teks pertanyaan minimal terdiri dari 5 karakter.',
+                ],
+            ];
+        } else {
+            $rules = [
+                'question_text'  => 'required|min_length[5]',
+                'option_a'       => 'required',
+                'option_b'       => 'required',
+                'option_c'       => 'required',
+                'option_d'       => 'required',
+                'correct_answer' => 'required|in_list[a,b,c,d]',
+            ];
+
+            $messages = [
+                'question_text' => [
+                    'required'   => 'Teks pertanyaan/soal kuis wajib diisi.',
+                    'min_length' => 'Teks pertanyaan minimal terdiri dari 5 karakter.',
+                ],
+                'option_a' => [
+                    'required' => 'Pilihan jawaban A wajib diisi.',
+                ],
+                'option_b' => [
+                    'required' => 'Pilihan jawaban B wajib diisi.',
+                ],
+                'option_c' => [
+                    'required' => 'Pilihan jawaban C wajib diisi.',
+                ],
+                'option_d' => [
+                    'required' => 'Pilihan jawaban D wajib diisi.',
+                ],
+                'correct_answer' => [
+                    'required' => 'Kunci jawaban yang benar wajib ditentukan.',
+                    'in_list'  => 'Kunci jawaban harus berupa opsi A, B, C, atau D.',
+                ],
+            ];
+        }
+
+        if (!$this->validate($rules, $messages)) {
+            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+        }
+
+        $data = [
+            'question_text'  => trim((string) $this->request->getPost('question_text')),
+            'question_type'  => $questionType,
+            'option_a'       => $questionType === 'pg' ? trim((string) $this->request->getPost('option_a')) : null,
+            'option_b'       => $questionType === 'pg' ? trim((string) $this->request->getPost('option_b')) : null,
+            'option_c'       => $questionType === 'pg' ? trim((string) $this->request->getPost('option_c')) : null,
+            'option_d'       => $questionType === 'pg' ? trim((string) $this->request->getPost('option_d')) : null,
+            'correct_answer' => $questionType === 'pg' ? (string) $this->request->getPost('correct_answer') : null,
+        ];
+
+        $this->quizModel->update($id, $data);
+
+        return redirect()->to(base_url('admin/sessions/' . $sessionId . '/quiz'))
+                         ->with('success', 'Butir soal berhasil diperbarui!');
+    }
+
+    /**
      * Menyimpan pengaturan jadwal dan durasi CBT kuis sesi
      *
      * @param int $sessionId

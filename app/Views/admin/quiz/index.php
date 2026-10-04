@@ -185,24 +185,24 @@
                 <svg class="w-5 h-5 text-upskill-pink" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
                 </svg>
-                Tambah Butir Soal Kuis
+                <span id="form-title">Tambah Butir Soal Kuis</span>
             </h3>
             <p class="text-xs text-slate-500 mt-1">
                 Pilih tipe soal (Pilihan Ganda atau Essay), ketik pertanyaan dan simpan.
             </p>
         </div>
 
-        <form id="form_quiz_question" action="<?= base_url('admin/sessions/' . $session['id'] . '/quiz/store') ?>" method="POST" class="space-y-4">
+        <form id="quiz-form" action="<?= base_url('admin/sessions/' . $session['id'] . '/quiz/store') ?>" method="post" class="space-y-4">
             <?= csrf_field() ?>
 
             <!-- Pilihan Tipe Soal (PG / Essay) -->
             <div>
-                <label for="question_type" class="block text-xs font-bold uppercase tracking-wider text-upskill-darkblue mb-1.5">
+                <label for="input-type" class="block text-xs font-bold uppercase tracking-wider text-upskill-darkblue mb-1.5">
                     Tipe Soal <span class="text-rose-500">*</span>
                 </label>
                 <div class="relative">
                     <select 
-                        id="question_type" 
+                        id="input-type" 
                         name="question_type" 
                         required 
                         onchange="toggleQuestionType(this.value)"
@@ -221,11 +221,11 @@
 
             <!-- 1. Teks Soal / Pertanyaan -->
             <div>
-                <label for="question_text" class="block text-xs font-bold uppercase tracking-wider text-upskill-darkblue mb-1.5">
+                <label for="input-question" class="block text-xs font-bold uppercase tracking-wider text-upskill-darkblue mb-1.5">
                     Teks Pertanyaan / Soal <span class="text-rose-500">*</span>
                 </label>
                 <textarea 
-                    id="question_text" 
+                    id="input-question" 
                     name="question_text" 
                     rows="3" 
                     required 
@@ -252,7 +252,7 @@
                            class="pg-radio w-5 h-5 text-upskill-pink focus:ring-upskill-pink border-gray-300 cursor-pointer accent-pink-600 shrink-0"
                            title="Tandai A sebagai jawaban benar">
                     <label for="correct_a" class="font-bold text-gray-500 w-6 text-center cursor-pointer shrink-0">A</label>
-                    <input type="text" name="option_a" id="option_a" value="<?= old('option_a') ?>" required placeholder="Ketik pilihan jawaban A..."
+                    <input type="text" name="option_a" id="input-a" value="<?= old('option_a') ?>" required placeholder="Ketik pilihan jawaban A..."
                            class="pg-input w-full px-4 py-2 border border-gray-300 rounded-lg text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-upskill-pink focus:border-upskill-pink">
                 </div>
 
@@ -263,7 +263,7 @@
                            class="pg-radio w-5 h-5 text-upskill-pink focus:ring-upskill-pink border-gray-300 cursor-pointer accent-pink-600 shrink-0"
                            title="Tandai B sebagai jawaban benar">
                     <label for="correct_b" class="font-bold text-gray-500 w-6 text-center cursor-pointer shrink-0">B</label>
-                    <input type="text" name="option_b" id="option_b" value="<?= old('option_b') ?>" required placeholder="Ketik pilihan jawaban B..."
+                    <input type="text" name="option_b" id="input-b" value="<?= old('option_b') ?>" required placeholder="Ketik pilihan jawaban B..."
                            class="pg-input w-full px-4 py-2 border border-gray-300 rounded-lg text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-upskill-pink focus:border-upskill-pink">
                 </div>
 
@@ -274,7 +274,7 @@
                            class="pg-radio w-5 h-5 text-upskill-pink focus:ring-upskill-pink border-gray-300 cursor-pointer accent-pink-600 shrink-0"
                            title="Tandai C sebagai jawaban benar">
                     <label for="correct_c" class="font-bold text-gray-500 w-6 text-center cursor-pointer shrink-0">C</label>
-                    <input type="text" name="option_c" id="option_c" value="<?= old('option_c') ?>" required placeholder="Ketik pilihan jawaban C..."
+                    <input type="text" name="option_c" id="input-c" value="<?= old('option_c') ?>" required placeholder="Ketik pilihan jawaban C..."
                            class="pg-input w-full px-4 py-2 border border-gray-300 rounded-lg text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-upskill-pink focus:border-upskill-pink">
                 </div>
 
@@ -285,21 +285,29 @@
                            class="pg-radio w-5 h-5 text-upskill-pink focus:ring-upskill-pink border-gray-300 cursor-pointer accent-pink-600 shrink-0"
                            title="Tandai D sebagai jawaban benar">
                     <label for="correct_d" class="font-bold text-gray-500 w-6 text-center cursor-pointer shrink-0">D</label>
-                    <input type="text" name="option_d" id="option_d" value="<?= old('option_d') ?>" required placeholder="Ketik pilihan jawaban D..."
+                    <input type="text" name="option_d" id="input-d" value="<?= old('option_d') ?>" required placeholder="Ketik pilihan jawaban D..."
                            class="pg-input w-full px-4 py-2 border border-gray-300 rounded-lg text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-upskill-pink focus:border-upskill-pink">
                 </div>
             </div>
 
-            <!-- Tombol Submit -->
-            <div class="pt-3">
+            <!-- Tombol Submit & Batal Edit -->
+            <div class="pt-3 flex items-center gap-2">
                 <button 
                     type="submit" 
-                    class="w-full py-2.5 px-4 inline-flex items-center justify-center gap-2 font-bold text-sm rounded-lg text-white bg-upskill-pink hover:bg-upskill-magenta transition-colors shadow-sm"
+                    id="btn-submit"
+                    class="flex-1 py-2.5 px-4 inline-flex items-center justify-center gap-2 font-bold text-sm rounded-lg text-white bg-upskill-pink hover:bg-upskill-magenta transition-colors shadow-sm cursor-pointer"
                 >
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                     </svg>
-                    Simpan Soal Kuis
+                    <span>Simpan Soal</span>
+                </button>
+                <button 
+                    type="button" 
+                    id="btn-cancel-edit" 
+                    class="hidden px-4 py-2.5 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-100 font-bold text-sm transition-colors cursor-pointer shrink-0"
+                >
+                    Batal Edit
                 </button>
             </div>
         </form>
@@ -366,17 +374,31 @@
                                         </h4>
                                     </div>
                                 </div>
-                                <button 
-                                    type="button" 
-                                    data-href="<?= base_url('admin/quiz-questions/delete/' . $q['id']) ?>" 
-                                    data-message="Soal nomor <?= $index + 1 ?> akan dihapus permanen dari kuis sesi ini."
-                                    class="btn-delete inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-semibold text-rose-600 hover:text-white hover:bg-rose-600 border border-rose-200 hover:border-rose-600 transition-colors shrink-0"
-                                >
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                    </svg>
-                                    Hapus Soal
-                                </button>
+                                <div class="flex items-center gap-1.5 shrink-0">
+                                    <button type="button" class="btn-edit-question text-upskill-blue hover:underline text-xs font-semibold px-2.5 py-1.5 rounded-lg border border-slate-200 cursor-pointer"
+                                        data-id="<?= $q['id'] ?>"
+                                        data-number="<?= $index + 1 ?>"
+                                        data-type="<?= esc($q['question_type']) ?>"
+                                        data-question="<?= esc($q['question_text']) ?>"
+                                        data-a="<?= esc($q['option_a'] ?? '') ?>"
+                                        data-b="<?= esc($q['option_b'] ?? '') ?>"
+                                        data-c="<?= esc($q['option_c'] ?? '') ?>"
+                                        data-d="<?= esc($q['option_d'] ?? '') ?>"
+                                        data-correct="<?= esc($q['correct_answer'] ?? '') ?>">
+                                        ✎ Edit
+                                    </button>
+                                    <button 
+                                        type="button" 
+                                        data-href="<?= base_url('admin/quiz-questions/delete/' . $q['id']) ?>" 
+                                        data-message="Soal nomor <?= $index + 1 ?> akan dihapus permanen dari kuis sesi ini."
+                                        class="btn-delete inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-rose-600 hover:text-white hover:bg-rose-600 border border-rose-200 hover:border-rose-600 transition-colors shrink-0 cursor-pointer"
+                                    >
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                        </svg>
+                                        Hapus Soal
+                                    </button>
+                                </div>
                             </div>
 
                             <!-- Opsi Jawaban (Jika PG) atau Kotak Uraian (Jika Essay) -->
@@ -449,20 +471,125 @@
         const inputs = document.querySelectorAll('.pg-input');
 
         if (type === 'essay') {
-            wrap.style.display = 'none';
+            if (wrap) wrap.style.display = 'none';
             radios.forEach(r => r.removeAttribute('required'));
             inputs.forEach(i => i.removeAttribute('required'));
         } else {
-            wrap.style.display = 'block';
+            if (wrap) wrap.style.display = 'block';
             radios.forEach(r => r.setAttribute('required', 'required'));
             inputs.forEach(i => i.setAttribute('required', 'required'));
         }
     }
 
     document.addEventListener('DOMContentLoaded', function() {
-        const select = document.getElementById('question_type');
+        const select = document.getElementById('input-type');
         if (select) {
             toggleQuestionType(select.value);
+        }
+
+        // ==============================================================
+        // Tahap 26: In-Page Form Populate untuk Edit Butir Soal Kuis
+        // ==============================================================
+        const quizForm = document.getElementById('quiz-form');
+        const formTitle = document.getElementById('form-title');
+        const btnSubmit = document.getElementById('btn-submit');
+        const btnCancelEdit = document.getElementById('btn-cancel-edit');
+        const inputType = document.getElementById('input-type');
+        const inputQuestion = document.getElementById('input-question');
+        const inputA = document.getElementById('input-a');
+        const inputB = document.getElementById('input-b');
+        const inputC = document.getElementById('input-c');
+        const inputD = document.getElementById('input-d');
+
+        const defaultAction = "<?= base_url('admin/sessions/' . $session['id'] . '/quiz/store') ?>";
+        const updateUrlBase = "<?= base_url('admin/quiz/update') ?>/";
+
+        // Handler Klik Tombol Edit pada Kartu Soal
+        document.querySelectorAll('.btn-edit-question').forEach(button => {
+            button.addEventListener('click', function() {
+                const id = this.getAttribute('data-id');
+                const number = this.getAttribute('data-number');
+                const type = this.getAttribute('data-type') || 'pg';
+                const question = this.getAttribute('data-question') || '';
+                const a = this.getAttribute('data-a') || '';
+                const b = this.getAttribute('data-b') || '';
+                const c = this.getAttribute('data-c') || '';
+                const d = this.getAttribute('data-d') || '';
+                const correct = (this.getAttribute('data-correct') || '').toLowerCase();
+
+                // 1. Ubah Judul Form & Tombol Submit
+                if (formTitle) formTitle.textContent = 'Edit Butir Soal #' + number;
+                if (btnSubmit) {
+                    btnSubmit.innerHTML = `
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                        </svg>
+                        <span>Perbarui Soal</span>
+                    `;
+                }
+                if (btnCancelEdit) btnCancelEdit.classList.remove('hidden');
+
+                // 2. Ubah Target Action Form
+                if (quizForm) quizForm.setAttribute('action', updateUrlBase + id);
+
+                // 3. Populate Input Tipe & Pertanyaan
+                if (inputType) inputType.value = type;
+                if (inputQuestion) inputQuestion.value = question;
+
+                // Sesuaikan visibilitas opsi PG / Essay
+                toggleQuestionType(type);
+
+                // 4. Jika tipe PG, populate pilihan dan centang kunci jawaban
+                if (type === 'pg') {
+                    if (inputA) inputA.value = a;
+                    if (inputB) inputB.value = b;
+                    if (inputC) inputC.value = c;
+                    if (inputD) inputD.value = d;
+
+                    const correctRadio = document.querySelector(`.pg-radio[value="${correct}"]`);
+                    if (correctRadio) {
+                        correctRadio.checked = true;
+                    }
+                } else {
+                    if (inputA) inputA.value = '';
+                    if (inputB) inputB.value = '';
+                    if (inputC) inputC.value = '';
+                    if (inputD) inputD.value = '';
+                    document.querySelectorAll('.pg-radio').forEach(r => r.checked = false);
+                }
+
+                // 5. Smooth scroll ke arah form dan fokuskan
+                if (quizForm) {
+                    quizForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+                if (inputQuestion) {
+                    inputQuestion.focus();
+                }
+            });
+        });
+
+        // Handler Tombol Batal Edit
+        if (btnCancelEdit) {
+            btnCancelEdit.addEventListener('click', function() {
+                if (quizForm) {
+                    quizForm.reset();
+                    quizForm.setAttribute('action', defaultAction);
+                }
+                if (formTitle) formTitle.textContent = 'Tambah Butir Soal Kuis';
+                if (btnSubmit) {
+                    btnSubmit.innerHTML = `
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                        </svg>
+                        <span>Simpan Soal</span>
+                    `;
+                }
+                btnCancelEdit.classList.add('hidden');
+                if (inputType) {
+                    inputType.value = 'pg';
+                    toggleQuestionType('pg');
+                }
+            });
         }
 
         // Tahap 25: Konfirmasi Reset Riwayat Ujian Peserta dengan SweetAlert2
