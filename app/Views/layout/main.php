@@ -121,7 +121,7 @@
             </div>
             
             <div class="border-t border-slate-200/60 mt-10 pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
-                <p>&copy; <?= date('Y') ?> MUSLIM UPSKILL ACADEMY by MATLA. Seluruh hak cipta dilindungi.</p>
+                <p>&copy; <?= date('Y') ?> MUSLIM UPSKILL ACADEMY by MATLA. Developed by <a href="https://instagram.com/akbrsk_" target="_blank" rel="noopener noreferrer" class="font-semibold text-upskill-pink hover:underline">@akbrsk_</a></p>
                 <p class="text-slate-400">Pendidikan Berkelanjutan & Keterampilan Praktis</p>
             </div>
         </div>
