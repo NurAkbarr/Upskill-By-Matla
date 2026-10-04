@@ -21,6 +21,8 @@ class SessionProgressModel extends Model
         'correct_count',
         'total_questions',
         'duration_seconds',
+        'answers_json',
+        'grading_status',
         'quiz_completed_at',
         'completed_at',
     ];
@@ -93,7 +95,9 @@ class SessionProgressModel extends Model
         float $score, 
         int $correctCount = 0, 
         int $totalQuestions = 0, 
-        int $durationSeconds = 0
+        int $durationSeconds = 0,
+        ?string $answersJson = null,
+        string $gradingStatus = 'graded'
     ): bool
     {
         $existing = $this->where('user_id', $userId)
@@ -109,6 +113,8 @@ class SessionProgressModel extends Model
             'correct_count'     => $correctCount,
             'total_questions'   => $totalQuestions,
             'duration_seconds'  => $durationSeconds,
+            'answers_json'      => $answersJson,
+            'grading_status'    => $gradingStatus,
             'quiz_completed_at' => date('Y-m-d H:i:s'),
             'completed_at'      => date('Y-m-d H:i:s'),
         ];
@@ -184,6 +190,8 @@ class SessionProgressModel extends Model
                                'correct_count'     => 0,
                                'total_questions'   => 0,
                                'duration_seconds'  => 0,
+                               'answers_json'      => null,
+                               'grading_status'    => 'graded',
                                'quiz_completed_at' => null,
                            ])
                            ->update();

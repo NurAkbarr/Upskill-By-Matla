@@ -170,10 +170,21 @@ class Quiz extends BaseController
             }
         }
 
-        $score = $totalPg > 0 ? round(($correctPg / $totalPg) * 100) : 100;
         $totalQuestions = count($questions);
+        $answersJson    = json_encode($answers, JSON_UNESCAPED_UNICODE);
 
-        // Simpan hasil pengerjaan kuis peserta ke tabel session_progress (Tahap 28: skor, benar, total, durasi)
+        if ($totalEssay > 0) {
+            // Kondisi B: Terdapat Soal Essay -> Status Menunggu Koreksi Manual Admin
+            $gradingStatus = 'pending_review';
+            // Poin sementara dari PG proporsional terhadap total soal (bukan 100 otomatis)
+            $score = $totalQuestions > 0 ? round(($correctPg / $totalQuestions) * 100) : 0;
+        } else {
+            // Kondisi A: Full Pilihan Ganda -> Otomatis Ternilai
+            $gradingStatus = 'graded';
+            $score = $totalPg > 0 ? round(($correctPg / $totalPg) * 100) : 0;
+        }
+
+        // Simpan hasil pengerjaan kuis peserta ke tabel session_progress (Tahap 30)
         if ($userId > 0) {
             $progressModel->markQuizCompleted(
                 $userId,
@@ -181,7 +192,9 @@ class Quiz extends BaseController
                 (float) $score,
                 $correctPg,
                 $totalQuestions,
-                $durationSeconds
+                $durationSeconds,
+                $answersJson,
+                $gradingStatus
             );
         }
 

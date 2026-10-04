@@ -4,6 +4,8 @@ namespace App\Controllers\Admin;
 
 use App\Controllers\BaseController;
 use App\Models\LessonModel;
+use App\Models\QuizQuestionModel;
+use App\Models\SessionProgressModel;
 use Config\Database;
 
 class Report extends BaseController
@@ -52,10 +54,12 @@ class Report extends BaseController
             $builder->where('session_progress.session_id', $sessionId);
         }
 
-        // Logika Urutan Krusial:
-        // 1. Nilai tertinggi di atas (DESC)
-        // 2. Durasi pengerjaan tercepat di atas (ASC)
-        // 3. Waktu submit paling awal di atas (ASC)
+        // Logika Urutan Krusial (Tahap 30):
+        // 1. Status 'graded' berada di atas 'pending_review'
+        // 2. Nilai tertinggi di atas (DESC)
+        // 3. Durasi pengerjaan tercepat di atas (ASC)
+        // 4. Waktu submit paling awal di atas (ASC)
+        $builder->orderBy("CASE WHEN session_progress.grading_status = 'graded' THEN 0 ELSE 1 END", "ASC", false);
         $builder->orderBy('session_progress.quiz_score', 'DESC');
         $builder->orderBy('session_progress.duration_seconds', 'ASC');
         $builder->orderBy('session_progress.completed_at', 'ASC');
@@ -70,16 +74,60 @@ class Report extends BaseController
                                 ->orderBy('lessons.id', 'ASC')
                                 ->findAll();
 
+        // Ambil butir soal untuk modal koreksi manual
+        $quizQuestionModel = new QuizQuestionModel();
+        $reportSessionIds  = array_unique(array_filter(array_column($reports, 'session_id')));
+        $sessionQuestions  = [];
+        if (!empty($reportSessionIds)) {
+            $allQuestions = $quizQuestionModel->whereIn('session_id', $reportSessionIds)->orderBy('id', 'ASC')->findAll();
+            foreach ($allQuestions as $q) {
+                $sessionQuestions[(int)$q['session_id']][] = $q;
+            }
+        }
+
         $data = [
-            'title'       => 'Laporan Nilai & Peringkat Peserta - MUSLIM UPSKILL ACADEMY',
-            'reports'     => $reports,
-            'search'      => $search,
-            'sessionId'   => $sessionId,
-            'sessions'    => $sessions,
-            'admin_name'  => session()->get('full_name') ?? 'Super Admin MATLA',
-            'admin_email' => session()->get('email') ?? 'admin@matla.id',
+            'title'            => 'Laporan Nilai & Peringkat Peserta - MUSLIM UPSKILL ACADEMY',
+            'reports'          => $reports,
+            'search'           => $search,
+            'sessionId'        => $sessionId,
+            'sessions'         => $sessions,
+            'sessionQuestions' => $sessionQuestions,
+            'admin_name'       => session()->get('full_name') ?? 'Super Admin MATLA',
+            'admin_email'      => session()->get('email') ?? 'admin@matla.id',
         ];
 
         return view('admin/reports/index', $data);
+    }
+
+    /**
+     * Menyimpan hasil koreksi manual nilai kuis oleh Admin (Tahap 30)
+     *
+     * @param int $id ID baris pada tabel session_progress
+     * @return \CodeIgniter\HTTP\RedirectResponse
+     */
+    public function grade_submission(int $id)
+    {
+        $progressModel = new SessionProgressModel();
+        $attempt = $progressModel->find($id);
+
+        if (!$attempt) {
+            return redirect()->to(base_url('admin/reports'))->with('error', 'Data riwayat ujian tidak ditemukan.');
+        }
+
+        $correctCount = (int) $this->request->getPost('correct_count');
+        $quizScore    = (float) $this->request->getPost('quiz_score');
+
+        // Batasi rentang nilai 0 - 100
+        $quizScore    = max(0, min(100, $quizScore));
+        $totalQ       = (int) ($attempt['total_questions'] ?? 100);
+        $correctCount = max(0, min($totalQ > 0 ? $totalQ : 100, $correctCount));
+
+        $progressModel->update($id, [
+            'correct_count'  => $correctCount,
+            'quiz_score'     => $quizScore,
+            'grading_status' => 'graded',
+        ]);
+
+        return redirect()->back()->with('success', 'Nilai kuis peserta berhasil diperbarui dan peringkat telah ditetapkan.');
     }
 }

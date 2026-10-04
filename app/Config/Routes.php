@@ -73,6 +73,7 @@ $routes->group('admin', ['filter' => ['auth', 'role:super_admin']], static funct
 
     // Laporan Nilai & Peringkat (Leaderboard)
     $routes->get('reports', 'Admin\Report::index');
+    $routes->post('reports/grade/(:num)', 'Admin\Report::grade_submission/$1');
 
     // Manajemen Pengguna
     $routes->get('users', 'Admin\User::index');
