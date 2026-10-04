@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="id" class="h-full bg-slate-50">
+<html lang="id" class="h-full bg-white">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -46,234 +46,269 @@
             -moz-user-select: none;
             -ms-user-select: none;
         }
-        /* Aktifkan badge huruf saat opsi terpilih */
-        label:has(input:checked) .badge-letter {
-            background-color: #FA1886;
-            color: #ffffff;
-            border-color: #FA1886;
-        }
     </style>
 </head>
 
-<body class="bg-slate-50 min-h-screen flex flex-col font-sans text-slate-800" oncontextmenu="return false;" oncopy="return false;" oncut="return false;" onpaste="return false;">
+<body class="bg-white min-h-screen flex flex-col font-sans text-slate-800" oncontextmenu="return false;" oncopy="return false;" oncut="return false;" onpaste="return false;">
 
     <!-- ============================================================== -->
-    <!-- 1. STICKY HEADER PUTIH BERSIH (TAHAP 27)                       -->
+    <!-- 1. TOP BAR MINIMALIS (TAHAP 29)                                -->
     <!-- ============================================================== -->
-    <header class="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-200 px-6 py-4">
-        <div class="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-            
-            <!-- Bagian Kiri: Badge CBT, Judul Sesi & Nama Kelas -->
-            <div class="flex items-center gap-3 w-full sm:w-auto">
-                <span class="bg-pink-50 text-upskill-pink font-extrabold px-3 py-1.5 rounded-xl border border-pink-100 text-xs shrink-0 tracking-wider">
-                    CBT
-                </span>
-                <div class="min-w-0">
-                    <h1 class="font-bold text-slate-800 text-sm sm:text-base truncate">
-                        <?= esc($session['chapter_title']) ?>
-                    </h1>
-                    <p class="text-xs text-slate-500 truncate">
-                        <?= esc($course['title']) ?> &bull; <?= esc($studentName) ?>
-                    </p>
-                </div>
-            </div>
+    <header class="sticky top-0 z-30 bg-white border-b border-slate-200 px-6 py-3.5 flex justify-between items-center">
+        <!-- Kiri: Nama Kelas & Sesi secara Ringkas -->
+        <div class="text-sm font-semibold text-slate-600 truncate mr-4">
+            <span><?= esc($course['title']) ?></span>
+            <span class="mx-1.5 text-slate-300">&bull;</span>
+            <span class="text-slate-800 font-bold"><?= esc($session['chapter_title'] ?? $session['title']) ?></span>
+        </div>
 
-            <!-- Bagian Kanan: Tampilan Sisa Waktu (Timer Elegan) -->
-            <div class="bg-slate-50 border border-slate-200 px-4 py-2 rounded-xl flex items-center gap-2.5 self-end sm:self-auto shrink-0 shadow-2xs">
-                <svg class="w-4 h-4 text-upskill-pink shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-                <div>
-                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block leading-none">
-                        SISA WAKTU
-                    </span>
-                    <span id="countdown-timer" class="text-lg font-extrabold text-upskill-pink font-mono tracking-wider leading-none mt-0.5 block">
-                        --:--
-                    </span>
-                </div>
-            </div>
-
+        <!-- Kanan: Kotak Timer Minimalis -->
+        <div class="border border-slate-200 bg-white px-4 py-1.5 rounded-lg shadow-2xs shrink-0 flex items-center gap-2">
+            <svg class="w-4 h-4 text-rose-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <span id="countdown-timer" class="font-mono text-sm font-bold text-rose-600">
+                --:--
+            </span>
         </div>
     </header>
 
     <!-- ============================================================== -->
-    <!-- KONTEN UTAMA: LEMBAR SOAL CBT                                  -->
+    <!-- 2. STRUKTUR LAYOUT UTAMA (2 KOLOM DICODING EXAM STYLE)         -->
     <!-- ============================================================== -->
-    <main class="flex-1 max-w-4xl w-full mx-auto p-4 sm:p-6 lg:p-8">
-        
-        <?php if (empty($questions)): ?>
-            <!-- State Belum Ada Soal -->
-            <div class="bg-white rounded-2xl border border-slate-200/80 p-10 text-center shadow-sm">
-                <div class="w-16 h-16 mx-auto rounded-full bg-slate-100 flex items-center justify-center text-slate-400 mb-4">
-                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <?php if (empty($questions)): ?>
+        <!-- Keadaan Kosong (Empty State) -->
+        <div class="min-h-[calc(100vh-61px)] flex items-center justify-center p-6 bg-white">
+            <div class="max-w-md w-full text-center p-8 border border-slate-200 rounded-2xl shadow-sm">
+                <div class="w-14 h-14 mx-auto rounded-full bg-slate-100 flex items-center justify-center text-slate-400 mb-4">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
                 </div>
-                <h3 class="text-lg font-bold text-slate-800">Kuis Belum Memiliki Soal</h3>
-                <p class="text-xs text-slate-500 max-w-sm mx-auto mt-1 leading-relaxed">
+                <h3 class="text-base font-bold text-slate-800">Kuis Belum Memiliki Soal</h3>
+                <p class="text-xs text-slate-500 mt-1 mb-6">
                     Pengajar belum menambahkan butir soal evaluasi untuk sesi pembelajaran ini.
                 </p>
-                <div class="mt-6">
-                    <a href="<?= base_url('dashboard/course/' . $session['course_id']) ?>" class="px-5 py-2.5 rounded-xl bg-slate-900 text-white font-bold text-xs hover:bg-slate-800 transition-colors">
-                        Kembali ke Detail Kelas
-                    </a>
-                </div>
+                <a href="<?= base_url('dashboard/course/' . $session['course_id']) ?>" class="inline-block px-5 py-2.5 rounded-xl bg-slate-900 text-white font-bold text-xs hover:bg-slate-800 transition-colors">
+                    Kembali ke Detail Kelas
+                </a>
             </div>
-        <?php else: ?>
+        </div>
+    <?php else: ?>
 
-            <form id="form-kuis" action="<?= base_url('sessions/' . $session['id'] . '/cbt/submit') ?>" method="POST" class="space-y-6">
-                <?= csrf_field() ?>
-
-                <!-- ============================================================== -->
-                <!-- 2. BANNER INSTRUKSI RINGKAS (TAHAP 27)                         -->
-                <!-- ============================================================== -->
-                <div class="bg-white border border-slate-200/80 rounded-2xl p-5 mb-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div>
-                        <h2 class="text-base font-bold text-slate-800">Lembar Evaluasi Peserta</h2>
-                        <p class="text-xs text-slate-500 mt-0.5">
-                            Jumlah Soal: <strong><?= count($questions) ?> Butir</strong> &bull; Durasi: <strong><?= esc($duration) ?> Menit</strong>
-                        </p>
-                    </div>
-                    <div class="bg-amber-50/70 border border-amber-200/60 text-amber-800 text-xs px-4 py-2.5 rounded-xl flex items-center gap-2">
-                        <svg class="w-4 h-4 text-amber-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                        </svg>
-                        <span><strong>Perhatian:</strong> Dilarang berpindah tab/aplikasi selama ujian berlangsung agar jawaban tidak terkumpul otomatis.</span>
-                    </div>
+        <div class="min-h-[calc(100vh-61px)] bg-white flex flex-col md:flex-row">
+            
+            <!-- Kolom Kiri: Sidebar Navigasi Nomor Soal -->
+            <aside class="w-full md:w-72 border-b md:border-b-0 md:border-r border-slate-200 p-6 shrink-0 bg-white">
+                <div class="text-sm font-bold text-slate-800 pb-4 mb-4 border-b border-slate-100 truncate">
+                    Soal kategori: <?= esc($session['chapter_title'] ?? $session['title'] ?? 'Evaluasi') ?>
                 </div>
 
-                <!-- ============================================================== -->
-                <!-- 3. KARTU BUTIR SOAL KUIS (PG & ESSAY) (TAHAP 27)               -->
-                <!-- ============================================================== -->
-                <div>
-                    <?php foreach ($questions as $idx => $q): ?>
-                        <div class="bg-white rounded-2xl border border-slate-200/80 p-6 md:p-8 shadow-sm mb-6 transition-all hover:border-slate-300">
-                            
-                            <!-- Header Butir Soal: Nomor & Tipe -->
-                            <div class="flex items-center gap-2.5">
-                                <span class="w-8 h-8 rounded-lg bg-slate-900 text-white font-bold text-sm flex items-center justify-center shrink-0">
-                                    <?= $idx + 1 ?>
-                                </span>
-                                <?php if (($q['question_type'] ?? 'pg') === 'essay'): ?>
-                                    <span class="bg-slate-100 text-slate-600 text-[11px] font-semibold px-2.5 py-1 rounded-md uppercase tracking-wide">
-                                        Soal Essay / Uraian
-                                    </span>
-                                <?php else: ?>
-                                    <span class="bg-slate-100 text-slate-600 text-[11px] font-semibold px-2.5 py-1 rounded-md uppercase tracking-wide">
-                                        Pilihan Ganda
-                                    </span>
-                                <?php endif; ?>
-                            </div>
+                <!-- Grid Nomor Soal -->
+                <div class="grid grid-cols-5 gap-2.5">
+                    <?php foreach ($questions as $index => $q): ?>
+                        <button 
+                            type="button" 
+                            id="nav-btn-<?= $index ?>" 
+                            onclick="goToQuestion(<?= $index ?>)"
+                            class="w-10 h-10 rounded-lg border border-slate-200 bg-white text-slate-700 font-semibold text-sm flex items-center justify-center hover:border-slate-400 transition-all cursor-pointer select-none <?= $index === 0 ? 'ring-2 ring-slate-800 border-slate-800 font-bold' : '' ?>"
+                        >
+                            <?= $index + 1 ?>
+                        </button>
+                    <?php endforeach; ?>
+                </div>
+            </aside>
 
-                            <!-- Teks Pertanyaan -->
-                            <p class="text-slate-800 font-semibold text-base md:text-lg leading-relaxed my-4 whitespace-pre-line">
+            <!-- Kolom Kanan: Area Soal Aktif (Single-Question View) -->
+            <main class="flex-1 p-6 md:p-12 lg:px-20 max-w-4xl bg-white">
+                <form id="form-kuis" action="<?= base_url('sessions/' . $session['id'] . '/cbt/submit') ?>" method="post">
+                    <?= csrf_field() ?>
+
+                    <!-- Daftar Soal (Hanya 1 Soal Tampil Sekaligus) -->
+                    <?php foreach ($questions as $index => $q): ?>
+                        <div 
+                            class="question-slide <?= $index === 0 ? '' : 'hidden' ?>" 
+                            data-index="<?= $index ?>" 
+                            id="question-slide-<?= $index ?>"
+                        >
+                            <!-- Teks Pertanyaan (Bersih tanpa nomor di depannya) -->
+                            <p class="text-slate-800 text-base md:text-lg font-normal leading-relaxed mb-6 whitespace-pre-line">
                                 <?= esc($q['question_text']) ?>
                             </p>
 
-                            <!-- Pilihan Ganda -->
+                            <!-- Opsi Pilihan Ganda -->
                             <?php if (($q['question_type'] ?? 'pg') === 'pg'): ?>
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-                                    
-                                    <!-- Opsi A -->
-                                    <?php if (!empty($q['option_a'])): ?>
-                                        <label class="flex items-center gap-3.5 p-4 rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-50 transition-all has-[:checked]:border-upskill-pink has-[:checked]:bg-pink-50/30 has-[:checked]:ring-2 has-[:checked]:ring-pink-500/10">
-                                            <input type="radio" name="answers[<?= $q['id'] ?>]" value="a" class="sr-only">
-                                            <span class="badge-letter w-7 h-7 rounded-lg bg-slate-100 text-slate-700 font-bold text-xs flex items-center justify-center shrink-0 border border-slate-200/80 uppercase transition-colors">
-                                                A
-                                            </span>
-                                            <span class="text-sm text-slate-700 flex-1 leading-snug">
-                                                <?= esc($q['option_a']) ?>
-                                            </span>
-                                        </label>
-                                    <?php endif; ?>
-
-                                    <!-- Opsi B -->
-                                    <?php if (!empty($q['option_b'])): ?>
-                                        <label class="flex items-center gap-3.5 p-4 rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-50 transition-all has-[:checked]:border-upskill-pink has-[:checked]:bg-pink-50/30 has-[:checked]:ring-2 has-[:checked]:ring-pink-500/10">
-                                            <input type="radio" name="answers[<?= $q['id'] ?>]" value="b" class="sr-only">
-                                            <span class="badge-letter w-7 h-7 rounded-lg bg-slate-100 text-slate-700 font-bold text-xs flex items-center justify-center shrink-0 border border-slate-200/80 uppercase transition-colors">
-                                                B
-                                            </span>
-                                            <span class="text-sm text-slate-700 flex-1 leading-snug">
-                                                <?= esc($q['option_b']) ?>
-                                            </span>
-                                        </label>
-                                    <?php endif; ?>
-
-                                    <!-- Opsi C -->
-                                    <?php if (!empty($q['option_c'])): ?>
-                                        <label class="flex items-center gap-3.5 p-4 rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-50 transition-all has-[:checked]:border-upskill-pink has-[:checked]:bg-pink-50/30 has-[:checked]:ring-2 has-[:checked]:ring-pink-500/10">
-                                            <input type="radio" name="answers[<?= $q['id'] ?>]" value="c" class="sr-only">
-                                            <span class="badge-letter w-7 h-7 rounded-lg bg-slate-100 text-slate-700 font-bold text-xs flex items-center justify-center shrink-0 border border-slate-200/80 uppercase transition-colors">
-                                                C
-                                            </span>
-                                            <span class="text-sm text-slate-700 flex-1 leading-snug">
-                                                <?= esc($q['option_c']) ?>
-                                            </span>
-                                        </label>
-                                    <?php endif; ?>
-
-                                    <!-- Opsi D -->
-                                    <?php if (!empty($q['option_d'])): ?>
-                                        <label class="flex items-center gap-3.5 p-4 rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-50 transition-all has-[:checked]:border-upskill-pink has-[:checked]:bg-pink-50/30 has-[:checked]:ring-2 has-[:checked]:ring-pink-500/10">
-                                            <input type="radio" name="answers[<?= $q['id'] ?>]" value="d" class="sr-only">
-                                            <span class="badge-letter w-7 h-7 rounded-lg bg-slate-100 text-slate-700 font-bold text-xs flex items-center justify-center shrink-0 border border-slate-200/80 uppercase transition-colors">
-                                                D
-                                            </span>
-                                            <span class="text-sm text-slate-700 flex-1 leading-snug">
-                                                <?= esc($q['option_d']) ?>
-                                            </span>
-                                        </label>
-                                    <?php endif; ?>
-
+                                <div class="space-y-3.5">
+                                    <?php foreach (['a' => 'option_a', 'b' => 'option_b', 'c' => 'option_c', 'd' => 'option_d'] as $key => $optField): ?>
+                                        <?php if (!empty($q[$optField])): ?>
+                                            <label class="flex items-start gap-3.5 p-3 rounded-xl cursor-pointer hover:bg-slate-50 transition-colors group border border-transparent hover:border-slate-200">
+                                                <input 
+                                                    type="radio" 
+                                                    name="answers[<?= $q['id'] ?>]" 
+                                                    value="<?= $key ?>" 
+                                                    onchange="markAnswered(<?= $index ?>)" 
+                                                    class="mt-1 w-4 h-4 text-upskill-pink border-slate-300 focus:ring-upskill-pink cursor-pointer shrink-0"
+                                                >
+                                                <span class="text-slate-700 text-sm md:text-base group-hover:text-slate-900 leading-snug">
+                                                    <?= esc($q[$optField]) ?>
+                                                </span>
+                                            </label>
+                                        <?php endif; ?>
+                                    <?php endforeach; ?>
                                 </div>
                             <?php else: ?>
                                 <!-- Input Jawaban Essay -->
-                                <div class="pt-1">
+                                <div class="mt-4">
                                     <textarea 
                                         name="answers[<?= $q['id'] ?>]" 
-                                        rows="4" 
-                                        placeholder="Ketik jawaban essay Anda di sini secara lengkap..."
-                                        class="w-full rounded-xl border border-slate-200 bg-slate-50/50 p-4 text-sm text-slate-700 focus:bg-white focus:border-upskill-pink focus:ring-4 focus:ring-pink-500/10 transition-all outline-none resize-y"
+                                        oninput="markAnswered(<?= $index ?>)" 
+                                        rows="5" 
+                                        class="w-full rounded-xl border border-slate-200 p-4 text-slate-700 focus:border-slate-800 focus:ring-0 outline-none transition-colors" 
+                                        placeholder="Ketik jawaban uraian Anda di sini..."
                                     ></textarea>
                                 </div>
                             <?php endif; ?>
 
                         </div>
                     <?php endforeach; ?>
-                </div>
 
-                <!-- ============================================================== -->
-                <!-- 4. FOOTER PENGUMPULAN (SUBMIT BAR) (TAHAP 27)                  -->
-                <!-- ============================================================== -->
-                <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
-                    <div class="text-xs text-slate-500 text-center sm:text-left flex items-center gap-2">
-                        <svg class="w-4 h-4 text-emerald-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
-                        <span>Pastikan semua soal telah Anda jawab dan periksa sebelum mengumpulkan ujian.</span>
+                    <!-- Footer Navigasi Soal -->
+                    <div class="border-t border-slate-100 pt-6 mt-10 flex justify-between items-center">
+                        <!-- Tombol Sebelumnya -->
+                        <button 
+                            type="button" 
+                            id="btn-prev" 
+                            onclick="prevQuestion()" 
+                            disabled
+                            class="flex items-center gap-2 text-sm font-medium text-slate-400 hover:text-slate-800 disabled:opacity-40 disabled:pointer-events-none transition-colors cursor-pointer"
+                        >
+                            <span class="w-7 h-7 rounded-full border border-slate-200 flex items-center justify-center shrink-0">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                                </svg>
+                            </span>
+                            <span>Sebelumnya</span>
+                        </button>
+
+                        <!-- Tombol Selanjutnya & Selesaikan -->
+                        <div class="flex items-center">
+                            <button 
+                                type="button" 
+                                id="btn-next" 
+                                onclick="nextQuestion()" 
+                                class="flex items-center gap-2 text-sm font-semibold text-slate-700 hover:text-slate-900 transition-colors cursor-pointer"
+                            >
+                                <span>Selanjutnya</span>
+                                <span class="w-7 h-7 rounded-full border border-slate-200 flex items-center justify-center shrink-0">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                    </svg>
+                                </span>
+                            </button>
+
+                            <button 
+                                type="button" 
+                                id="btn-submit-exam" 
+                                onclick="confirmSubmission()" 
+                                class="hidden bg-upskill-pink hover:bg-pink-600 text-white font-bold text-sm px-6 py-2.5 rounded-xl shadow-xs transition-all cursor-pointer"
+                            >
+                                Selesaikan & Kumpulkan
+                            </button>
+                        </div>
                     </div>
-                    <button 
-                        type="button" 
-                        onclick="confirmSubmission()"
-                        class="w-full sm:w-auto bg-upskill-pink hover:bg-pink-600 text-white font-bold text-sm px-7 py-3.5 rounded-xl shadow-sm hover:shadow transition-all cursor-pointer"
-                    >
-                        Selesaikan & Kumpulkan Ujian
-                    </button>
-                </div>
 
-            </form>
+                </form>
+            </main>
 
-        <?php endif; ?>
+        </div>
 
-    </main>
+    <?php endif; ?>
 
     <!-- ============================================================== -->
-    <!-- JAVASCRIPT MESIN CBT: TIMER & ANTI-CHEAT                        -->
+    <!-- 3. JAVASCRIPT NAVIGASI, TIMER & ANTI-CHEAT                     -->
     <!-- ============================================================== -->
     <script>
+        const totalQuestions = <?= count($questions) ?>;
+        let currentIndex = 0;
+
         // -------------------------------------------------------------
-        // 1. Timer Hitung Mundur CBT
+        // Navigasi Pindah Soal (Single-Question View)
+        // -------------------------------------------------------------
+        function goToQuestion(index) {
+            if (index < 0 || index >= totalQuestions) return;
+
+            // 1. Sembunyikan slide lama, munculkan slide tujuan
+            const currentSlide = document.getElementById('question-slide-' + currentIndex);
+            const targetSlide  = document.getElementById('question-slide-' + index);
+
+            if (currentSlide) currentSlide.classList.add('hidden');
+            if (targetSlide) targetSlide.classList.remove('hidden');
+
+            // 2. Update ring indikator nomor aktif di sidebar
+            const currentNavBtn = document.getElementById('nav-btn-' + currentIndex);
+            const targetNavBtn  = document.getElementById('nav-btn-' + index);
+
+            if (currentNavBtn) {
+                currentNavBtn.classList.remove('ring-2', 'ring-slate-800', 'font-bold');
+            }
+            if (targetNavBtn) {
+                targetNavBtn.classList.add('ring-2', 'ring-slate-800', 'font-bold');
+            }
+
+            currentIndex = index;
+
+            // 3. Update Tombol Prev (disabled jika di soal pertama)
+            const btnPrev = document.getElementById('btn-prev');
+            if (btnPrev) {
+                btnPrev.disabled = (currentIndex === 0);
+            }
+
+            // 4. Update Tombol Next & Submit (jika di soal terakhir)
+            const btnNext   = document.getElementById('btn-next');
+            const btnSubmit = document.getElementById('btn-submit-exam');
+
+            if (currentIndex === totalQuestions - 1) {
+                if (btnNext) btnNext.classList.add('hidden');
+                if (btnSubmit) btnSubmit.classList.remove('hidden');
+            } else {
+                if (btnNext) btnNext.classList.remove('hidden');
+                if (btnSubmit) btnSubmit.classList.add('hidden');
+            }
+        }
+
+        function nextQuestion() {
+            if (currentIndex < totalQuestions - 1) {
+                goToQuestion(currentIndex + 1);
+            }
+        }
+
+        function prevQuestion() {
+            if (currentIndex > 0) {
+                goToQuestion(currentIndex - 1);
+            }
+        }
+
+        // Tandai tombol nomor kuis jika sudah dijawab
+        function markAnswered(index) {
+            const slide  = document.getElementById('question-slide-' + index);
+            const navBtn = document.getElementById('nav-btn-' + index);
+            if (!slide || !navBtn) return;
+
+            const checkedRadio = slide.querySelector('input[type="radio"]:checked');
+            const textarea     = slide.querySelector('textarea');
+            const hasText      = textarea && textarea.value.trim().length > 0;
+
+            if (checkedRadio || hasText) {
+                navBtn.classList.add('bg-slate-800', 'text-white', 'border-slate-800');
+                navBtn.classList.remove('bg-white', 'text-slate-700', 'border-slate-200');
+            } else {
+                navBtn.classList.remove('bg-slate-800', 'text-white', 'border-slate-800');
+                navBtn.classList.add('bg-white', 'text-slate-700', 'border-slate-200');
+            }
+        }
+
+        // -------------------------------------------------------------
+        // Timer Hitung Mundur CBT
         // -------------------------------------------------------------
         const durationMinutes = <?= (int) $duration ?>;
         let totalSeconds = durationMinutes * 60;
@@ -281,7 +316,7 @@
 
         function updateTimer() {
             if (totalSeconds <= 0) {
-                if (timerElement) timerElement.textContent = "00:00";
+                if (timerElement) timerElement.textContent = "00m:00s";
                 
                 Swal.fire({
                     title: 'Waktu Ujian Habis!',
@@ -304,21 +339,18 @@
             const formattedSec = String(seconds).padStart(2, '0');
 
             if (timerElement) {
-                timerElement.textContent = `${formattedMin}:${formattedSec}`;
-                
-                // Berikan warna merah jika waktu kurang dari 5 menit
-                if (totalSeconds < 300) {
-                    timerElement.classList.add('text-rose-500');
-                    timerElement.classList.remove('text-upskill-pink');
-                }
+                timerElement.textContent = `${formattedMin}m:${formattedSec}s`;
             }
 
             totalSeconds--;
             setTimeout(updateTimer, 1000);
         }
 
-        // Jalankan timer saat halaman selesai dimuat
+        // Inisialisasi saat DOM siap
         document.addEventListener('DOMContentLoaded', () => {
+            if (totalQuestions > 0) {
+                goToQuestion(0);
+            }
             if (durationMinutes > 0) {
                 updateTimer();
             } else if (timerElement) {
@@ -327,7 +359,7 @@
         });
 
         // -------------------------------------------------------------
-        // 2. Deteksi Pindah Tab (Anti-Cheat) via Page Visibility API
+        // Deteksi Pindah Tab (Anti-Cheat) via Page Visibility API
         // -------------------------------------------------------------
         let cheatCount = 0;
         document.addEventListener("visibilitychange", () => {
@@ -359,7 +391,7 @@
         });
 
         // -------------------------------------------------------------
-        // 3. Konfirmasi Pengumpulan Manual
+        // Konfirmasi Pengumpulan Manual
         // -------------------------------------------------------------
         function confirmSubmission() {
             Swal.fire({
