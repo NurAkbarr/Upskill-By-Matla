@@ -532,6 +532,116 @@ class Dashboard extends BaseController
     }
 
     /**
+     * Halaman Hasil Evaluasi, Papan Peringkat (Leaderboard) & Pembahasan Soal Peserta (Tahap 32B)
+     *
+     * @param int $sessionId
+     * @return \CodeIgniter\HTTP\RedirectResponse|string
+     */
+    public function quiz_result(int $sessionId)
+    {
+        $userId = (int) (session()->get('user_id') ?? 0);
+        if ($userId <= 0) {
+            return redirect()->to(base_url('login'));
+        }
+
+        $lessonModel = new \App\Models\LessonModel();
+        $session = $lessonModel->find($sessionId);
+        if (!$session) {
+            return redirect()->to(base_url('dashboard'))->with('error', 'Sesi pembelajaran tidak ditemukan.');
+        }
+
+        $courseModel = new CourseModel();
+        $course = $courseModel->find((int) $session['course_id']);
+        if (!$course) {
+            return redirect()->to(base_url('dashboard'))->with('error', 'Kelas tidak ditemukan.');
+        }
+
+        // Cek pengerjaan peserta saat ini
+        $progressModel = new SessionProgressModel();
+        $myAttempt = $progressModel->where('user_id', $userId)
+                                   ->where('session_id', $sessionId)
+                                   ->first();
+
+        if (!$myAttempt || (empty($myAttempt['quiz_completed']) && $myAttempt['quiz_score'] === null)) {
+            return redirect()->to(base_url('dashboard/course/' . $session['course_id']))
+                             ->with('error', 'Anda belum menyelesaikan kuis evaluasi pada sesi ini.');
+        }
+
+        // Decode jawaban peserta & catatan koreksi instruktur
+        $myAnswers     = json_decode($myAttempt['answers_json'] ?? '{}', true) ?: [];
+        $adminFeedback = json_decode($myAttempt['admin_feedback_json'] ?? '{}', true) ?: [];
+
+        // Ambil butir pertanyaan sesi ini
+        $quizQuestionModel = new QuizQuestionModel();
+        $questions = $quizQuestionModel->where('session_id', $sessionId)
+                                       ->orderBy('id', 'ASC')
+                                       ->findAll();
+
+        // Query Leaderboard sesi ini (sesuai aturan prioritas: graded > quiz_score DESC > duration_seconds ASC > completed_at ASC)
+        $db = \Config\Database::connect();
+        $leaderboard = $db->table('session_progress sp')
+                          ->select('
+                              sp.id,
+                              sp.user_id,
+                              sp.quiz_score,
+                              sp.duration_seconds,
+                              sp.correct_count,
+                              sp.total_questions,
+                              sp.grading_status,
+                              sp.completed_at,
+                              sp.quiz_completed_at,
+                              u.full_name as student_name,
+                              u.email as student_email
+                          ')
+                          ->join('users u', 'u.id = sp.user_id')
+                          ->where('sp.session_id', $sessionId)
+                          ->groupStart()
+                              ->where('sp.quiz_completed', 1)
+                              ->orWhere('sp.quiz_score IS NOT NULL')
+                          ->groupEnd()
+                          ->orderBy("CASE WHEN sp.grading_status = 'graded' THEN 0 ELSE 1 END", "ASC", false)
+                          ->orderBy('sp.quiz_score', 'DESC')
+                          ->orderBy('sp.duration_seconds', 'ASC')
+                          ->orderBy('sp.completed_at', 'ASC')
+                          ->get()
+                          ->getResultArray();
+
+        $totalParticipants = count($leaderboard);
+        $myRank            = '-';
+        $currentRank       = 0;
+
+        foreach ($leaderboard as $row) {
+            $isRowGraded = ($row['grading_status'] === 'graded');
+            if ($isRowGraded) {
+                $currentRank++;
+                $rankLabel = (string) $currentRank;
+            } else {
+                $rankLabel = '-';
+            }
+
+            if ((int) $row['user_id'] === $userId) {
+                $myRank = $rankLabel;
+            }
+        }
+
+        $data = [
+            'title'              => 'Hasil Evaluasi & Peringkat - ' . esc($session['chapter_title']),
+            'course'             => $course,
+            'session'            => $session,
+            'my_attempt'         => $myAttempt,
+            'my_answers'         => $myAnswers,
+            'admin_feedback'     => $adminFeedback,
+            'questions'          => $questions,
+            'leaderboard'        => $leaderboard,
+            'my_rank'            => $myRank,
+            'total_participants' => $totalParticipants,
+            'user_id'            => $userId,
+        ];
+
+        return view('dashboard/quiz_result', $data);
+    }
+
+    /**
      * Helper untuk mengekstrak 11 karakter YouTube Video ID dari berbagai format URL
      * Mendukung: https://www.youtube.com/watch?v=xxx, https://youtu.be/xxx, embed/xxx, atau raw ID
      */

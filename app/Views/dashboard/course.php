@@ -395,20 +395,28 @@
                                             <!-- TOMBOL 2 (KUIS): Logika Berdasarkan Status (Tahap 24) -->
                                             <!-- ============================================== -->
                                             <?php if ($isQuizCompleted): ?>
-                                                <!-- Kondisi 1: Kuis SUDAH Dikerjakan (1x Attempt Selesai) -->
-                                                <div class="flex flex-col">
-                                                    <div class="w-full py-3 px-4 rounded-xl font-bold text-xs sm:text-sm bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center justify-center gap-2 shadow-xs cursor-default">
-                                                        <svg class="w-4 h-4 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                                                <!-- Kondisi 1: Kuis SUDAH Dikerjakan (1x Attempt Selesai - Tahap 32B) -->
+                                                <div class="flex flex-col gap-2">
+                                                    <a 
+                                                        href="<?= base_url('dashboard/quiz-result/' . $s['id']) ?>" 
+                                                        class="w-full py-2.5 px-4 rounded-xl font-bold text-xs sm:text-sm bg-upskill-blue hover:bg-upskill-darkblue text-white transition-all duration-200 flex items-center justify-center gap-2 shadow-xs group"
+                                                    >
+                                                        <span>📊 Lihat Hasil, Peringkat & Pembahasan</span>
+                                                        <svg class="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
                                                         </svg>
-                                                        <span>✓ Kuis Telah Diselesaikan <?= $quizScore !== null ? '(Nilai: ' . (int)$quizScore . ')' : '' ?></span>
+                                                    </a>
+                                                    <div class="flex items-center justify-between text-[11px] text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-lg">
+                                                        <span class="flex items-center gap-1 font-semibold">
+                                                            <svg class="w-3.5 h-3.5 text-emerald-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                                                            </svg>
+                                                            <span>Kuis Telah Diselesaikan</span>
+                                                        </span>
+                                                        <span class="font-bold text-slate-800">
+                                                            Nilai: <?= $quizScore !== null ? (int)$quizScore : 0 ?>
+                                                        </span>
                                                     </div>
-                                                    <span class="text-[11px] text-emerald-600 font-medium mt-1.5 flex items-center gap-1">
-                                                        <svg class="w-3 h-3 text-emerald-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                                                        </svg>
-                                                        Evaluasi sesi ini telah selesai dan terekam (1x pengerjaan).
-                                                    </span>
                                                 </div>
                                             <?php elseif ($isCompleted): ?>
                                                 <!-- Kondisi 2: Materi Selesai 100% & Kuis BELUM Dikerjakan -->
