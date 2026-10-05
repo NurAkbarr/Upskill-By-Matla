@@ -100,7 +100,7 @@ class Report extends BaseController
     }
 
     /**
-     * Menyimpan hasil koreksi manual nilai kuis oleh Admin (Tahap 30)
+     * Menyimpan hasil koreksi manual nilai kuis & feedback essay oleh Admin (Tahap 32A)
      *
      * @param int $id ID baris pada tabel session_progress
      * @return \CodeIgniter\HTTP\RedirectResponse
@@ -114,20 +114,36 @@ class Report extends BaseController
             return redirect()->to(base_url('admin/reports'))->with('error', 'Data riwayat ujian tidak ditemukan.');
         }
 
-        $correctCount = (int) $this->request->getPost('correct_count');
-        $quizScore    = (float) $this->request->getPost('quiz_score');
+        $correctCount   = (int) $this->request->getPost('correct_count');
+        $quizScore      = (float) $this->request->getPost('quiz_score');
+        $essayStatuses  = $this->request->getPost('essay_status');
+        $essayFeedbacks = $this->request->getPost('essay_feedback');
 
         // Batasi rentang nilai 0 - 100
         $quizScore    = max(0, min(100, $quizScore));
         $totalQ       = (int) ($attempt['total_questions'] ?? 100);
         $correctCount = max(0, min($totalQ > 0 ? $totalQ : 100, $correctCount));
 
-        $progressModel->update($id, [
-            'correct_count'  => $correctCount,
-            'quiz_score'     => $quizScore,
-            'grading_status' => 'graded',
-        ]);
+        // Format data feedback per question_id
+        $feedbackData = [];
+        if (!empty($essayStatuses) && is_array($essayStatuses)) {
+            foreach ($essayStatuses as $qId => $status) {
+                $feedbackData[$qId] = [
+                    'status' => $status,
+                    'note'   => trim((string)($essayFeedbacks[$qId] ?? ''))
+                ];
+            }
+        }
 
-        return redirect()->back()->with('success', 'Nilai kuis peserta berhasil diperbarui dan peringkat telah ditetapkan.');
+        $updateData = [
+            'correct_count'       => $correctCount,
+            'quiz_score'          => $quizScore,
+            'grading_status'      => 'graded',
+            'admin_feedback_json' => !empty($feedbackData) ? json_encode($feedbackData) : null,
+        ];
+
+        $progressModel->update($id, $updateData);
+
+        return redirect()->back()->with('success', 'Nilai dan catatan koreksi essay berhasil disimpan.');
     }
 }

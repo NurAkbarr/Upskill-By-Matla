@@ -22,6 +22,7 @@ class SessionProgressModel extends Model
         'total_questions',
         'duration_seconds',
         'answers_json',
+        'admin_feedback_json',
         'grading_status',
         'quiz_completed_at',
         'completed_at',
@@ -190,9 +191,10 @@ class SessionProgressModel extends Model
                                'correct_count'     => 0,
                                'total_questions'   => 0,
                                'duration_seconds'  => 0,
-                               'answers_json'      => null,
-                               'grading_status'    => 'graded',
-                               'quiz_completed_at' => null,
+                               'answers_json'        => null,
+                               'admin_feedback_json' => null,
+                               'grading_status'      => 'graded',
+                               'quiz_completed_at'   => null,
                            ])
                            ->update();
     }

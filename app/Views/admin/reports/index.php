@@ -300,6 +300,7 @@ function formatDuration(?int $seconds): string {
                                     data-score="<?= (int) ($row['quiz_score'] ?? 0) ?>"
                                     data-status="<?= esc($row['grading_status'] ?? 'graded') ?>"
                                     data-answers="<?= esc($row['answers_json'] ?? '{}', 'attr') ?>"
+                                    data-feedback="<?= esc($row['admin_feedback_json'] ?? '{}', 'attr') ?>"
                                 >
                                     <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
@@ -345,70 +346,73 @@ function formatDuration(?int $seconds): string {
             </button>
         </div>
 
-        <!-- Modal Body: Daftar Pertanyaan & Jawaban Peserta (Scrollable) -->
-        <div class="p-6 overflow-y-auto space-y-4 flex-1">
-            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400">Lembar Pertanyaan & Jawaban Peserta</h4>
-            <div id="modal-questions-container" class="space-y-4">
-                <!-- Diisi secara dinamis oleh JavaScript -->
-            </div>
-        </div>
-
-        <!-- Modal Footer: Form Koreksi Nilai & Tombol Simpan -->
-        <form id="modal-grading-form" method="POST" action="" class="p-6 border-t border-slate-100 bg-slate-50/80 shrink-0">
+        <!-- Form Koreksi Nilai & Evaluasi Essay (Tahap 32A) -->
+        <form id="modal-grading-form" method="POST" action="" class="flex flex-col flex-1 overflow-hidden">
             <?= csrf_field() ?>
-            
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-                <div>
-                    <label for="input-modal-correct" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
-                        Jumlah Jawaban Benar
-                    </label>
-                    <div class="flex items-center gap-2">
+
+            <!-- Modal Body: Daftar Pertanyaan & Jawaban Peserta (Scrollable) -->
+            <div class="p-6 overflow-y-auto space-y-4 flex-1">
+                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400">Lembar Pertanyaan & Jawaban Peserta</h4>
+                <div id="modal-questions-container" class="space-y-4">
+                    <!-- Diisi secara dinamis oleh JavaScript -->
+                </div>
+            </div>
+
+            <!-- Modal Footer: Form Koreksi Nilai & Tombol Simpan -->
+            <div class="p-6 border-t border-slate-100 bg-slate-50/80 shrink-0">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label for="input-modal-correct" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                            Jumlah Jawaban Benar
+                        </label>
+                        <div class="flex items-center gap-2">
+                            <input 
+                                type="number" 
+                                id="input-modal-correct" 
+                                name="correct_count" 
+                                min="0" 
+                                required 
+                                class="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-upskill-pink/20 focus:border-upskill-pink bg-white"
+                            >
+                            <span class="text-xs font-semibold text-slate-400 whitespace-nowrap">/ <span id="modal-total-questions">0</span> Soal</span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="input-modal-score" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                            Nilai Akhir (0 - 100)
+                        </label>
                         <input 
                             type="number" 
-                            id="input-modal-correct" 
-                            name="correct_count" 
+                            id="input-modal-score" 
+                            name="quiz_score" 
                             min="0" 
+                            max="100" 
+                            step="any"
                             required 
                             class="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-upskill-pink/20 focus:border-upskill-pink bg-white"
                         >
-                        <span class="text-xs font-semibold text-slate-400 whitespace-nowrap">/ <span id="modal-total-questions">0</span> Soal</span>
                     </div>
                 </div>
 
-                <div>
-                    <label for="input-modal-score" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
-                        Nilai Akhir (0 - 100)
-                    </label>
-                    <input 
-                        type="number" 
-                        id="input-modal-score" 
-                        name="quiz_score" 
-                        min="0" 
-                        max="100" 
-                        step="any"
-                        required 
-                        class="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-upskill-pink/20 focus:border-upskill-pink bg-white"
+                <div class="flex items-center justify-end gap-3">
+                    <button 
+                        type="button" 
+                        onclick="closeGradingModal()" 
+                        class="px-4 py-2.5 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-100 font-semibold text-xs transition-colors cursor-pointer"
                     >
+                        Batal
+                    </button>
+                    <button 
+                        type="submit" 
+                        class="px-6 py-2.5 rounded-xl bg-upskill-pink hover:bg-upskill-magenta text-white font-bold text-xs shadow-xs transition-colors cursor-pointer flex items-center gap-2"
+                    >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                        </svg>
+                        <span>Simpan Nilai & Tetapkan Peringkat</span>
+                    </button>
                 </div>
-            </div>
-
-            <div class="flex items-center justify-end gap-3">
-                <button 
-                    type="button" 
-                    onclick="closeGradingModal()" 
-                    class="px-4 py-2.5 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-100 font-semibold text-xs transition-colors cursor-pointer"
-                >
-                    Batal
-                </button>
-                <button 
-                    type="submit" 
-                    class="px-6 py-2.5 rounded-xl bg-upskill-pink hover:bg-upskill-magenta text-white font-bold text-xs shadow-xs transition-colors cursor-pointer flex items-center gap-2"
-                >
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                    </svg>
-                    <span>Simpan Nilai & Tetapkan Peringkat</span>
-                </button>
             </div>
         </form>
 
@@ -453,6 +457,13 @@ document.querySelectorAll('.btn-open-grade').forEach(btn => {
             answers = JSON.parse(this.getAttribute('data-answers') || '{}');
         } catch (e) {
             answers = {};
+        }
+
+        let feedback = {};
+        try {
+            feedback = JSON.parse(this.getAttribute('data-feedback') || '{}');
+        } catch (e) {
+            feedback = {};
         }
 
         // Set info header modal
@@ -508,11 +519,45 @@ document.querySelectorAll('.btn-open-grade').forEach(btn => {
                 `;
 
                 if (isEssay) {
+                    const essayEval = feedback[qId] || {};
+                    const evalStatus = essayEval.status || 'correct';
+                    const evalNote = essayEval.note || '';
+
                     qHtml += `
-                        <div class="mt-2">
-                            <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">Jawaban Peserta:</label>
-                            <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 whitespace-pre-line font-medium leading-relaxed">
-                                ${studentAnswer ? escapeHtml(studentAnswer) : '<span class="text-slate-400 italic">(Tidak ada jawaban dikirim)</span>'}
+                        <div class="mt-2 space-y-2.5">
+                            <div>
+                                <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">Jawaban Peserta:</label>
+                                <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 whitespace-pre-line font-medium leading-relaxed">
+                                    ${studentAnswer ? escapeHtml(studentAnswer) : '<span class="text-slate-400 italic">(Tidak ada jawaban dikirim)</span>'}
+                                </div>
+                            </div>
+
+                            <!-- Pilihan Evaluasi Status & Catatan Feedback Essay (Tahap 32A) -->
+                            <div class="p-3.5 bg-amber-50/60 border border-amber-200/80 rounded-xl space-y-2.5">
+                                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                                    <label class="block text-[11px] font-bold uppercase tracking-wider text-amber-900">
+                                        Status Evaluasi Essay:
+                                    </label>
+                                    <select 
+                                        name="essay_status[${qId}]" 
+                                        class="px-2.5 py-1.5 rounded-lg border border-amber-300 bg-white text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 shadow-2xs"
+                                    >
+                                        <option value="correct" ${evalStatus === 'correct' ? 'selected' : ''}>✓ Tepat / Benar</option>
+                                        <option value="partial" ${evalStatus === 'partial' ? 'selected' : ''}>⚠️ Kurang Tepat / Perlu Perbaikan</option>
+                                        <option value="wrong" ${evalStatus === 'wrong' ? 'selected' : ''}>✕ Salah</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold uppercase tracking-wider text-amber-900/80 mb-1">
+                                        Catatan Masukan Koreksi (Opsional):
+                                    </label>
+                                    <textarea 
+                                        name="essay_feedback[${qId}]" 
+                                        rows="2" 
+                                        placeholder="Tulis koreksi atau masukan untuk jawaban peserta ini..." 
+                                        class="w-full px-3 py-2 rounded-lg border border-amber-300 text-xs text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 placeholder:text-slate-400 leading-relaxed"
+                                    >${escapeHtml(evalNote)}</textarea>
+                                </div>
                             </div>
                         </div>
                     `;
