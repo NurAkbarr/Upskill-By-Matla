@@ -23,8 +23,13 @@ class TrialQuiz extends BaseController
     /**
      * Daftar seluruh Trial Quiz & Quiz Mandiri.
      */
-    public function index(): string
+    public function index()
     {
+        if (! \Config\Database::connect()->tableExists('trial_quizzes')) {
+            return redirect()->to(base_url('admin/maintenance'))
+                ->with('warning', 'Tabel Trial Quiz belum tersedia di database. Silakan jalankan Database Migration terlebih dahulu.');
+        }
+
         $quizzes = $this->quizModel->getAllWithStats();
 
         return view('admin/trial_quizzes/index', [

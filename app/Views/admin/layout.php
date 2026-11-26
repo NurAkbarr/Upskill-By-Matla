@@ -102,6 +102,17 @@
                     </svg>
                     Laporan Nilai
                 </a>
+
+                <div class="pt-3 mt-3 border-t border-slate-800/80">
+                    <!-- 6. Maintenance Tools -->
+                    <a href="<?= base_url('admin/maintenance') ?>" class="flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-semibold <?= strpos(uri_string(), 'admin/maintenance') !== false ? 'bg-slate-800 text-white' : 'text-slate-400 hover:text-white hover:bg-slate-800/60' ?> transition-colors duration-300">
+                        <svg class="w-4 h-4 <?= strpos(uri_string(), 'admin/maintenance') !== false ? 'text-upskill-pink' : 'text-slate-400' ?>" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        </svg>
+                        Maintenance Tools
+                    </a>
+                </div>
             </nav>
         </div>
 
@@ -155,13 +166,20 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
-        // Inisialisasi Toast SweetAlert2 untuk Notifikasi Flash Data
+        // Inisialisasi Toast SweetAlert2 bertema MUSLIM UPSKILL ACADEMY
         const Toast = Swal.mixin({
             toast: true,
             position: 'top-end',
             showConfirmButton: false,
-            timer: 3500,
+            timer: 4000,
             timerProgressBar: true,
+            background: '#FFFFFF',
+            color: '#0F172A',
+            customClass: {
+                popup: 'rounded-xl border border-slate-200 shadow-lg',
+                title: 'text-xs font-bold text-slate-800',
+                timerProgressBar: 'bg-upskill-pink'
+            },
             didOpen: (toast) => {
                 toast.addEventListener('mouseenter', Swal.stopTimer);
                 toast.addEventListener('mouseleave', Swal.resumeTimer);
@@ -171,14 +189,32 @@
         <?php if (session()->getFlashdata('success')): ?>
             Toast.fire({
                 icon: 'success',
-                title: '<?= esc(session()->getFlashdata('success')) ?>'
+                iconColor: '#059669',
+                title: <?= json_encode((string) session()->getFlashdata('success')) ?>
             });
         <?php endif; ?>
 
         <?php if (session()->getFlashdata('error')): ?>
             Toast.fire({
                 icon: 'error',
-                title: '<?= esc(session()->getFlashdata('error')) ?>'
+                iconColor: '#E11D48',
+                title: <?= json_encode((string) session()->getFlashdata('error')) ?>
+            });
+        <?php endif; ?>
+
+        <?php if (session()->getFlashdata('warning')): ?>
+            Toast.fire({
+                icon: 'warning',
+                iconColor: '#D97706',
+                title: <?= json_encode((string) session()->getFlashdata('warning')) ?>
+            });
+        <?php endif; ?>
+
+        <?php if (session()->getFlashdata('info')): ?>
+            Toast.fire({
+                icon: 'info',
+                iconColor: '#1C21AC',
+                title: <?= json_encode((string) session()->getFlashdata('info')) ?>
             });
         <?php endif; ?>
 

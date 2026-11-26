@@ -101,4 +101,10 @@ $routes->group('admin', ['filter' => ['auth', 'role:super_admin']], static funct
     $routes->get('users/edit/(:num)', 'Admin\User::edit/$1');
     $routes->post('users/update/(:num)', 'Admin\User::update/$1');
     $routes->get('users/delete/(:num)', 'Admin\User::delete/$1');
+
+    // Maintenance Tools (Migrasi & Clear Cache Tanpa Terminal)
+    $routes->get('maintenance', 'Admin\Maintenance::index');
+    $routes->post('maintenance/migrate', 'Admin\Maintenance::runMigration');
+    $routes->post('maintenance/clear-cache', 'Admin\Maintenance::clearCache');
+    $routes->post('maintenance/seed-trial-quiz', 'Admin\Maintenance::runTrialQuizSeeder');
 });

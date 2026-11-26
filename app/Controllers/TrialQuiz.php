@@ -26,6 +26,12 @@ class TrialQuiz extends BaseController
      */
     public function index()
     {
+        if (! \Config\Database::connect()->tableExists('trial_quizzes')) {
+            return view('trial_quiz/empty', [
+                'title' => 'Quiz Evaluasi - MUSLIM UPSKILL ACADEMY',
+            ]);
+        }
+
         $featured = $this->quizModel->getFeaturedTrial();
 
         if (! $featured) {
@@ -43,6 +49,10 @@ class TrialQuiz extends BaseController
      */
     public function play(string $slug)
     {
+        if (! \Config\Database::connect()->tableExists('trial_quizzes')) {
+            return redirect()->to(base_url('quiz'));
+        }
+
         $quiz = $this->quizModel
             ->where('slug', $slug)
             ->where('status', 'published')
