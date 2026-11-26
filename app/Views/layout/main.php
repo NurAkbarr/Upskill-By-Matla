@@ -43,44 +43,44 @@
 <body class="min-h-full flex flex-col bg-white text-slate-900 selection:bg-pink-100 selection:text-upskill-pink">
 
     <!-- Header & Navigasi -->
-    <header class="border-b border-slate-100 bg-white/95 backdrop-blur-sm sticky top-0 z-50">
+    <header class="border-b border-slate-200/70 bg-white/95 backdrop-blur-sm sticky top-0 z-50">
         <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-20 sm:h-24">
+            <div class="flex items-center justify-between h-16">
                 <!-- Logo Muslim Upskill Academy (Sesuaikan nama file gambar jika berbeda) -->
-                <div class="flex items-center">
-                    <a href="<?= base_url('/') ?>" class="flex items-center gap-3 group py-2">
-                        <img src="<?= base_url('assets/images/logo-removebg.png') ?>" alt="Muslim Upskill Academy" class="h-12 sm:h-14 w-auto object-contain transition-transform duration-300 group-hover:scale-105">
+                <div class="flex items-center shrink-0">
+                    <a href="<?= base_url('/') ?>" class="flex items-center gap-2.5 group">
+                        <img src="<?= base_url('assets/images/logo-removebg.png') ?>" alt="Muslim Upskill Academy" class="h-9 sm:h-10 w-auto object-contain transition-transform duration-300 group-hover:scale-105">
                     </a>
                 </div>
 
                 <!-- Desktop Navigation Menu (text-upskill-blue) -->
-                <nav class="hidden md:flex items-center gap-8 text-sm font-bold text-upskill-blue">
-                    <a href="<?= base_url('/#program-kelas') ?>" class="hover:text-upskill-pink transition-colors duration-300">Program</a>
-                    <a href="<?= base_url('quiz') ?>" class="<?= str_starts_with(uri_string(), 'quiz') ? 'text-upskill-pink' : 'hover:text-upskill-pink' ?> transition-colors duration-300">Quiz</a>
-                    <a href="<?= base_url('/#target-peserta') ?>" class="hover:text-upskill-pink transition-colors duration-300">Target Peserta</a>
-                    <a href="<?= base_url('/#tentang-kami') ?>" class="hover:text-upskill-pink transition-colors duration-300">Tentang Kami</a>
+                <nav class="hidden md:flex items-center gap-7 text-sm font-semibold text-upskill-blue">
+                    <a href="<?= base_url('/#program-kelas') ?>" class="hover:text-upskill-pink transition-colors duration-200">Program</a>
+                    <a href="<?= base_url('quiz') ?>" class="<?= str_starts_with(uri_string(), 'quiz') ? 'text-upskill-pink font-bold' : 'hover:text-upskill-pink' ?> transition-colors duration-200">Quiz</a>
+                    <a href="<?= base_url('/#target-peserta') ?>" class="hover:text-upskill-pink transition-colors duration-200">Target Peserta</a>
+                    <a href="<?= base_url('/#tentang-kami') ?>" class="hover:text-upskill-pink transition-colors duration-200">Tentang Kami</a>
                 </nav>
 
                 <!-- Auth Action Button (Dynamic based on Session) -->
-                <div class="flex items-center gap-2.5 sm:gap-3">
-                    <a href="<?= base_url('quiz') ?>" class="md:hidden inline-flex items-center justify-center px-3 py-2 text-xs font-bold rounded-lg <?= str_starts_with(uri_string(), 'quiz') ? 'text-white bg-upskill-darkblue' : 'text-upskill-darkblue bg-slate-100 hover:bg-slate-200' ?> transition-colors duration-200">
+                <div class="flex items-center gap-2 sm:gap-2.5 shrink-0">
+                    <a href="<?= base_url('quiz') ?>" class="md:hidden inline-flex items-center justify-center px-2.5 py-1.5 text-xs font-bold rounded-lg <?= str_starts_with(uri_string(), 'quiz') ? 'text-white bg-upskill-darkblue' : 'text-upskill-darkblue bg-slate-100 hover:bg-slate-200' ?> transition-colors duration-200">
                         Quiz
                     </a>
                     <?php if (session()->get('isLoggedIn')): ?>
                         <span class="text-xs font-semibold text-upskill-darkblue hidden sm:inline-block">
                             Halo, <strong class="text-upskill-blue"><?= esc(session()->get('full_name')) ?></strong>
                         </span>
-                        <a href="<?= session()->get('role') == 'super_admin' ? base_url('/admin/dashboard') : base_url('/dashboard') ?>" class="inline-flex items-center justify-center px-4 py-2 text-xs font-bold rounded-lg text-white bg-upskill-pink hover:bg-upskill-magenta transition-colors duration-300 shadow-sm">
+                        <a href="<?= session()->get('role') == 'super_admin' ? base_url('/admin/dashboard') : base_url('/dashboard') ?>" class="inline-flex items-center justify-center px-3.5 py-1.5 text-xs font-bold rounded-lg text-white bg-upskill-pink hover:bg-upskill-magenta transition-colors duration-200 shadow-2xs">
                             Dasbor
                         </a>
-                        <a href="<?= base_url('logout') ?>" class="inline-flex items-center justify-center px-3.5 py-1.5 text-xs font-semibold rounded-lg text-rose-700 bg-rose-50 border border-rose-200 hover:bg-rose-100 transition-colors duration-300">
+                        <a href="<?= base_url('logout') ?>" class="inline-flex items-center justify-center px-3 py-1.5 text-xs font-semibold rounded-lg text-rose-700 bg-rose-50 border border-rose-200 hover:bg-rose-100 transition-colors duration-200">
                             Keluar
                         </a>
                     <?php else: ?>
-                        <a href="<?= base_url('login') ?>" class="inline-flex items-center justify-center px-4 py-2 text-sm font-bold rounded-lg text-upskill-darkblue bg-white border border-slate-200 hover:border-upskill-blue hover:text-upskill-blue transition-colors duration-300">
+                        <a href="<?= base_url('login') ?>" class="inline-flex items-center justify-center px-3.5 py-1.5 text-xs sm:text-sm font-bold rounded-lg text-upskill-darkblue bg-white border border-slate-200 hover:border-upskill-blue hover:text-upskill-blue transition-colors duration-200">
                             Masuk
                         </a>
-                        <a href="<?= base_url('register') ?>" class="hidden sm:inline-flex items-center justify-center px-5 py-2.5 text-sm font-bold rounded-lg text-white bg-upskill-pink hover:bg-upskill-magenta transition-colors duration-300 shadow-sm">
+                        <a href="<?= base_url('register') ?>" class="hidden sm:inline-flex items-center justify-center px-4 py-1.5 text-xs sm:text-sm font-bold rounded-lg text-white bg-upskill-pink hover:bg-upskill-magenta transition-colors duration-200 shadow-2xs">
                             Daftar Sekarang
                         </a>
                     <?php endif; ?>

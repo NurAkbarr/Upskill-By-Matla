@@ -187,6 +187,12 @@ class TrialQuiz extends BaseController
             }
         }
 
+        $totalQuestions = count($questions);
+        $score          = $totalQuestions > 0 ? round(($correctCount / $totalQuestions) * 100, 2) : 0;
+
+        $startKey        = 'trial_quiz_start_' . $quiz['id'];
+        $startTimestamp  = session()->get($startKey);
+        $durationSeconds = $startTimestamp ? max(1, time() - (int) $startTimestamp) : 1;
         $totalQuestions  = count($questions);
         $score           = $totalQuestions > 0 ? round(($correctCount / $totalQuestions) * 100, 2) : 0;
         $durationSeconds = max(1, $now - (int) $startTimestamp);
@@ -258,40 +264,60 @@ class TrialQuiz extends BaseController
             session()->set('pending_trial_token', $token);
         }
 
-        $questions      = $this->questionModel->getByQuiz((int) $quiz['id']);
-        $answers        = json_decode($attempt['answers_json'] ?? '{}', true) ?: [];
-        $otherQuizzes   = $this->quizModel->getOtherPublishedQuizzes((int) $quiz['id']);
+        $questions    = $this->questionModel->getByQuiz((int) $quiz['id']);
+        $answers      = json_decode($attempt['answers_json'] ?? '{}', true) ?: [];
+        $otherQuizzes = $this->quizModel->getOtherPublishedQuizzes((int) $quiz['id']);
+
+        // Ambil seluruh kelas published yang ditambahkan di Dashboard Admin untuk "Tantangan Quiz Lainnya"
+        $courseModel      = new CourseModel();
+        $publishedCourses = $courseModel->where('status', 'published')
+            ->orderBy('id', 'DESC')
+            ->findAll();
 
         $recommendedCourse = null;
         if (! empty($quiz['recommended_course_id'])) {
-            $courseModel = new CourseModel();
-            $course      = $courseModel->where('id', (int) $quiz['recommended_course_id'])
-                ->where('status', 'published')
-                ->first();
-            if ($course) {
-                $recommendedCourse = $course;
+            foreach ($publishedCourses as $pc) {
+                if ((int) $pc['id'] === (int) $quiz['recommended_course_id']) {
+                    $recommendedCourse = $pc;
+                    break;
+                }
             }
         }
+        if ($recommendedCourse === null && ! empty($publishedCourses)) {
+            $recommendedCourse = $publishedCourses[0];
+        }
 
-        // Tentukan predikat capaian yang objektif
+        // Skala predikat capaian (Mumtaz, Jayyid Jiddan, Jayyid, Maqbul, Perlu Pendalaman)
         $scoreVal = (float) $attempt['score'];
-        if ($scoreVal >= 85) {
+        if ($scoreVal >= 90) {
             $predicate = [
-                'label'   => 'Pemahaman Sangat Baik',
-                'summary' => 'Dasar keilmuan Anda pada topik ini sudah kuat. Pertahankan dengan memperdalam materi lanjutan.',
+                'label'   => 'Mumtaz',
+                'summary' => 'Pemahaman Anda sangat baik dan menyeluruh. Pertahankan dengan memperdalam materi lanjutan.',
                 'tone'    => 'emerald',
+            ];
+        } elseif ($scoreVal >= 75) {
+            $predicate = [
+                'label'   => 'Jayyid Jiddan',
+                'summary' => 'Sebagian besar konsep sudah Anda kuasai dengan sangat baik. Tinggal menyempurnakan beberapa detail.',
+                'tone'    => 'blue',
             ];
         } elseif ($scoreVal >= 60) {
             $predicate = [
-                'label'   => 'Pemahaman Dasar Baik',
+                'label'   => 'Jayyid',
                 'summary' => 'Sebagian besar konsep sudah Anda kuasai, namun masih ada detail penting yang perlu diluruskan.',
-                'tone'    => 'blue',
+                'tone'    => 'indigo',
+            ];
+        } elseif ($scoreVal >= 40) {
+            $predicate = [
+                'label'   => 'Maqbul',
+                'summary' => 'Dasar pemahaman sudah terbentuk. Pelajari pembahasannya agar penguasaan materi semakin mantap.',
+                'tone'    => 'amber',
             ];
         } else {
             $predicate = [
-                'label'   => 'Perlu Pendalaman Materi',
+                'label'   => 'Perlu Pendalaman',
                 'summary' => 'Langkah awal yang bagus untuk mengetahui bagian mana yang perlu dipelajari lebih runut.',
-                'tone'    => 'amber',
+                'tone'    => 'rose',
             ];
         }
 
@@ -301,11 +327,12 @@ class TrialQuiz extends BaseController
             : base_url('quiz/' . $quiz['slug']);
 
         $shareMessage = sprintf(
-            'Alhamdulillah, saya baru saja mencoba "%s" di Muslim Upskill Academy dan mendapat skor %d/%d benar (%d%%). Yuk uji pemahamanmu juga di sini: %s',
+            'Alhamdulillah, saya baru saja mencoba "%s" di Muslim Upskill Academy dan mendapat skor %d/%d benar (%d%% - %s). Yuk uji pemahamanmu juga di sini: %s',
             $quiz['title'],
             (int) $attempt['correct_count'],
             (int) $attempt['total_questions'],
             (int) round($scoreVal),
+            $predicate['label'],
             $shareTargetUrl
         );
 
@@ -321,6 +348,7 @@ class TrialQuiz extends BaseController
             'is_logged_in'       => $isLoggedIn,
             'predicate'          => $predicate,
             'other_quizzes'      => $otherQuizzes,
+            'published_courses'  => $publishedCourses,
             'recommended_course' => $recommendedCourse,
             'whatsapp_share_url' => $whatsappShareUrl,
             'retry_url'          => (int) $quiz['is_trial'] === 1 ? base_url('quiz') : base_url('quiz/' . $quiz['slug']),
@@ -332,6 +360,7 @@ class TrialQuiz extends BaseController
      */
     private function renderPlayView(array $quiz)
     {
+        $questions = $this->questionModel->getByQuiz((int) $quiz['id']);
         // Hanya kirim teks soal & pilihan A-D ke view (tanpa correct_answer & explanation)
         $questions = $this->questionModel->getPublicByQuiz((int) $quiz['id']);
 
