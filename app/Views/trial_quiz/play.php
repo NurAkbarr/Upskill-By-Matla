@@ -138,6 +138,10 @@
             <!-- Form Pengerjaan Quiz -->
             <form id="trial-quiz-form" action="<?= base_url('quiz/' . $quiz['slug'] . '/submit') ?>" method="post">
                 <?= csrf_field() ?>
+                <div class="hidden" aria-hidden="true">
+                    <label for="website_url">Website</label>
+                    <input type="text" id="website_url" name="website_url" value="" tabindex="-1" autocomplete="off">
+                </div>
 
                 <div class="bg-white border border-slate-200 rounded-2xl p-5 sm:p-8 shadow-xs">
                     <?php foreach ($questions as $index => $q): ?>

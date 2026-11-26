@@ -35,6 +35,18 @@ class TrialQuizQuestionModel extends Model
             ->findAll();
     }
 
+    /**
+     * Mengambil soal untuk halaman pengerjaan publik TANPA kunci jawaban dan pembahasan.
+     */
+    public function getPublicByQuiz(int $quizId): array
+    {
+        return $this->select('id, quiz_id, question_text, option_a, option_b, option_c, option_d, order_index')
+            ->where('quiz_id', $quizId)
+            ->orderBy('order_index', 'ASC')
+            ->orderBy('id', 'ASC')
+            ->findAll();
+    }
+
     public function getNextOrderIndex(int $quizId): int
     {
         $last = $this->where('quiz_id', $quizId)

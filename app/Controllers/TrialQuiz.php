@@ -6,9 +6,15 @@ use App\Models\CourseModel;
 use App\Models\TrialQuizAttemptModel;
 use App\Models\TrialQuizModel;
 use App\Models\TrialQuizQuestionModel;
+use Config\Services;
 
 class TrialQuiz extends BaseController
 {
+    private const IP_MAX_SUBMITS        = 15;
+    private const IP_WINDOW_SECONDS     = 900;  // 15 menit
+    private const GUEST_MAX_PER_HOUR    = 3;
+    private const GUEST_COOLDOWN_SECOND = 15;
+
     protected TrialQuizModel $quizModel;
     protected TrialQuizQuestionModel $questionModel;
     protected TrialQuizAttemptModel $attemptModel;
@@ -78,6 +84,19 @@ class TrialQuiz extends BaseController
      */
     public function submit(string $slug)
     {
+        if (! \Config\Database::connect()->tableExists('trial_quizzes')) {
+            return redirect()->to(base_url('quiz'));
+        }
+
+        // 1. Proteksi Honeypot: tolak otomatis jika field jebakan terisi oleh bot
+        if (trim((string) $this->request->getPost('website_url')) !== '') {
+            log_message('warning', '[TrialQuiz] Honeypot triggered from ip={ip}', [
+                'ip' => $this->request->getIPAddress(),
+            ]);
+
+            return redirect()->to(base_url('quiz'))->with('error', 'Permintaan tidak dapat diproses.');
+        }
+
         $quiz = $this->quizModel
             ->where('slug', $slug)
             ->where('status', 'published')
@@ -97,6 +116,51 @@ class TrialQuiz extends BaseController
                 ->with('error', 'Silakan masuk terlebih dahulu untuk menyelesaikan quiz ini.');
         }
 
+        // 2. Wajib memiliki penanda mulai sesi (mencegah POST mentah tanpa membuka halaman soal)
+        $startKey       = 'trial_quiz_start_' . $quiz['id'];
+        $startTimestamp = session()->get($startKey);
+        if (empty($startTimestamp)) {
+            return redirect()->to(base_url((int) $quiz['is_trial'] === 1 ? 'quiz' : 'quiz/' . $quiz['slug']))
+                ->with('info', 'Sesi pengerjaan tidak ditemukan atau sudah berakhir. Silakan mulai ulang quiz.');
+        }
+
+        // 3. Proteksi IP Rate Limit (longgar untuk Wi-Fi bersama: maks 15 submit / 15 menit per IP)
+        $throttler = Services::throttler();
+        $ipKey     = 'trial_quiz_ip_' . md5((string) $this->request->getIPAddress());
+        if ($throttler->check($ipKey, self::IP_MAX_SUBMITS, self::IP_WINDOW_SECONDS) === false) {
+            log_message('warning', '[TrialQuiz] IP rate limit exceeded from ip={ip}', [
+                'ip' => $this->request->getIPAddress(),
+            ]);
+
+            return redirect()->to(base_url('quiz'))
+                ->with('error', 'Terlalu banyak pengiriman dari jaringan Anda. Silakan tunggu beberapa menit lalu coba kembali.');
+        }
+
+        // 4. Proteksi Session Limit & Cooldown khusus tamu (tanpa login)
+        $now            = time();
+        $guestHistory   = [];
+        if (! $isLoggedIn) {
+            $rawHistory   = session()->get('trial_quiz_submit_history');
+            $guestHistory = is_array($rawHistory)
+                ? array_values(array_filter($rawHistory, static fn ($ts): bool => is_numeric($ts) && ($now - (int) $ts) < 3600))
+                : [];
+
+            $lastSubmit = ! empty($guestHistory) ? (int) end($guestHistory) : 0;
+            if ($lastSubmit > 0 && ($now - $lastSubmit) < self::GUEST_COOLDOWN_SECOND) {
+                return redirect()->to(base_url('quiz'))
+                    ->with('info', 'Mohon tunggu beberapa detik sebelum mengirim jawaban kembali.');
+            }
+
+            if (count($guestHistory) >= self::GUEST_MAX_PER_HOUR) {
+                $pendingToken = (string) (session()->get('pending_trial_token') ?? '');
+                $fallbackUrl  = $pendingToken !== '' ? base_url('quiz/result/' . $pendingToken) : base_url('register');
+
+                return redirect()->to($fallbackUrl)
+                    ->with('info', 'Batas percobaan tamu (3x per jam) telah tercapai. Daftar akun gratis untuk membuka pembahasan & mengikuti quiz lainnya.');
+            }
+        }
+
+        // Validasi jawaban & hitung skor 100% di server
         $questions = $this->questionModel->getByQuiz((int) $quiz['id']);
         if (empty($questions)) {
             return redirect()->to(base_url('quiz'))->with('error', 'Quiz ini belum memiliki butir soal.');
@@ -123,12 +187,9 @@ class TrialQuiz extends BaseController
             }
         }
 
-        $totalQuestions = count($questions);
-        $score          = $totalQuestions > 0 ? round(($correctCount / $totalQuestions) * 100, 2) : 0;
-
-        $startKey        = 'trial_quiz_start_' . $quiz['id'];
-        $startTimestamp  = session()->get($startKey);
-        $durationSeconds = $startTimestamp ? max(1, time() - (int) $startTimestamp) : 1;
+        $totalQuestions  = count($questions);
+        $score           = $totalQuestions > 0 ? round(($correctCount / $totalQuestions) * 100, 2) : 0;
+        $durationSeconds = max(1, $now - (int) $startTimestamp);
         session()->remove($startKey);
 
         $token = bin2hex(random_bytes(16));
@@ -147,6 +208,8 @@ class TrialQuiz extends BaseController
         ]);
 
         if (! $userId) {
+            $guestHistory[] = $now;
+            session()->set('trial_quiz_submit_history', $guestHistory);
             session()->set('pending_trial_token', $token);
         }
 
@@ -269,7 +332,8 @@ class TrialQuiz extends BaseController
      */
     private function renderPlayView(array $quiz)
     {
-        $questions = $this->questionModel->getByQuiz((int) $quiz['id']);
+        // Hanya kirim teks soal & pilihan A-D ke view (tanpa correct_answer & explanation)
+        $questions = $this->questionModel->getPublicByQuiz((int) $quiz['id']);
 
         if (empty($questions)) {
             return view('trial_quiz/empty', [
