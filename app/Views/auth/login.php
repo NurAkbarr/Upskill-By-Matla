@@ -11,10 +11,32 @@
             <h2 class="text-2xl font-extrabold tracking-tight text-upskill-darkblue">
                 Masuk ke Akun
             </h2>
-            <p class="text-xs sm:text-sm text-slate-500 mt-1.5">
+            <p class="text-xs sm:text-sm text-slate-600 mt-1.5">
                 Akses materi belajar Anda di Muslim Upskill Academy.
             </p>
         </div>
+
+        <!-- Konteks Hasil Trial Quiz -->
+        <?php if (!empty($trial_context)): ?>
+            <div class="mb-5 p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs sm:text-sm text-slate-700 space-y-1">
+                <p class="font-bold text-upskill-darkblue">
+                    Masuk untuk membuka pembahasan &amp; menyimpan skor (<span class="tabular-nums"><?= (int) $trial_context['correct_count'] ?>/<?= (int) $trial_context['total_questions'] ?></span>)
+                </p>
+                <p class="text-xs text-slate-600 leading-relaxed">
+                    Hasil <strong class="text-slate-800"><?= esc($trial_context['quiz_title']) ?></strong> akan otomatis tersimpan ke akun Anda setelah masuk.
+                </p>
+            </div>
+        <?php endif; ?>
+
+        <!-- Pesan Info Flashdata -->
+        <?php if (session()->getFlashdata('info')): ?>
+            <div class="mb-5 p-3.5 rounded-lg bg-blue-50 border border-blue-200 text-blue-900 text-xs sm:text-sm flex items-start gap-2.5">
+                <svg class="w-4 h-4 text-upskill-darkblue shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <span><?= esc(session()->getFlashdata('info')) ?></span>
+            </div>
+        <?php endif; ?>
 
         <!-- Pesan Sukses Flashdata -->
         <?php if (session()->getFlashdata('success')): ?>

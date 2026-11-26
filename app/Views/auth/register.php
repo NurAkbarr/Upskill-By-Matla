@@ -11,10 +11,22 @@
             <h2 class="text-2xl font-extrabold tracking-tight text-upskill-darkblue">
                 Daftar Akun Baru
             </h2>
-            <p class="text-xs sm:text-sm text-slate-500 mt-1.5">
+            <p class="text-xs sm:text-sm text-slate-600 mt-1.5">
                 Mulai tingkatkan keahlian praktis bersama Muslim Upskill Academy.
             </p>
         </div>
+
+        <!-- Konteks Hasil Trial Quiz (jika mendaftar dari halaman hasil) -->
+        <?php if (!empty($trial_context)): ?>
+            <div class="mb-5 p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs sm:text-sm text-slate-700 space-y-1">
+                <p class="font-bold text-upskill-darkblue">
+                    Skor Trial Anda (<span class="tabular-nums"><?= (int) $trial_context['correct_count'] ?>/<?= (int) $trial_context['total_questions'] ?></span> benar) siap disimpan
+                </p>
+                <p class="text-xs text-slate-600 leading-relaxed">
+                    Selesaikan pendaftaran gratis untuk langsung membuka seluruh pembahasan <strong class="text-slate-800"><?= esc($trial_context['quiz_title']) ?></strong> dan mengakses quiz lainnya.
+                </p>
+            </div>
+        <?php endif; ?>
 
         <!-- Notifikasi Error Validasi -->
         <?php if (session()->getFlashdata('errors')): ?>

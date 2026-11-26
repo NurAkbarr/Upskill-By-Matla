@@ -1,0 +1,279 @@
+<?php
+
+namespace App\Controllers;
+
+use App\Models\CourseModel;
+use App\Models\TrialQuizAttemptModel;
+use App\Models\TrialQuizModel;
+use App\Models\TrialQuizQuestionModel;
+
+class TrialQuiz extends BaseController
+{
+    protected TrialQuizModel $quizModel;
+    protected TrialQuizQuestionModel $questionModel;
+    protected TrialQuizAttemptModel $attemptModel;
+
+    public function __construct()
+    {
+        $this->quizModel     = new TrialQuizModel();
+        $this->questionModel = new TrialQuizQuestionModel();
+        $this->attemptModel  = new TrialQuizAttemptModel();
+    }
+
+    /**
+     * Entry langsung dari menu "Quiz" di navbar publik.
+     * Membuka 1 Quiz Trial Utama tanpa perlu login.
+     */
+    public function index()
+    {
+        $featured = $this->quizModel->getFeaturedTrial();
+
+        if (! $featured) {
+            return view('trial_quiz/empty', [
+                'title' => 'Quiz Evaluasi - MUSLIM UPSKILL ACADEMY',
+            ]);
+        }
+
+        return $this->renderPlayView($featured);
+    }
+
+    /**
+     * Membuka halaman pengerjaan quiz tertentu berdasarkan slug.
+     * Quiz dengan is_trial = 1 terbuka untuk tamu; is_trial = 0 wajib login.
+     */
+    public function play(string $slug)
+    {
+        $quiz = $this->quizModel
+            ->where('slug', $slug)
+            ->where('status', 'published')
+            ->first();
+
+        if (! $quiz) {
+            return redirect()->to(base_url('quiz'))->with('error', 'Quiz yang Anda cari tidak ditemukan atau belum dipublikasikan.');
+        }
+
+        $isLoggedIn = (bool) session()->get('isLoggedIn');
+        if ((int) $quiz['is_trial'] !== 1 && ! $isLoggedIn) {
+            session()->set('redirect_after_auth', 'quiz/' . $quiz['slug']);
+
+            return redirect()->to(base_url('login'))
+                ->with('info', 'Masuk atau daftar gratis terlebih dahulu untuk mengerjakan quiz "' . $quiz['title'] . '".');
+        }
+
+        return $this->renderPlayView($quiz);
+    }
+
+    /**
+     * Memproses jawaban quiz (baik tamu untuk trial maupun member).
+     */
+    public function submit(string $slug)
+    {
+        $quiz = $this->quizModel
+            ->where('slug', $slug)
+            ->where('status', 'published')
+            ->first();
+
+        if (! $quiz) {
+            return redirect()->to(base_url('quiz'))->with('error', 'Quiz tidak ditemukan.');
+        }
+
+        $isLoggedIn = (bool) session()->get('isLoggedIn');
+        $userId     = $isLoggedIn ? (int) session()->get('user_id') : null;
+
+        if ((int) $quiz['is_trial'] !== 1 && ! $isLoggedIn) {
+            session()->set('redirect_after_auth', 'quiz/' . $quiz['slug']);
+
+            return redirect()->to(base_url('login'))
+                ->with('error', 'Silakan masuk terlebih dahulu untuk menyelesaikan quiz ini.');
+        }
+
+        $questions = $this->questionModel->getByQuiz((int) $quiz['id']);
+        if (empty($questions)) {
+            return redirect()->to(base_url('quiz'))->with('error', 'Quiz ini belum memiliki butir soal.');
+        }
+
+        $submittedAnswers = $this->request->getPost('answers');
+        if (! is_array($submittedAnswers)) {
+            $submittedAnswers = [];
+        }
+
+        $correctCount = 0;
+        $cleanAnswers = [];
+
+        foreach ($questions as $q) {
+            $qId     = (int) $q['id'];
+            $ans     = isset($submittedAnswers[$qId]) ? strtolower(trim((string) $submittedAnswers[$qId])) : '';
+            $isValid = in_array($ans, ['a', 'b', 'c', 'd'], true);
+
+            if ($isValid) {
+                $cleanAnswers[$qId] = $ans;
+                if ($ans === strtolower((string) $q['correct_answer'])) {
+                    $correctCount++;
+                }
+            }
+        }
+
+        $totalQuestions = count($questions);
+        $score          = $totalQuestions > 0 ? round(($correctCount / $totalQuestions) * 100, 2) : 0;
+
+        $startKey        = 'trial_quiz_start_' . $quiz['id'];
+        $startTimestamp  = session()->get($startKey);
+        $durationSeconds = $startTimestamp ? max(1, time() - (int) $startTimestamp) : 1;
+        session()->remove($startKey);
+
+        $token = bin2hex(random_bytes(16));
+
+        $this->attemptModel->insert([
+            'quiz_id'          => (int) $quiz['id'],
+            'user_id'          => $userId,
+            'attempt_token'    => $token,
+            'score'            => $score,
+            'correct_count'    => $correctCount,
+            'total_questions'  => $totalQuestions,
+            'duration_seconds' => $durationSeconds,
+            'answers_json'     => json_encode($cleanAnswers, JSON_UNESCAPED_UNICODE),
+            'claimed_at'       => $userId ? date('Y-m-d H:i:s') : null,
+            'completed_at'     => date('Y-m-d H:i:s'),
+        ]);
+
+        if (! $userId) {
+            session()->set('pending_trial_token', $token);
+        }
+
+        return redirect()->to(base_url('quiz/result/' . $token));
+    }
+
+    /**
+     * Menampilkan halaman hasil evaluasi, teaser/pembahasan penuh, Share WA, quiz lain, & rekomendasi kelas.
+     */
+    public function result(string $token)
+    {
+        $attempt = $this->attemptModel->findByToken($token);
+        if (! $attempt) {
+            return redirect()->to(base_url('quiz'))->with('error', 'Hasil quiz tidak ditemukan.');
+        }
+
+        $quiz = $this->quizModel->find((int) $attempt['quiz_id']);
+        if (! $quiz) {
+            return redirect()->to(base_url('quiz'))->with('error', 'Data quiz sudah tidak tersedia.');
+        }
+
+        $isLoggedIn = (bool) session()->get('isLoggedIn');
+        $userId     = $isLoggedIn ? (int) session()->get('user_id') : 0;
+        $userRole   = (string) (session()->get('role') ?? '');
+
+        // Auto-claim jika user login dan membuka hasil trial miliknya yang belum diklaim
+        if ($isLoggedIn && $attempt['user_id'] === null && session()->get('pending_trial_token') === $token) {
+            $this->attemptModel->claimByToken($token, $userId);
+            session()->remove('pending_trial_token');
+            $attempt = $this->attemptModel->findByToken($token);
+        }
+
+        // Lindungi hasil milik peserta lain
+        if ($attempt['user_id'] !== null && (int) $attempt['user_id'] !== $userId && $userRole !== 'super_admin') {
+            return redirect()->to(base_url('quiz/' . $quiz['slug']))
+                ->with('info', 'Hasil tersebut milik peserta lain. Yuk coba kerjakan quiznya sendiri!');
+        }
+
+        $isUnlocked = $isLoggedIn && (
+            ($attempt['user_id'] !== null && (int) $attempt['user_id'] === $userId)
+            || $userRole === 'super_admin'
+        );
+
+        // Pastikan pending_trial_token tetap tercatat untuk tamu yang membuka ulang halaman hasil
+        if (! $isLoggedIn && $attempt['user_id'] === null) {
+            session()->set('pending_trial_token', $token);
+        }
+
+        $questions      = $this->questionModel->getByQuiz((int) $quiz['id']);
+        $answers        = json_decode($attempt['answers_json'] ?? '{}', true) ?: [];
+        $otherQuizzes   = $this->quizModel->getOtherPublishedQuizzes((int) $quiz['id']);
+
+        $recommendedCourse = null;
+        if (! empty($quiz['recommended_course_id'])) {
+            $courseModel = new CourseModel();
+            $course      = $courseModel->where('id', (int) $quiz['recommended_course_id'])
+                ->where('status', 'published')
+                ->first();
+            if ($course) {
+                $recommendedCourse = $course;
+            }
+        }
+
+        // Tentukan predikat capaian yang objektif
+        $scoreVal = (float) $attempt['score'];
+        if ($scoreVal >= 85) {
+            $predicate = [
+                'label'   => 'Pemahaman Sangat Baik',
+                'summary' => 'Dasar keilmuan Anda pada topik ini sudah kuat. Pertahankan dengan memperdalam materi lanjutan.',
+                'tone'    => 'emerald',
+            ];
+        } elseif ($scoreVal >= 60) {
+            $predicate = [
+                'label'   => 'Pemahaman Dasar Baik',
+                'summary' => 'Sebagian besar konsep sudah Anda kuasai, namun masih ada detail penting yang perlu diluruskan.',
+                'tone'    => 'blue',
+            ];
+        } else {
+            $predicate = [
+                'label'   => 'Perlu Pendalaman Materi',
+                'summary' => 'Langkah awal yang bagus untuk mengetahui bagian mana yang perlu dipelajari lebih runut.',
+                'tone'    => 'amber',
+            ];
+        }
+
+        // Tautan Share WhatsApp selalu mengarah ke halaman mulai quiz (bukan hasil pribadi)
+        $shareTargetUrl = (int) $quiz['is_trial'] === 1
+            ? base_url('quiz')
+            : base_url('quiz/' . $quiz['slug']);
+
+        $shareMessage = sprintf(
+            'Alhamdulillah, saya baru saja mencoba "%s" di Muslim Upskill Academy dan mendapat skor %d/%d benar (%d%%). Yuk uji pemahamanmu juga di sini: %s',
+            $quiz['title'],
+            (int) $attempt['correct_count'],
+            (int) $attempt['total_questions'],
+            (int) round($scoreVal),
+            $shareTargetUrl
+        );
+
+        $whatsappShareUrl = 'https://wa.me/?text=' . rawurlencode($shareMessage);
+
+        return view('trial_quiz/result', [
+            'title'              => 'Hasil Quiz: ' . $quiz['title'] . ' - MUSLIM UPSKILL ACADEMY',
+            'quiz'               => $quiz,
+            'attempt'            => $attempt,
+            'questions'          => $questions,
+            'answers'            => $answers,
+            'is_unlocked'        => $isUnlocked,
+            'is_logged_in'       => $isLoggedIn,
+            'predicate'          => $predicate,
+            'other_quizzes'      => $otherQuizzes,
+            'recommended_course' => $recommendedCourse,
+            'whatsapp_share_url' => $whatsappShareUrl,
+            'retry_url'          => (int) $quiz['is_trial'] === 1 ? base_url('quiz') : base_url('quiz/' . $quiz['slug']),
+        ]);
+    }
+
+    /**
+     * Merender tampilan pengerjaan quiz ringan.
+     */
+    private function renderPlayView(array $quiz)
+    {
+        $questions = $this->questionModel->getByQuiz((int) $quiz['id']);
+
+        if (empty($questions)) {
+            return view('trial_quiz/empty', [
+                'title' => 'Quiz Belum Tersedia - MUSLIM UPSKILL ACADEMY',
+            ]);
+        }
+
+        session()->set('trial_quiz_start_' . $quiz['id'], time());
+
+        return view('trial_quiz/play', [
+            'title'     => $quiz['title'] . ' - MUSLIM UPSKILL ACADEMY',
+            'quiz'      => $quiz,
+            'questions' => $questions,
+        ]);
+    }
+}
+

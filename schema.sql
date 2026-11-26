@@ -7,6 +7,9 @@
 
 SET FOREIGN_KEY_CHECKS = 0;
 
+DROP TABLE IF EXISTS `trial_quiz_attempts`;
+DROP TABLE IF EXISTS `trial_quiz_questions`;
+DROP TABLE IF EXISTS `trial_quizzes`;
 DROP TABLE IF EXISTS `transactions`;
 DROP TABLE IF EXISTS `session_progress`;
 DROP TABLE IF EXISTS `enrollments`;
@@ -177,5 +180,87 @@ CREATE TABLE `transactions` (
     CONSTRAINT `fk_transactions_course` 
         FOREIGN KEY (`course_id`) REFERENCES `courses` (`id`) 
         ON DELETE SET NULL 
+        ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ----------------------------------------------------------
+-- 8. Tabel trial_quizzes
+-- Quiz mandiri terpisah dari katalog kelas (1 Trial Utama tanpa login + quiz lanjutan khusus member)
+-- ----------------------------------------------------------
+CREATE TABLE `trial_quizzes` (
+    `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    `title` VARCHAR(200) NOT NULL,
+    `slug` VARCHAR(220) NOT NULL,
+    `topic_label` VARCHAR(80) DEFAULT NULL,
+    `description` TEXT DEFAULT NULL,
+    `is_trial` TINYINT(1) NOT NULL DEFAULT 0 COMMENT '1 = dapat dikerjakan tanpa login & menjadi tujuan menu Quiz',
+    `status` ENUM('draft', 'published') NOT NULL DEFAULT 'draft',
+    `duration_minutes` INT UNSIGNED NOT NULL DEFAULT 0,
+    `recommended_course_id` INT UNSIGNED DEFAULT NULL,
+    `created_by` INT UNSIGNED DEFAULT NULL,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY `uk_trial_quizzes_slug` (`slug`),
+    INDEX `idx_trial_quizzes_status_trial` (`status`, `is_trial`),
+    CONSTRAINT `fk_trial_quizzes_course`
+        FOREIGN KEY (`recommended_course_id`) REFERENCES `courses` (`id`)
+        ON DELETE SET NULL
+        ON UPDATE CASCADE,
+    CONSTRAINT `fk_trial_quizzes_creator`
+        FOREIGN KEY (`created_by`) REFERENCES `users` (`id`)
+        ON DELETE SET NULL
+        ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ----------------------------------------------------------
+-- 9. Tabel trial_quiz_questions
+-- Butir soal pilihan ganda beserta pembahasan & dalil
+-- ----------------------------------------------------------
+CREATE TABLE `trial_quiz_questions` (
+    `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    `quiz_id` INT UNSIGNED NOT NULL,
+    `question_text` TEXT NOT NULL,
+    `option_a` TEXT NOT NULL,
+    `option_b` TEXT NOT NULL,
+    `option_c` TEXT NOT NULL,
+    `option_d` TEXT NOT NULL,
+    `correct_answer` ENUM('a', 'b', 'c', 'd') NOT NULL,
+    `explanation` TEXT DEFAULT NULL,
+    `order_index` INT UNSIGNED NOT NULL DEFAULT 1,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    INDEX `idx_trial_questions_quiz_order` (`quiz_id`, `order_index`),
+    CONSTRAINT `fk_trial_questions_quiz`
+        FOREIGN KEY (`quiz_id`) REFERENCES `trial_quizzes` (`id`)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ----------------------------------------------------------
+-- 10. Tabel trial_quiz_attempts
+-- Riwayat pengerjaan quiz trial (guest) & member beserta auto-claim
+-- ----------------------------------------------------------
+CREATE TABLE `trial_quiz_attempts` (
+    `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    `quiz_id` INT UNSIGNED NOT NULL,
+    `user_id` INT UNSIGNED DEFAULT NULL,
+    `attempt_token` VARCHAR(64) NOT NULL,
+    `score` DECIMAL(5, 2) NOT NULL DEFAULT 0.00,
+    `correct_count` INT UNSIGNED NOT NULL DEFAULT 0,
+    `total_questions` INT UNSIGNED NOT NULL DEFAULT 0,
+    `duration_seconds` INT UNSIGNED NOT NULL DEFAULT 0,
+    `answers_json` LONGTEXT DEFAULT NULL,
+    `claimed_at` DATETIME DEFAULT NULL,
+    `completed_at` DATETIME NOT NULL,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY `uk_trial_attempts_token` (`attempt_token`),
+    INDEX `idx_trial_attempts_quiz` (`quiz_id`),
+    INDEX `idx_trial_attempts_user` (`user_id`),
+    CONSTRAINT `fk_trial_attempts_quiz`
+        FOREIGN KEY (`quiz_id`) REFERENCES `trial_quizzes` (`id`)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+    CONSTRAINT `fk_trial_attempts_user`
+        FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
+        ON DELETE SET NULL
         ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

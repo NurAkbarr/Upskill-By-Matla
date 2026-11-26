@@ -15,6 +15,12 @@ use CodeIgniter\Router\RouteCollection;
 // 1. Halaman Utama (Landing Page)
 $routes->get('/', 'Home::index');
 
+// 2. Trial Quiz Publik & Quiz Mandiri
+$routes->get('quiz', 'TrialQuiz::index');
+$routes->get('quiz/result/(:segment)', 'TrialQuiz::result/$1');
+$routes->post('quiz/(:segment)/submit', 'TrialQuiz::submit/$1');
+$routes->get('quiz/(:segment)', 'TrialQuiz::play/$1');
+
 
 // 3. Autentikasi & Akun
 $routes->get('login', 'Auth::login');
@@ -75,6 +81,18 @@ $routes->group('admin', ['filter' => ['auth', 'role:super_admin']], static funct
     // Laporan Nilai & Peringkat (Leaderboard)
     $routes->get('reports', 'Admin\Report::index');
     $routes->post('reports/grade/(:num)', 'Admin\Report::grade_submission/$1');
+
+    // Manajemen Trial Quiz & Quiz Mandiri
+    $routes->get('trial-quizzes', 'Admin\TrialQuiz::index');
+    $routes->get('trial-quizzes/create', 'Admin\TrialQuiz::create');
+    $routes->post('trial-quizzes/store', 'Admin\TrialQuiz::store');
+    $routes->get('trial-quizzes/edit/(:num)', 'Admin\TrialQuiz::edit/$1');
+    $routes->post('trial-quizzes/update/(:num)', 'Admin\TrialQuiz::update/$1');
+    $routes->get('trial-quizzes/delete/(:num)', 'Admin\TrialQuiz::delete/$1');
+    $routes->get('trial-quizzes/(:num)/questions', 'Admin\TrialQuiz::questions/$1');
+    $routes->post('trial-quizzes/(:num)/questions/store', 'Admin\TrialQuiz::storeQuestion/$1');
+    $routes->post('trial-quizzes/questions/update/(:num)', 'Admin\TrialQuiz::updateQuestion/$1');
+    $routes->get('trial-quizzes/questions/delete/(:num)', 'Admin\TrialQuiz::deleteQuestion/$1');
 
     // Manajemen Pengguna
     $routes->get('users', 'Admin\User::index');

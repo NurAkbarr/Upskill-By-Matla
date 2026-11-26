@@ -56,12 +56,16 @@
                 <!-- Desktop Navigation Menu (text-upskill-blue) -->
                 <nav class="hidden md:flex items-center gap-8 text-sm font-bold text-upskill-blue">
                     <a href="<?= base_url('/#program-kelas') ?>" class="hover:text-upskill-pink transition-colors duration-300">Program</a>
+                    <a href="<?= base_url('quiz') ?>" class="<?= str_starts_with(uri_string(), 'quiz') ? 'text-upskill-pink' : 'hover:text-upskill-pink' ?> transition-colors duration-300">Quiz</a>
                     <a href="<?= base_url('/#target-peserta') ?>" class="hover:text-upskill-pink transition-colors duration-300">Target Peserta</a>
                     <a href="<?= base_url('/#tentang-kami') ?>" class="hover:text-upskill-pink transition-colors duration-300">Tentang Kami</a>
                 </nav>
 
                 <!-- Auth Action Button (Dynamic based on Session) -->
-                <div class="flex items-center gap-3">
+                <div class="flex items-center gap-2.5 sm:gap-3">
+                    <a href="<?= base_url('quiz') ?>" class="md:hidden inline-flex items-center justify-center px-3 py-2 text-xs font-bold rounded-lg <?= str_starts_with(uri_string(), 'quiz') ? 'text-white bg-upskill-darkblue' : 'text-upskill-darkblue bg-slate-100 hover:bg-slate-200' ?> transition-colors duration-200">
+                        Quiz
+                    </a>
                     <?php if (session()->get('isLoggedIn')): ?>
                         <span class="text-xs font-semibold text-upskill-darkblue hidden sm:inline-block">
                             Halo, <strong class="text-upskill-blue"><?= esc(session()->get('full_name')) ?></strong>
@@ -106,6 +110,7 @@
                     <h4 class="text-xs font-bold text-upskill-darkblue uppercase tracking-wider mb-3">Navigasi</h4>
                     <ul class="space-y-2 text-sm font-medium text-slate-600">
                         <li><a href="<?= base_url('/#program-kelas') ?>" class="hover:text-upskill-pink transition-colors duration-300">Semua Program</a></li>
+                        <li><a href="<?= base_url('quiz') ?>" class="hover:text-upskill-pink transition-colors duration-300">Quiz Evaluasi</a></li>
                         <li><a href="<?= base_url('login') ?>" class="hover:text-upskill-pink transition-colors duration-300">Portal Peserta</a></li>
                         <li><a href="<?= base_url('/#target-peserta') ?>" class="hover:text-upskill-pink transition-colors duration-300">Target Belajar</a></li>
                     </ul>
