@@ -1,4 +1,4 @@
-<?php
+            <?php
 /**
  * ==========================================================
  * UPSKILL by MATLA - Database Configuration & Connection

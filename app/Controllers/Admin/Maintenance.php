@@ -26,24 +26,19 @@ class Maintenance extends BaseController
         $tokenReady      = strlen($configuredToken) >= self::MIN_TOKEN_LENGTH;
 
         $migrationStatus = $this->inspectMigrations();
-        $db              = Database::connect();
-        $trialTableReady = $db->tableExists('trial_quizzes');
-        $trialQuizCount  = $trialTableReady ? $db->table('trial_quizzes')->countAllResults() : 0;
 
         return view('admin/maintenance/index', [
-            'title'             => 'Maintenance Tools - MUSLIM UPSKILL ACADEMY',
-            'admin_name'        => session()->get('full_name') ?? 'Super Admin MATLA',
-            'admin_email'       => session()->get('email') ?? 'admin@matla.id',
-            'token_ready'       => $tokenReady,
-            'is_https'          => $this->request->isSecure(),
-            'environment'       => ENVIRONMENT,
-            'php_version'       => PHP_VERSION,
-            'migrations_list'   => $migrationStatus['items'],
-            'pending_count'     => $migrationStatus['pending_count'],
-            'applied_count'     => $migrationStatus['applied_count'],
-            'migration_error'   => $migrationStatus['error'],
-            'trial_table_ready' => $trialTableReady,
-            'trial_quiz_count'  => $trialQuizCount,
+            'title'           => 'Maintenance Tools - MUSLIM UPSKILL ACADEMY',
+            'admin_name'      => session()->get('full_name') ?? 'Super Admin MATLA',
+            'admin_email'     => session()->get('email') ?? 'admin@matla.id',
+            'token_ready'     => $tokenReady,
+            'is_https'        => $this->request->isSecure(),
+            'environment'     => ENVIRONMENT,
+            'php_version'     => PHP_VERSION,
+            'migrations_list' => $migrationStatus['items'],
+            'pending_count'   => $migrationStatus['pending_count'],
+            'applied_count'   => $migrationStatus['applied_count'],
+            'migration_error' => $migrationStatus['error'],
         ]);
     }
 
@@ -157,57 +152,6 @@ class Maintenance extends BaseController
 
             return redirect()->to(base_url('admin/maintenance'))
                 ->with('error', 'Gagal membersihkan cache: ' . $e->getMessage());
-        }
-    }
-
-    /**
-     * Menjalankan TrialQuizSeeder secara idempoten untuk mengisi contoh 5 soal Ilmu Tauhid & Fiqih.
-     */
-    public function runTrialQuizSeeder()
-    {
-        if ($redirect = $this->ensureSuperAdmin()) {
-            return $redirect;
-        }
-
-        if ($error = $this->validateMaintenanceToken('seed_trial_quiz')) {
-            return redirect()->to(base_url('admin/maintenance'))->with('error', $error);
-        }
-
-        $db = Database::connect();
-        if (! $db->tableExists('trial_quizzes')) {
-            return redirect()->to(base_url('admin/maintenance'))
-                ->with('warning', 'Tabel trial_quizzes belum ada. Silakan jalankan Database Migration terlebih dahulu.');
-        }
-
-        try {
-            $beforeCount = $db->table('trial_quizzes')->countAllResults();
-            Database::seeder()->call('TrialQuizSeeder');
-            $afterCount  = $db->table('trial_quizzes')->countAllResults();
-            $added       = max(0, $afterCount - $beforeCount);
-
-            $this->logAudit('seed_trial_quiz', 'success', "added={$added}");
-
-            if ($added === 0) {
-                return redirect()->to(base_url('admin/maintenance'))
-                    ->with('info', 'Data contoh Trial Quiz sudah tersedia sebelumnya (tidak ada duplikasi dibuat).');
-            }
-
-            return redirect()->to(base_url('admin/maintenance'))
-                ->with('success', "{$added} contoh Trial Quiz berhasil diisi ke database!")
-                ->with('maintenance_log', [
-                    'action' => 'TrialQuizSeeder',
-                    'time'   => date('d M Y, H:i:s') . ' WIB',
-                    'status' => 'success',
-                    'lines'  => [
-                        '[OK] Tes Pemahaman Ilmu Tauhid Dasar (5 soal + pembahasan)',
-                        '[OK] Evaluasi Fiqih Sholat Sehari-hari (3 soal + pembahasan)',
-                    ],
-                ]);
-        } catch (Throwable $e) {
-            $this->logAudit('seed_trial_quiz', 'failed', $e->getMessage());
-
-            return redirect()->to(base_url('admin/maintenance'))
-                ->with('error', 'Gagal menjalankan seeder: ' . $e->getMessage());
         }
     }
 

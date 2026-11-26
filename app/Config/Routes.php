@@ -106,5 +106,4 @@ $routes->group('admin', ['filter' => ['auth', 'role:super_admin']], static funct
     $routes->get('maintenance', 'Admin\Maintenance::index');
     $routes->post('maintenance/migrate', 'Admin\Maintenance::runMigration');
     $routes->post('maintenance/clear-cache', 'Admin\Maintenance::clearCache');
-    $routes->post('maintenance/seed-trial-quiz', 'Admin\Maintenance::runTrialQuizSeeder');
 });
