@@ -93,6 +93,8 @@ $routes->group('admin', ['filter' => ['auth', 'role:super_admin']], static funct
     $routes->post('trial-quizzes/(:num)/questions/store', 'Admin\TrialQuiz::storeQuestion/$1');
     $routes->post('trial-quizzes/questions/update/(:num)', 'Admin\TrialQuiz::updateQuestion/$1');
     $routes->get('trial-quizzes/questions/delete/(:num)', 'Admin\TrialQuiz::deleteQuestion/$1');
+    $routes->get('trial-quizzes/(:num)/attempts', 'Admin\TrialQuiz::attempts/$1');
+    $routes->get('trial-quizzes/attempts/delete/(:num)', 'Admin\TrialQuiz::deleteAttempt/$1');
 
     // Manajemen Pengguna
     $routes->get('users', 'Admin\User::index');

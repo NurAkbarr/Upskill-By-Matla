@@ -4,19 +4,23 @@ namespace App\Controllers\Admin;
 
 use App\Controllers\BaseController;
 use App\Models\CourseModel;
+use App\Models\TrialQuizAttemptModel;
 use App\Models\TrialQuizModel;
 use App\Models\TrialQuizQuestionModel;
+use Config\Database;
 
 class TrialQuiz extends BaseController
 {
     protected TrialQuizModel $quizModel;
     protected TrialQuizQuestionModel $questionModel;
+    protected TrialQuizAttemptModel $attemptModel;
     protected CourseModel $courseModel;
 
     public function __construct()
     {
         $this->quizModel     = new TrialQuizModel();
         $this->questionModel = new TrialQuizQuestionModel();
+        $this->attemptModel  = new TrialQuizAttemptModel();
         $this->courseModel   = new CourseModel();
     }
 
@@ -347,6 +351,136 @@ class TrialQuiz extends BaseController
 
         return redirect()->to(base_url('admin/trial-quizzes/' . $quizId . '/questions'))
             ->with('success', 'Butir soal berhasil dihapus.');
+    }
+
+    /**
+     * Menampilkan riwayat pengerjaan (member/terkonversi vs tamu anonim) untuk 1 quiz.
+     */
+    public function attempts(int $quizId)
+    {
+        if (! Database::connect()->tableExists('trial_quizzes')) {
+            return redirect()->to(base_url('admin/maintenance'))
+                ->with('warning', 'Tabel Trial Quiz belum tersedia di database.');
+        }
+
+        $quiz = $this->quizModel->find($quizId);
+        if (! $quiz) {
+            return redirect()->to(base_url('admin/trial-quizzes'))->with('error', 'Quiz tidak ditemukan.');
+        }
+
+        $filter = strtolower(trim((string) ($this->request->getGet('filter') ?? 'all')));
+        if (! in_array($filter, ['all', 'registered', 'guest'], true)) {
+            $filter = 'all';
+        }
+        $search = trim((string) ($this->request->getGet('search') ?? ''));
+
+        $db = Database::connect();
+
+        // Statistik ringkas (selalu dari total quiz ini)
+        $statsRow = $db->table('trial_quiz_attempts')
+            ->select('
+                COUNT(*) as total_attempts,
+                SUM(CASE WHEN user_id IS NOT NULL THEN 1 ELSE 0 END) as registered_count,
+                SUM(CASE WHEN user_id IS NULL THEN 1 ELSE 0 END) as guest_count,
+                AVG(score) as avg_score
+            ')
+            ->where('quiz_id', $quizId)
+            ->get()
+            ->getRowArray();
+
+        $totalAttempts   = (int) ($statsRow['total_attempts'] ?? 0);
+        $registeredCount = (int) ($statsRow['registered_count'] ?? 0);
+        $guestCount      = (int) ($statsRow['guest_count'] ?? 0);
+        $avgScore        = $totalAttempts > 0 ? round((float) ($statsRow['avg_score'] ?? 0), 1) : 0;
+        $conversionRate  = $totalAttempts > 0 ? (int) round(($registeredCount / $totalAttempts) * 100) : 0;
+
+        // Query daftar riwayat dengan filter & pencarian
+        $builder = $db->table('trial_quiz_attempts a')
+            ->select('a.*, u.full_name as user_name, u.email as user_email, u.role as user_role')
+            ->join('users u', 'u.id = a.user_id', 'left')
+            ->where('a.quiz_id', $quizId);
+
+        if ($filter === 'registered') {
+            $builder->where('a.user_id IS NOT NULL', null, false);
+        } elseif ($filter === 'guest') {
+            $builder->where('a.user_id IS NULL', null, false);
+        }
+
+        if ($search !== '') {
+            $builder->groupStart()
+                ->like('u.full_name', $search)
+                ->orLike('u.email', $search)
+                ->orLike('a.attempt_token', $search)
+                ->groupEnd();
+        }
+
+        $attempts = $builder
+            ->orderBy('a.completed_at', 'DESC')
+            ->orderBy('a.id', 'DESC')
+            ->get()
+            ->getResultArray();
+
+        // Tambahkan label predikat HSI per baris
+        foreach ($attempts as &$row) {
+            $row['predicate'] = $this->resolveHsiPredicate((int) round((float) ($row['score'] ?? 0)));
+        }
+        unset($row);
+
+        return view('admin/trial_quizzes/attempts', [
+            'title'            => 'Riwayat Pengerjaan: ' . $quiz['title'] . ' - MUSLIM UPSKILL ACADEMY',
+            'quiz'             => $quiz,
+            'attempts'         => $attempts,
+            'filter'           => $filter,
+            'search'           => $search,
+            'total_attempts'   => $totalAttempts,
+            'registered_count' => $registeredCount,
+            'guest_count'      => $guestCount,
+            'conversion_rate'  => $conversionRate,
+            'avg_score'        => $avgScore,
+            'admin_name'       => session()->get('full_name') ?? 'Super Admin MATLA',
+            'admin_email'      => session()->get('email') ?? 'admin@matla.id',
+        ]);
+    }
+
+    /**
+     * Menghapus 1 baris riwayat pengerjaan (berguna untuk membersihkan data testing).
+     */
+    public function deleteAttempt(int $id)
+    {
+        $attempt = $this->attemptModel->find($id);
+        if (! $attempt) {
+            return redirect()->back()->with('error', 'Data riwayat pengerjaan tidak ditemukan.');
+        }
+
+        $quizId = (int) $attempt['quiz_id'];
+        $this->attemptModel->delete($id);
+
+        return redirect()->to(base_url('admin/trial-quizzes/' . $quizId . '/attempts'))
+            ->with('success', 'Riwayat pengerjaan berhasil dihapus.');
+    }
+
+    private function resolveHsiPredicate(int $scoreInt): array
+    {
+        if ($scoreInt >= 100) {
+            return ['label' => "Mumtaz Murtafi'", 'tone' => 'emerald'];
+        }
+        if ($scoreInt >= 90) {
+            return ['label' => 'Mumtaz', 'tone' => 'emerald'];
+        }
+        if ($scoreInt >= 80) {
+            return ['label' => 'Jayyid Jiddan', 'tone' => 'blue'];
+        }
+        if ($scoreInt >= 70) {
+            return ['label' => 'Jayyid', 'tone' => 'indigo'];
+        }
+        if ($scoreInt >= 50) {
+            return ['label' => 'Maqbul', 'tone' => 'amber'];
+        }
+        if ($scoreInt >= 1) {
+            return ['label' => 'Rasib', 'tone' => 'rose'];
+        }
+
+        return ['label' => 'Ghayyib', 'tone' => 'rose'];
     }
 }
 

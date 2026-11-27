@@ -117,7 +117,9 @@
                             </td>
 
                             <td class="px-6 py-4 text-center font-mono font-semibold text-slate-700 tabular-nums">
-                                <?= (int) $q['attempt_count'] ?>
+                                <a href="<?= base_url('admin/trial-quizzes/' . $q['id'] . '/attempts') ?>" class="hover:text-upskill-pink underline decoration-slate-300 underline-offset-2 transition-colors">
+                                    <?= (int) $q['attempt_count'] ?>
+                                </a>
                             </td>
 
                             <td class="px-6 py-4 text-right whitespace-nowrap">
@@ -127,6 +129,12 @@
                                         class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold text-white bg-upskill-darkblue hover:bg-upskill-blue transition-colors"
                                     >
                                         Kelola Soal
+                                    </a>
+                                    <a
+                                        href="<?= base_url('admin/trial-quizzes/' . $q['id'] . '/attempts') ?>"
+                                        class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold text-upskill-darkblue bg-blue-50 border border-blue-200 hover:bg-blue-100 transition-colors"
+                                    >
+                                        Riwayat
                                     </a>
                                     <a
                                         href="<?= base_url('admin/trial-quizzes/edit/' . $q['id']) ?>"
