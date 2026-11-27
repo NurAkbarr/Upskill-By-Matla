@@ -240,14 +240,17 @@
                                     data-step="<?= $index ?>"
                                     id="step-<?= $index ?>"
                                 >
-                                    <!-- Nomor Kotak Biru + Teks Pertanyaan -->
-                                    <div class="flex items-start gap-3.5 sm:gap-4 mb-5">
-                                        <span class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-upskill-darkblue text-white font-mono text-sm sm:text-base font-extrabold flex items-center justify-center shrink-0 tabular-nums shadow-2xs">
-                                            <?= $index + 1 ?>
-                                        </span>
-                                        <h2 class="text-sm sm:text-base font-bold text-slate-900 leading-relaxed pt-0.5 whitespace-pre-line">
-                                            <?= esc($q['question_text']) ?>
-                                        </h2>
+                                    <!-- Nomor Kotak Biru Tengah Vertikal + Garis Pembatas Vertikal + Teks Pertanyaan -->
+                                    <div class="flex items-stretch gap-3.5 sm:gap-4 pb-5 mb-4 border-b border-slate-100">
+                                        <div class="flex items-center shrink-0">
+                                            <span class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-upskill-darkblue text-white font-mono text-sm sm:text-base font-extrabold flex items-center justify-center tabular-nums shadow-2xs">
+                                                <?= $index + 1 ?>
+                                            </span>
+                                        </div>
+                                        <div class="w-px self-stretch bg-slate-200 shrink-0" aria-hidden="true"></div>
+                                        <div class="flex items-center min-w-0">
+                                            <h2 class="text-sm sm:text-base font-bold text-slate-900 leading-relaxed whitespace-pre-line"><?= esc(trim((string) $q['question_text'])) ?></h2>
+                                        </div>
                                     </div>
 
                                     <p class="text-xs font-medium text-slate-500 mb-3.5">
@@ -447,6 +450,13 @@
                                 0 / <?= $totalQuestions ?> soal
                             </dd>
                         </div>
+
+                        <?php if (! empty($quiz['description'])): ?>
+                            <div class="pt-3 mt-3 space-y-1">
+                                <dt class="text-slate-500 font-semibold text-xs">Deskripsi</dt>
+                                <dd class="text-xs text-slate-700 leading-relaxed whitespace-pre-line"><?= esc(trim((string) $quiz['description'])) ?></dd>
+                            </div>
+                        <?php endif; ?>
                     </dl>
                 </div>
 

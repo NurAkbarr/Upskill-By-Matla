@@ -171,7 +171,7 @@
                     <!-- Header Judul + Badge -->
                     <div class="flex flex-wrap items-center gap-2.5">
                         <h1 class="text-lg sm:text-xl font-extrabold text-slate-900 tracking-tight">
-                            Hasil <?= esc($quiz['title']) ?>
+                            <?= esc($quiz['title']) ?>
                         </h1>
                         <?php if ($isTrialQuiz && ! $is_logged_in): ?>
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-pink-50 text-upskill-pink border border-pink-100">
@@ -180,45 +180,36 @@
                         <?php endif; ?>
                     </div>
 
-                    <!-- Isi Utama: Metrik Kiri + Medali Predikat Kanan -->
+                    <!-- Isi Utama: Metrik Kiri + Medali Predikat & Nilai Kanan -->
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
                         <div class="space-y-4 flex-1 min-w-0">
-                            <!-- 3 Metrik Kompak -->
-                            <div class="flex flex-wrap items-center gap-4 sm:gap-6">
-                                <!-- Blok Skor Akhir -->
-                                <div class="bg-blue-50/80 border border-blue-100 rounded-xl px-4 py-2.5 min-w-[120px]">
-                                    <span class="text-[11px] font-bold text-slate-600 block">Skor Akhir</span>
-                                    <div class="flex items-baseline gap-1 mt-0.5">
-                                        <span class="text-3xl font-extrabold text-upskill-darkblue font-mono tabular-nums"><?= $scoreInt ?></span>
-                                        <span class="text-xs font-bold text-slate-500">/ 100</span>
-                                    </div>
-                                </div>
-
+                            <!-- 2 Metrik Kompak (Nilai dipindahkan ke bawah predikat di kanan) -->
+                            <div class="flex flex-wrap items-center gap-5 sm:gap-8">
                                 <!-- Jawaban Benar -->
-                                <div class="flex items-center gap-2.5">
-                                    <span class="w-8 h-8 rounded-lg bg-emerald-50 border border-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
+                                <div class="flex items-center gap-3">
+                                    <span class="w-9 h-9 rounded-xl bg-emerald-50 border border-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.4" d="M5 13l4 4L19 7"/>
                                         </svg>
                                     </span>
                                     <div>
                                         <span class="text-[11px] font-semibold text-slate-500 block">Jawaban Benar</span>
-                                        <p class="text-sm font-extrabold text-slate-900 tabular-nums">
+                                        <p class="text-sm sm:text-base font-extrabold text-slate-900 tabular-nums">
                                             <?= $correctCount ?> <span class="font-medium text-slate-500">dari <?= $totalQuestions ?> soal</span>
                                         </p>
                                     </div>
                                 </div>
 
                                 <!-- Waktu Pengerjaan -->
-                                <div class="flex items-center gap-2.5">
-                                    <span class="w-8 h-8 rounded-lg bg-blue-50 border border-blue-100 text-upskill-darkblue flex items-center justify-center shrink-0">
+                                <div class="flex items-center gap-3">
+                                    <span class="w-9 h-9 rounded-xl bg-blue-50 border border-blue-100 text-upskill-darkblue flex items-center justify-center shrink-0">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                         </svg>
                                     </span>
                                     <div>
                                         <span class="text-[11px] font-semibold text-slate-500 block">Waktu Pengerjaan</span>
-                                        <p class="text-sm font-extrabold text-slate-900 tabular-nums"><?= esc($durationLabel) ?></p>
+                                        <p class="text-sm sm:text-base font-extrabold text-slate-900 tabular-nums"><?= esc($durationLabel) ?></p>
                                     </div>
                                 </div>
                             </div>
@@ -228,8 +219,8 @@
                             </p>
                         </div>
 
-                        <!-- Medali & Label Predikat (Mumtaz / Jayyid Jiddan / Jayyid / Maqbul) -->
-                        <div class="flex sm:flex-col items-center justify-center gap-3 sm:gap-2.5 pt-4 sm:pt-0 border-t sm:border-t-0 sm:border-l border-slate-100 sm:pl-6 shrink-0">
+                        <!-- Medali, Label Predikat & Nilai di Bawahnya -->
+                        <div class="flex sm:flex-col items-center justify-center gap-3 sm:gap-2 pt-4 sm:pt-0 border-t sm:border-t-0 sm:border-l border-slate-100 sm:pl-7 shrink-0 min-w-[155px]">
                             <svg class="w-16 h-16 sm:w-20 sm:h-20 shrink-0" viewBox="0 0 80 80" fill="none" aria-hidden="true">
                                 <!-- Pita Medali -->
                                 <path d="M29 48L24 72L35 65L40 73V49H29Z" fill="<?= $medalColors['ribbon'] ?>" opacity="0.9"/>
@@ -241,9 +232,14 @@
                                 <path d="M40 24.5L42.8 30.2L49 31.1L44.5 35.5L45.6 41.7L40 38.7L34.4 41.7L35.5 35.5L31 31.1L37.2 30.2L40 24.5Z" fill="<?= $medalColors['star'] ?>"/>
                             </svg>
 
-                            <span class="inline-flex items-center justify-center px-4 py-1.5 rounded-xl text-sm font-extrabold border <?= $predicatePill ?> whitespace-nowrap">
-                                <?= esc($predicate['label']) ?>
-                            </span>
+                            <div class="text-left sm:text-center space-y-1">
+                                <span class="inline-flex items-center justify-center px-3.5 py-1 rounded-xl text-sm font-extrabold border <?= $predicatePill ?> whitespace-nowrap">
+                                    <?= esc($predicate['label']) ?>
+                                </span>
+                                <p class="text-sm font-extrabold text-upskill-darkblue font-mono tabular-nums">
+                                    Nilai <?= $scoreInt ?>
+                                </p>
+                            </div>
                         </div>
                     </div>
 
@@ -358,9 +354,7 @@
                                 </div>
 
                                 <!-- Teks Pertanyaan -->
-                                <p class="text-sm sm:text-[15px] font-bold text-slate-900 leading-relaxed whitespace-pre-line">
-                                    <?= ($idx + 1) ?>. <?= esc($q['question_text']) ?>
-                                </p>
+                                <p class="text-sm sm:text-[15px] font-bold text-slate-900 leading-relaxed whitespace-pre-line"><?= ($idx + 1) ?>. <?= esc(trim((string) $q['question_text'])) ?></p>
 
                                 <!-- Jawaban Anda & Jawaban Benar -->
                                 <div class="space-y-1.5 text-xs sm:text-sm">
@@ -397,9 +391,7 @@
                                                 </svg>
                                                 <span>Pembahasan &amp; Dalil</span>
                                             </div>
-                                            <p class="p-4 rounded-xl bg-slate-50 border border-slate-200/80 text-xs sm:text-sm text-slate-700 leading-relaxed whitespace-pre-line">
-                                                <?= esc($q['explanation']) ?>
-                                            </p>
+                                            <p class="p-4 rounded-xl bg-slate-50 border border-slate-200/80 text-xs sm:text-sm text-slate-700 leading-relaxed whitespace-pre-line"><?= esc(trim((string) $q['explanation'])) ?></p>
                                         </div>
                                     <?php endif; ?>
                                 <?php else: ?>
@@ -493,10 +485,28 @@
                             </dt>
                             <dd class="font-bold text-slate-900 tabular-nums"><?= esc($durationInfo) ?></dd>
                         </div>
+
+                        <?php if (! empty($quiz['description'])): ?>
+                            <div class="pt-3 mt-3 space-y-1">
+                                <dt class="text-slate-500 font-semibold text-xs">Deskripsi</dt>
+                                <dd class="text-xs text-slate-700 leading-relaxed whitespace-pre-line"><?= esc(trim((string) $quiz['description'])) ?></dd>
+                            </div>
+                        <?php endif; ?>
                     </dl>
                 </div>
 
-                <!-- Kartu 2: Tantangan Quiz Lainnya (Dinamis dari Kelas Published di Dashboard Admin) -->
+                <!-- Kartu 2: Tantangan Quiz Lainnya (Daftar Topik Statis) -->
+                <?php
+                    $staticTopics = [
+                        ['label' => 'Siroh Nabi',     'cls' => 'bg-blue-50 text-upskill-darkblue border-blue-200 hover:bg-blue-100',     'icon' => 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253'],
+                        ['label' => 'Fiqh',           'cls' => 'bg-purple-50 text-purple-900 border-purple-200 hover:bg-purple-100',     'icon' => 'M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3'],
+                        ['label' => 'Tauhid',         'cls' => 'bg-emerald-50 text-emerald-900 border-emerald-200 hover:bg-emerald-100', 'icon' => 'M12 3l8 4v5c0 5-3.5 8.5-8 9-4.5-.5-8-4-8-9V7l8-4z'],
+                        ['label' => 'Bahasa Arab',    'cls' => 'bg-pink-50 text-upskill-pink border-pink-200 hover:bg-pink-100',         'icon' => 'M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129'],
+                        ['label' => 'Bahasa Inggris', 'cls' => 'bg-sky-50 text-sky-900 border-sky-200 hover:bg-sky-100',                 'icon' => 'M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9'],
+                        ['label' => 'Matematika',     'cls' => 'bg-amber-50 text-amber-900 border-amber-200 hover:bg-amber-100',         'icon' => 'M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z'],
+                    ];
+                    $topicTargetUrl = $is_logged_in ? base_url('dashboard') : $registerUrl;
+                ?>
                 <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs space-y-3.5">
                     <div>
                         <h2 class="text-sm sm:text-base font-extrabold text-upskill-darkblue flex items-center gap-2">
@@ -506,30 +516,23 @@
                             <span>Tantangan Quiz Lainnya</span>
                         </h2>
                         <p class="text-xs text-slate-600 mt-1 leading-relaxed">
-                            Uji pemahamanmu pada kelas dan evaluasi yang tersedia di Muslim Upskill Academy:
+                            Uji pemahamanmu di berbagai topik menarik lainnya, seperti:
                         </p>
                     </div>
 
-                    <?php if (empty($published_courses)): ?>
-                        <p class="text-xs text-slate-500">
-                            Program kelas dan quiz lanjutan sedang dipersiapkan oleh pengajar.
-                        </p>
-                    <?php else: ?>
-                        <div class="flex flex-wrap gap-2">
-                            <?php foreach ($published_courses as $cIdx => $pc): ?>
-                                <?php $chipCls = $courseChipStyles[$cIdx % count($courseChipStyles)]; ?>
-                                <a
-                                    href="<?= base_url('courses/' . $pc['slug']) ?>"
-                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition-colors <?= $chipCls ?>"
-                                >
-                                    <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
-                                    </svg>
-                                    <span><?= esc($pc['title']) ?></span>
-                                </a>
-                            <?php endforeach; ?>
-                        </div>
-                    <?php endif; ?>
+                    <div class="flex flex-wrap gap-2">
+                        <?php foreach ($staticTopics as $topic): ?>
+                            <a
+                                href="<?= $topicTargetUrl ?>"
+                                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition-colors <?= $topic['cls'] ?>"
+                            >
+                                <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="<?= $topic['icon'] ?>"/>
+                                </svg>
+                                <span><?= esc($topic['label']) ?></span>
+                            </a>
+                        <?php endforeach; ?>
+                    </div>
                 </div>
 
                 <!-- Kartu 3: Pelajari Materinya Secara Runut (Hanya tampil jika ada kelas published) -->

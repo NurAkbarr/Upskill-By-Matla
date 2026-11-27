@@ -287,36 +287,50 @@ class TrialQuiz extends BaseController
             $recommendedCourse = $publishedCourses[0];
         }
 
-        // Skala predikat capaian (Mumtaz, Jayyid Jiddan, Jayyid, Maqbul, Perlu Pendalaman)
+        // Skala predikat nilai mengikuti urutan HSI (100 -> 0)
         $scoreVal = (float) $attempt['score'];
-        if ($scoreVal >= 90) {
+        $scoreInt = (int) round($scoreVal);
+
+        if ($scoreInt >= 100) {
             $predicate = [
-                'label'   => 'Mumtaz',
-                'summary' => 'Pemahaman Anda sangat baik dan menyeluruh. Pertahankan dengan memperdalam materi lanjutan.',
+                'label'   => "Mumtaz Murtafi'",
+                'summary' => 'Nilai sempurna! Pemahaman Anda pada topik ini sangat kokoh dan menyeluruh.',
                 'tone'    => 'emerald',
             ];
-        } elseif ($scoreVal >= 75) {
+        } elseif ($scoreInt >= 90) {
+            $predicate = [
+                'label'   => 'Mumtaz',
+                'summary' => 'Pemahaman Anda sangat baik. Pertahankan dengan memperdalam materi lanjutan.',
+                'tone'    => 'emerald',
+            ];
+        } elseif ($scoreInt >= 80) {
             $predicate = [
                 'label'   => 'Jayyid Jiddan',
-                'summary' => 'Sebagian besar konsep sudah Anda kuasai dengan sangat baik. Tinggal menyempurnakan beberapa detail.',
+                'summary' => 'Sangat baik! Sebagian besar konsep sudah Anda kuasai dengan tepat.',
                 'tone'    => 'blue',
             ];
-        } elseif ($scoreVal >= 60) {
+        } elseif ($scoreInt >= 70) {
             $predicate = [
                 'label'   => 'Jayyid',
-                'summary' => 'Sebagian besar konsep sudah Anda kuasai, namun masih ada detail penting yang perlu diluruskan.',
+                'summary' => 'Baik! Konsep dasar sudah Anda pahami, tinggal meluruskan beberapa detail penting.',
                 'tone'    => 'indigo',
             ];
-        } elseif ($scoreVal >= 40) {
+        } elseif ($scoreInt >= 50) {
             $predicate = [
                 'label'   => 'Maqbul',
                 'summary' => 'Dasar pemahaman sudah terbentuk. Pelajari pembahasannya agar penguasaan materi semakin mantap.',
                 'tone'    => 'amber',
             ];
+        } elseif ($scoreInt >= 1) {
+            $predicate = [
+                'label'   => 'Rasib',
+                'summary' => 'Masih perlu penguatan materi. Pelajari pembahasan soalnya agar pemahaman semakin terarah.',
+                'tone'    => 'rose',
+            ];
         } else {
             $predicate = [
-                'label'   => 'Perlu Pendalaman',
-                'summary' => 'Langkah awal yang bagus untuk mengetahui bagian mana yang perlu dipelajari lebih runut.',
+                'label'   => 'Ghayyib',
+                'summary' => 'Langkah awal yang bagus untuk mulai belajar. Pelajari pembahasan soalnya secara runut.',
                 'tone'    => 'rose',
             ];
         }
